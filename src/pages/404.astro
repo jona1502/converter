@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Seite nicht gefunden"
+  description="Die angeforderte Seite gibt es nicht."
+  noindex
+>
+  <div class="page-container-narrow">
+    <p class="badge badge-neutral">Fehler 404</p>
+    <h1 class="page-title mt-3">Seite nicht gefunden</h1>
+    <p class="page-lead">
+      Unter dieser Adresse gibt es keine Seite. Vielleicht hat sich die Adresse geändert oder sie
+      enthält einen Tippfehler.
+    </p>
+    <p class="mt-8 flex flex-wrap gap-3">
+      <a href="/" class="btn btn-primary">Zur Startseite</a>
+      <a href="/lokale-verarbeitung" class="btn btn-secondary">Lokale Verarbeitung</a>
+    </p>
+  </div>
+</BaseLayout>

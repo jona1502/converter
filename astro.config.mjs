@@ -6,6 +6,8 @@ import tailwindcss from '@tailwindcss/vite';
 // Rein statische Ausgabe: kein Server, keine Adapter.
 export default defineConfig({
   output: 'static',
+  // Shiki erzeugt Inline-Styles, die die CSP blockieren würde; Syntaxhervorhebung wird nicht gebraucht.
+  markdown: { syntaxHighlight: false },
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

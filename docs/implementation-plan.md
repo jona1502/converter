@@ -44,15 +44,19 @@ dokumentiert in [commit-log.md](commit-log.md).
 | --- | --- | --- | --- | --- |
 | P01 | Projektgrundlage, Schnittstellenvertrag, Prüfwerkzeuge, Plan | Hauptagent | – | erledigt |
 | P02 | Bildverarbeitungskern mit Worker und Browser-Tests | Subagent „Kern“ | P01 | offen |
-| P03 | Seitengerüst, Gestaltungssystem, Startseite, Erklärseite, 404-Seite | Subagent „Oberfläche“ | P01 | offen |
-| P04 | Gemeinsame Werkzeugoberfläche und Werkzeug „Bilder konvertieren“ | Subagent „Werkzeuge“ | P02, P03 | offen |
+| P03 | Seitengerüst, Gestaltungssystem, Startseite, Erklärseite, 404-Seite | Subagent „Oberfläche“ | P01 | erledigt |
+| P04 | Gemeinsame Werkzeugoberfläche und Werkzeug „Bilder konvertieren“ | Subagent „Werkzeuge“ | P02, P03, P09 | offen |
 | P05 | Werkzeug „Bilder komprimieren“ | Subagent „Werkzeuge“ | P04 | offen |
 | P06 | Werkzeug „Bilder skalieren“ | Subagent „Werkzeuge“ | P04 | offen |
 | P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06 | offen |
 | P08 | README und Projektdokumentation | Hauptagent | P07 | offen |
-| P09+ | Korrekturpunkte aus der abschließenden Prüfung (werden bei Bedarf ergänzt) | – | – | – |
+| P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | offen |
+| P10+ | Korrekturpunkte aus der abschließenden Prüfung (werden bei Bedarf ergänzt) | – | – | – |
 
 P02 und P03 laufen parallel (getrennte Dateien, gemeinsamer Vertrag `types.ts`).
+P09 wurde nachträglich auf Wunsch des Nutzers ergänzt (Icons und weitere Formate) und wird vor P04
+umgesetzt, damit die Werkzeugoberfläche alle Formate von Beginn an kennt. Die IDs bleiben stabil;
+die Reihenfolge der Commits ist daher P01, P02, P03, P09, P04 …
 P05 und P06 laufen parallel; Einträge in `src/data/tools.ts` pflegt der Hauptagent.
 
 ### P01 – Projektgrundlage
@@ -108,9 +112,22 @@ E2E: keine Netzwerkanfragen mit Dateiinhalt/-namen während der Verarbeitung, ke
 in Web Storage/IndexedDB/Cache Storage, keine CSP-Verstöße, Freigabe von Objekt-URLs,
 Tastaturbedienung, Mobilansicht, automatisierte Barrierefreiheitsprüfung (axe), falls sinnvoll.
 
+### P09 – Weitere Bildformate
+- Ausgabe ICO: eigener Encoder ohne Bibliothek (ICONDIR + PNG-kodierte Einträge), wählbare
+  Größen (16, 32, 48, 64, 128, 256 px), quadratisch eingepasst mit transparentem Rand,
+  Grenzwerte (Kante ≤ 256 px gemäß Format).
+- Ausgabe BMP: eigener Encoder (24 bit ohne Alpha mit Hintergrundfarbe bzw. 32 bit mit Alpha – je
+  nach Kompatibilität begründet entscheiden).
+- Eingabe: statisches GIF, BMP, ICO (größter Eintrag), AVIF – nur sofern der Browser dekodiert;
+  Signaturerkennung und Header-Abmessungen; animierte GIF/AVIF werden abgelehnt.
+- Fähigkeitsprüfung für die Dekodierung (z. B. AVIF) statt Annahmen.
+- Browser-Tests: Ausgabe dekodierbar, Struktur der ICO/BMP-Datei, Größen, Transparenz.
+
 ### P08 – Dokumentation
 README (Voraussetzungen, Befehle, Architektur, Datenschutzverhalten, Formate, Grenzen).
 
 ## Spätere Erweiterungen (nicht Teil dieses Releases)
-PDF-Werkzeuge, Audio- und Videokonvertierung, weitere Bildformate (z. B. AVIF, GIF),
-ZIP-Download aller Ergebnisse.
+PDF-Werkzeuge, Audio- und Videokonvertierung, weitere Bildformate (z. B. AVIF- und GIF-Export),
+ZIP-Download aller Ergebnisse. Für Office-Konvertierung (DOCX ↔ PDF) und PDF-Komprimierung in
+Qualitätsstufen ist ein separater, optionaler Verarbeitungsdienst denkbar; dessen Planung erfolgt
+außerhalb dieses Releases.

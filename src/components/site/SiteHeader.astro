@@ -1,0 +1,47 @@
+---
+import { availableTools } from '../../data/tools';
+
+interface Props {
+  siteName: string;
+}
+
+const { siteName } = Astro.props;
+
+/** Pfad ohne abschließenden Schrägstrich, damit /seite und /seite/ gleich behandelt werden. */
+const normalize = (path: string) => (path.length > 1 ? path.replace(/\/+$/, '') : path);
+const current = normalize(Astro.url.pathname);
+
+const navItems = [
+  ...availableTools.map((tool) => ({ href: tool.href, label: tool.title })),
+  { href: '/lokale-verarbeitung', label: 'Lokale Verarbeitung' },
+];
+---
+<header class="border-b border-border bg-surface">
+  <div class="page-container flex flex-wrap items-center justify-between gap-x-8 gap-y-2 py-3">
+    <a
+      href="/"
+      class="inline-flex min-h-11 items-center gap-2 rounded-control font-semibold tracking-tight text-ink no-underline"
+      aria-current={current === '/' ? 'page' : undefined}
+    >
+      <img src="/favicon.svg" alt="" width="28" height="28" class="size-7" />
+      <span class="text-lg">{siteName}</span>
+    </a>
+    <nav aria-label="Hauptnavigation" class="-mx-2 max-w-full">
+      <ul class="flex flex-wrap items-center gap-x-1 gap-y-1">
+        {
+          navItems.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={current === item.href ? 'page' : undefined}
+                class="inline-flex min-h-11 items-center rounded-control px-2 text-sm font-medium text-muted no-underline hover:bg-surface-muted hover:text-ink aria-[current=page]:text-accent aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8 sm:text-base"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
