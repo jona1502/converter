@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P12
+
+- **Commit-Nachricht:** `docs(release): P12 unabhängige Abschlussprüfung dokumentieren`
+- **Änderungen:** Abschlussbericht mit Reviews, tatsächlichen Ergebnissen, Browserbesonderheiten und verbleibenden Grenzen; Plan abgeschlossen. Kein zusätzlicher Produktumfang.
+- **Prüfung:** Drei Subagents prüften fremde Bereiche des integrierten Stands unabhängig; keine weiteren bestätigten Produktfehler. Hauptagent prüfte Integration und Screenshots des Produktionsbuilds.
+- **Checks:** Vollständiges `npm run verify` unter Node 24.21.0 mit Exit 0: Astro-Check 89 Dateien ohne Befunde, Unit-Tests 42 Dateien/410 bestanden/10 fähigkeitsabhängig übersprungen, statischer Build mit 7 Seiten, E2E 136/136 bestanden (Chromium/Firefox/WebKit/mobil, einschließlich 16 axe-Prüfungen). Frühere Firefox-Close-Probleme im Abschlusslauf nicht reproduziert.
+- **Einschränkungen:** Siehe `release-review.md` und README; insbesondere PDF-Browserfähigkeiten, komplexe PDF-Inhalte, best-effort Speichergrenzen und ausstehende echte Safari/iOS-Prüfung. Kein Deployment/Push; `docs/handoff.md` bleibt bewusst uncommittet.
+
 ## P08
 
 - **Commit-Nachricht:** `docs(project): P08 Bedienung Architektur und Grenzen dokumentieren`

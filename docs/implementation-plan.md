@@ -53,7 +53,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 | P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | erledigt |
 | P10 | PDF-Komprimierungskern (Analyse, drei Stufen, Bild-Neukodierung im Worker) | Subagent „PDF“ | P01 | erledigt |
 | P11 | Werkzeug „PDF komprimieren“ mit drei Varianten | Subagent „Werkzeuge“ | P04, P10 | erledigt |
-| P12 | Abschließende unabhängige Prüfung und Prüfbericht | Hauptagent + Reviewer | P07, P08 | offen |
+| P12 | Abschließende unabhängige Prüfung und Prüfbericht | Hauptagent + Reviewer | P07, P08 | erledigt |
 
 Weitere Korrekturpunkte werden bei Bedarf als P13+ ergänzt.
 
