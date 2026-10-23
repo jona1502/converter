@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageCompressor from '../../components/tools/ImageCompressor';
+---
+<BaseLayout title="Bilder komprimieren" description="Bilder lokal im Browser komprimieren, Qualität und maximale Kantenlänge wählen und tatsächliche Ergebnisgrößen vergleichen.">
+  <div class="page-container">
+    <h1 class="page-title">Bilder komprimieren</h1>
+    <p class="page-lead">Wählen Sie Format und Qualität und verkleinern Sie bei Bedarf die Abmessungen. Die tatsächliche Ergebnisgröße sehen Sie nach der Verarbeitung. Ihre Bilder bleiben auf Ihrem Gerät.</p>
+    <div class="page-section"><ImageCompressor client:load /></div>
+  </div>
+</BaseLayout>

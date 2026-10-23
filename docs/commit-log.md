@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P05
+
+- **Commit-Nachricht:** `feat(tools): P05 Bildkomprimierung ergänzen`
+- **Änderungen:** Komprimierungsseite mit JPEG/WebP-Qualität, ehrlichem PNG-Hinweis, Hintergrundfarbe und optionaler maximaler Kantenlänge. Vorhandene Stapelverwaltung, Größenvergleich und Download werden wiederverwendet. Werkzeug freigeschaltet.
+- **Prüfung:** Hauptagent prüfte Implementierung unabhängig auf Eingabegrenzen, PNG-Verhalten, Ressourcen und Einstellungswechsel.
+- **Checks:** Agent unter Node 24: `npm run check` (88 Dateien, keine Befunde), Produktionsbuild erfolgreich; P05/P06-E2E gemeinsam 12/12 in Chromium/Firefox/WebKit/mobil bestanden. P05 prüft PNG-Verkleinerung, JPEG-Wechsel, ungültige Kante und Reset.
+- **Einschränkungen:** Keine garantierte Einsparung; PNG wird verlustfrei neu kodiert. Browserfähigkeiten und Bildkernlimits gelten weiterhin.
+
 ## P04
 
 - **Commit-Nachricht:** `feat(tools): P04 Bildkonverter und gemeinsame Werkzeugoberfläche ergänzen`

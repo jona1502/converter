@@ -43,7 +43,7 @@ export const TOOLS: readonly Tool[] = [
     description: 'Dateigröße von Bildern über Qualität und Abmessungen verringern.',
     href: '/bilder/komprimieren',
     category: 'bilder',
-    available: false,
+    available: true,
   },
   {
     id: 'bilder-skalieren',
