@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/*
+  Design-Tokens. Farben, Radien und Schrift zentral definieren; Komponenten verwenden
+  ausschließlich diese Tokens (z. B. bg-surface, text-muted, ring-focus).
+  Schrift: System-Schriftstapel, damit keine Fonts nachgeladen werden müssen.
+*/
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-canvas: #f7f7f4;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0f0ec;
+  --color-border: #d9d9d2;
+  --color-border-strong: #a8a89e;
+  --color-ink: #1c1d1a;
+  --color-muted: #55574f;
+  --color-accent: #1f6f5c;
+  --color-accent-hover: #185a4a;
+  --color-accent-soft: #e3f1ec;
+  --color-on-accent: #ffffff;
+  --color-focus: #2457c5;
+  --color-success: #1d6b3a;
+  --color-success-soft: #e4f3e8;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #fdf3dc;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+
+  --radius-control: 0.5rem;
+  --radius-card: 0.875rem;
+}
+
+@layer base {
+  html {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-focus;
+  }
+}

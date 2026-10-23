@@ -1,0 +1,21 @@
+# Build-Ausgabe
+dist/
+.astro/
+
+# Abhängigkeiten
+node_modules/
+
+# Testartefakte
+test-results/
+playwright-report/
+tests/**/__screenshots__/
+.vitest-attachments/
+
+# Logs und Umgebung
+npm-debug.log*
+.env
+.env.*
+
+# Editor/OS
+.DS_Store
+.idea/
