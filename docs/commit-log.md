@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P04
+
+- **Commit-Nachricht:** `feat(tools): P04 Bildkonverter und gemeinsame Werkzeugoberfläche ergänzen`
+- **Änderungen:** React-Stapelverwaltung, Dropzone, Format-/Qualitäts-/Hintergrund-/ICO-Einstellungen, Dateiliste mit echten Größen, Downloads, Abbruch und URL-Freigabe; Konvertierungsseite und Navigation freigeschaltet. Prüfung der Eingabedekodierfähigkeit vor Verarbeitung, eindeutige Ausgabenamen, Fokusführung und zugängliche Statusansagen.
+- **Prüfung:** Unabhängiges Review durch separaten Agent und Hauptagent. Behoben: verspätete Statusansagen nach Reset mittels Generationstoken, Fokusrennen beim Entfernen während Vorabprüfung und mehrdeutige Dateifeld-/Buttonbeschriftung.
+- **Checks:** Typprüfung vor den unabhängigen P06-Vorbereitungen fehlerfrei; Produktionsbuild erfolgreich. Agent: Konverter-E2E Chromium/WebKit/mobil 12/12 bestanden; Firefox-Funktionsassertions ausgeführt, allerdings Playwright-Protokollfehler beim Schließen des Browserkontexts. Zusätzliche P07-Konvertertests in Chromium/mobil bestanden. Keine Behauptung eines vollständig grünen Firefox-E2E-Laufs.
+- **Einschränkungen:** Playwright-Firefox unter dieser Windows-Umgebung meldet sporadisch `_maybeDontRestoreTabs` bei Context.close. WebKit erzeugt für native Selects bereits ohne Appcode einen style-src-attr-CSP-Verstoß; separater Minimalfall bestätigt. P07 grenzt diesen Testbrowser-Effekt eng ein, die Anwendungs-CSP wird nicht gelockert. P05/P06/P11 sind eigene Arbeitspunkte.
+
 ## P10
 
 - **Commit-Nachricht:** `feat(pdf): P10 lokalen PDF-Komprimierungskern ergänzen`

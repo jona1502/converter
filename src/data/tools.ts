@@ -35,7 +35,7 @@ export const TOOLS: readonly Tool[] = [
     description: 'Bilder zwischen JPEG, PNG und WebP umwandeln.',
     href: '/bilder/konvertieren',
     category: 'bilder',
-    available: false,
+    available: true,
   },
   {
     id: 'bilder-komprimieren',

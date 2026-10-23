@@ -1,0 +1,84 @@
+import { useId, type Ref } from 'react';
+import type { BatchCounts, RunProgress } from './useImageBatch';
+
+export interface BatchSummaryProps {
+  readonly progress: RunProgress | null;
+  readonly isProcessing: boolean;
+}
+
+/** Stand des aktuellen bzw. letzten Durchlaufs – nur gezählte Dateien, keine geschätzten Prozente. */
+export function BatchSummary({ progress, isProcessing }: BatchSummaryProps) {
+  if (!progress) return null;
+  const { total, done, failed, finished } = progress;
+  return (
+    <div className="flex flex-col gap-2" data-testid="batch-summary">
+      <p className="text-sm font-medium">
+        {isProcessing ? 'Verarbeitung läuft: ' : ''}
+        {done} von {total} fertig
+        {failed > 0 && <span className="text-danger">, {failed} mit Fehler</span>}
+      </p>
+      <progress className="progress" max={total} value={finished} aria-label="Fortschritt des Stapels">
+        {finished} von {total}
+      </progress>
+    </div>
+  );
+}
+
+export interface ActionBarProps {
+  /** Beschriftung der Hauptaktion, z. B. „Konvertieren“. */
+  readonly processLabel: string;
+  readonly onProcess: () => void;
+  readonly onReset: () => void;
+  readonly counts: BatchCounts;
+  readonly isProcessing: boolean;
+  readonly progress: RunProgress | null;
+  /** Grund, warum die Hauptaktion nicht möglich ist; null = möglich. */
+  readonly disabledReason: string | null;
+  readonly processButtonRef?: Ref<HTMLButtonElement>;
+}
+
+export function ActionBar({
+  processLabel,
+  onProcess,
+  onReset,
+  counts,
+  isProcessing,
+  progress,
+  disabledReason,
+  processButtonRef,
+}: ActionBarProps) {
+  const reasonId = useId();
+  const disabled = disabledReason !== null;
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-3">
+        <button
+          ref={processButtonRef}
+          type="button"
+          className="btn btn-primary"
+          disabled={disabled}
+          aria-describedby={disabled ? reasonId : undefined}
+          onClick={onProcess}
+        >
+          {processLabel}
+        </button>
+        <button type="button" className="btn btn-danger" disabled={counts.total === 0} onClick={onReset}>
+          Alle entfernen
+        </button>
+      </div>
+      {disabled && (
+        <p id={reasonId} className="hint">
+          {disabledReason}
+        </p>
+      )}
+      <p className="hint">
+        {counts.total === 0
+          ? 'Keine Dateien in der Liste.'
+          : `${counts.total} ${counts.total === 1 ? 'Datei' : 'Dateien'} in der Liste, davon ${counts.processable} verarbeitbar${
+              counts.invalid > 0 ? `, ${counts.invalid} nicht verwendbar` : ''
+            }${counts.checking > 0 ? `, ${counts.checking} in Prüfung` : ''}.`}
+      </p>
+      <BatchSummary progress={progress} isProcessing={isProcessing} />
+    </div>
+  );
+}

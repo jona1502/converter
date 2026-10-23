@@ -123,6 +123,15 @@
 
   Badges
     .badge + .badge-neutral | .badge-accent | .badge-success | .badge-warn | .badge-danger
+
+  Werkzeugoberfläche (src/components/tools)
+    .drop-zone             Ablagebereich; data-dragging="true" (Datei wird darübergezogen),
+                           data-disabled="true" (Auswahl nicht möglich)
+    .file-list / .file-row Dateiliste und Zeile (data-status spiegelt den Verarbeitungsstand)
+    .file-name             Dateiname, einzeilig abgeschnitten (vollen Namen per title anbieten)
+    .file-result           Ergebnisbereich einer Zeile
+    .meta-list             Beschreibungsliste (<dl>) mit Paaren in <div><dt/><dd/></div>
+    .progress              <progress>-Balken in Akzentfarbe (ohne value = unbestimmt)
 */
 @layer components {
   /* Layout */
@@ -339,5 +348,47 @@
   }
   .badge-danger {
     @apply bg-danger-soft text-danger;
+  }
+
+  /* Werkzeugoberfläche */
+  .drop-zone {
+    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-control bg-surface px-4 py-8 text-center transition-colors sm:px-6 sm:py-12;
+  }
+  .drop-zone[data-dragging="true"] {
+    @apply border-solid border-accent bg-accent-soft;
+  }
+  .drop-zone[data-disabled="true"] {
+    @apply border-border bg-surface-muted;
+  }
+  .file-list {
+    @apply flex flex-col divide-y divide-border rounded-card border border-border bg-surface;
+  }
+  .file-row {
+    @apply flex min-w-0 flex-col gap-3 p-4;
+  }
+  .file-row[data-status="invalid"],
+  .file-row[data-status="error"] {
+    @apply bg-danger-soft/40;
+  }
+  .file-name {
+    @apply truncate font-medium;
+  }
+  .file-result {
+    @apply flex flex-col gap-3 rounded-control border border-border bg-surface-muted p-3;
+  }
+  .meta-list {
+    @apply grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[max-content_minmax(0,1fr)];
+  }
+  .meta-list > div {
+    @apply flex flex-wrap gap-x-2 sm:contents;
+  }
+  .meta-list dt {
+    @apply font-medium text-muted;
+  }
+  .meta-list dd {
+    @apply m-0 min-w-0;
+  }
+  .progress {
+    @apply block h-2 w-full accent-accent;
   }
 }
