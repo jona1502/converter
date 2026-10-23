@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P11
+
+- **Commit-Nachricht:** `feat(tools): P11 PDF-Komprimierung mit drei echten Ergebnisgrößen ergänzen`
+- **Änderungen:** PDF-Seite mit Dateiauswahl/Drop, Analyse, seriell automatisch berechneten Qualitätsstufen, echten KB/MB und Prozentvergleich, Downloads, Browsergrenzen und Reset. Signaturwarnung vor Auswahl, transparente Grenzen, Generationstoken und Worker-/URL-Freigabe. Kategorie und Werkzeug freigeschaltet.
+- **Prüfung:** Hauptagent und unabhängiger UI-Agent reviewten. Behoben: Button-Basisklassen, sichere Dateinamen, Drop außerhalb der Zone, präzise Auflösungsbeschreibung, global abgebrochene Varianten korrekt auf Fehler und Variantenkarten erst nach erfolgreicher Analyse.
+- **Checks:** Produktionsbuild erfolgreich, PDF-E2E nach letzten Änderungen 8/8 in Chromium/Firefox/WebKit/mobil bestanden (Node 24). Prüft drei Downloads bzw. explizite Browsergrenze, Downloadname, Analyse, Reset/Fokus und beschädigte Eingabe.
+- **Einschränkungen:** Keine Vorschätzung: Größen erst nach echter Berechnung. WebKit ohne OffscreenCanvas zeigt Browsergrenze. PDF-Kerngrenzen aus P10 gelten. Signaturen und PDF/A können durch Neuschreiben ungültig werden.
+
 ## P06
 
 - **Commit-Nachricht:** `feat(tools): P06 Bildskalierung mit Originalformat ergänzen`

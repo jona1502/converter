@@ -4,7 +4,7 @@
  * Ein Werkzeug erst freischalten, wenn seine Seite unter `href` existiert.
  */
 
-export type ToolCategory = 'bilder';
+export type ToolCategory = 'bilder' | 'pdf';
 
 export interface ToolCategoryInfo {
   readonly id: ToolCategory;
@@ -26,9 +26,17 @@ export interface Tool {
   readonly available: boolean;
 }
 
-export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [{ id: 'bilder', title: 'Bilder' }];
+export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [{ id: 'bilder', title: 'Bilder' }, { id: 'pdf', title: 'PDF' }];
 
 export const TOOLS: readonly Tool[] = [
+  {
+    id: 'pdf-komprimieren',
+    title: 'PDF komprimieren',
+    description: 'Drei Qualitätsstufen lokal berechnen und tatsächliche Dateigrößen vergleichen.',
+    href: '/pdf/komprimieren',
+    category: 'pdf',
+    available: true,
+  },
   {
     id: 'bilder-konvertieren',
     title: 'Bilder konvertieren',
