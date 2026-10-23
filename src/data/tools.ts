@@ -5,6 +5,7 @@
  */
 
 export type ToolCategory = 'bilder' | 'pdf';
+export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
 
 export interface ToolCategoryInfo {
   readonly id: ToolCategory;
@@ -22,6 +23,7 @@ export interface Tool {
   /** Pfad der Werkzeugseite (ohne abschließenden Schrägstrich). */
   readonly href: `/${string}`;
   readonly category: ToolCategory;
+  readonly operation: ToolOperation;
   /** Nur verfügbare Werkzeuge werden verlinkt. */
   readonly available: boolean;
 }
@@ -35,14 +37,16 @@ export const TOOLS: readonly Tool[] = [
     description: 'Drei Qualitätsstufen lokal berechnen und tatsächliche Dateigrößen vergleichen.',
     href: '/pdf/komprimieren',
     category: 'pdf',
+    operation: 'komprimieren',
     available: true,
   },
   {
     id: 'bilder-konvertieren',
     title: 'Bilder konvertieren',
-    description: 'Bilder zwischen JPEG, PNG und WebP umwandeln.',
+    description: 'JPEG, PNG, WebP, BMP und ICO erzeugen.',
     href: '/bilder/konvertieren',
     category: 'bilder',
+    operation: 'konvertieren',
     available: true,
   },
   {
@@ -51,6 +55,7 @@ export const TOOLS: readonly Tool[] = [
     description: 'Dateigröße von Bildern über Qualität und Abmessungen verringern.',
     href: '/bilder/komprimieren',
     category: 'bilder',
+    operation: 'komprimieren',
     available: true,
   },
   {
@@ -59,6 +64,7 @@ export const TOOLS: readonly Tool[] = [
     description: 'Bilder auf eine neue Breite oder Höhe bringen oder prozentual verkleinern bzw. vergrößern.',
     href: '/bilder/skalieren',
     category: 'bilder',
+    operation: 'skalieren',
     available: true,
   },
 ];

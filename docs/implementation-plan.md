@@ -11,7 +11,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 | Bereich | Entscheidung | Begründung |
 | --- | --- | --- |
 | Framework | Astro 7.4, `output: 'static'` | statischer Build, kein Server |
-| Interaktivität | React 19 über `@astrojs/react`, Inseln mit `client:load` nur auf Werkzeugseiten | Startseite und Infoseiten bleiben JS-frei |
+| Interaktivität | React 19 über `@astrojs/react`, Inseln mit `client:load` nur auf Werkzeugseiten | Statische Seiten ohne React; seit P14 kleines Astro-Skript für die gemeinsame Werkzeugnavigation |
 | Styling | Tailwind CSS 4.3 über `@tailwindcss/vite` | für Tailwind v4 der von Astro dokumentierte Weg (`@astrojs/tailwind` gilt nur für v3) |
 | TypeScript | 6.0 (`astro/tsconfigs/strict` + `noUncheckedIndexedAccess`) | `@astrojs/check` unterstützt TS ^5 \|\| ^6, TS 7 noch nicht |
 | Bildverarbeitung | `createImageBitmap` (Orientierung `from-image`), `OffscreenCanvas.convertToBlob` im Web Worker, Rückfall auf Hauptthread-Canvas | native APIs, kein WASM nötig |
@@ -59,6 +59,9 @@ Weitere Korrekturpunkte werden bei Bedarf als P13+ ergänzt.
 
 ### P13 – FAQ entfernen
 Auf Nutzerwunsch den vollständigen Abschnitt „Häufige Fragen“ von der Konvertierungsseite entfernt. Status: erledigt. Prüfung: Produktionsbuild und unabhängiges Review.
+
+### P14 – Werkzeugnavigation
+Schlichte Navigation nach Konvertieren, Komprimieren und Skalieren mit verfügbaren Werkzeugen im Dropdown. Hover für Maus, native Klick-/Tastaturbedienung und mobile Darstellung; aktive Links und Escape. Status: erledigt. Ein eigener dokumentierter Commit nach unabhängiger Prüfung.
 
 P02 und P03 laufen parallel (getrennte Dateien, gemeinsamer Vertrag `types.ts`).
 P09 wurde nachträglich auf Wunsch des Nutzers ergänzt (Icons und weitere Formate) und wird vor P04

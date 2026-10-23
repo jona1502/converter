@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P14
+
+- **Commit-Nachricht:** `feat(navigation): P14 kompakte Werkzeugnavigation mit Dropdowns ergänzen`
+- **Änderungen:** Drei Gruppen Konvertieren/Komprimieren/Skalieren, verfügbare Werkzeuge aus typisiertem Verzeichnis. Native Details-Menüs mit Maus-Hover, Klick, Tastatur, Escape, Außenklick und aktiven Links. Schlichte responsive Gestaltung; kleiner Info-Link. Keine zusätzliche React-Insel für die Navigation.
+- **Prüfung:** Unabhängiger Subagent prüfte Header und Werkzeugverzeichnis ohne Produktbefunde und ergänzte Browser-Tests. Hauptagent prüfte Screenshots offener Menüs auf Desktop und 320 px. Veraltete JS-frei-Aussage im Plan korrigiert: die gemeinsame Navigation lädt nun ein kleines Astro-Skript auf statischen Seiten.
+- **Checks:** Astro-/TypeScript-Check 90 Dateien ohne Befunde; Produktionsbuild mit sieben Seiten erfolgreich. Navigation/Seiten/Startseite/axe: 92 Tests bestanden, 4 gezielte Desktop-/Touch-Skips, einschließlich 16 erfolgreicher axe-Prüfungen. Ergänzter Hover-/Erstklick-Test anschließend in allen drei Desktopbrowsern bestanden, mobiler Hover-Fall bewusst übersprungen.
+- **Einschränkungen:** Keine neuen Produktgrenzen. Die Menüs zeigen ausschließlich tatsächlich verfügbare Werkzeuge. Native Details bleiben ohne Navigationsskript per Klick bedienbar.
+
 ## P13
 
 - **Commit-Nachricht:** `refactor(site): P13 FAQ von der Konvertierungsseite entfernen`
