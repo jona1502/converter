@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P10
+
+- **Commit-Nachricht:** `feat(pdf): P10 lokalen PDF-Komprimierungskern ergänzen`
+- **Änderungen:** PDF-Analyse und drei seriell berechnete Varianten mit tatsächlichen Bytegrößen; JPEG-/Flate-RGB-/Gray-Neukodierung, DPI-/Kantenlimits, Objekt- und Streamoptimierung. PDF-Worker mit Abbruch und Ergebnisbudget. Gemeinsame dezimale KB/MB-/Prozentformatierung, `@cantoo/pdf-lib` und Node-Typen für Browser-Teststeuerung ergänzt.
+- **Prüfung:** Agent vervollständigte Kern und Regressionstests, Hauptagent prüfte unabhängig Verarbeitung, Streams, Platzierungsanalyse, Ressourcen und Worker-Vertrag. Befunde behoben: Transportfehler-Cleanup, inkrementelle Content-Auswertung, spezielle Profile/Masken konservativ unverändert, Parserwarnungen im dedizierten Worker unterdrückt.
+- **Checks:** Typprüfung vor den unabhängigen P06-Vorbereitungen und statischer Build erfolgreich. Abschließender Agent-Lauf `npm test -- tests/unit/pdf tests/unit/format.test.ts`: 15 Browser-Testdateien bestanden, 125 Tests bestanden, 7 übersprungen, Exit 0. Hauptagent hatte zuvor Firefox-Zeitüberschreitungen im parallelen Lauf bestätigt. Dateiparallelität deshalb abgeschaltet; nur rechenintensive Verschlüsselungs-Fixturetests erhalten 60 Sekunden. Node 24 für weitere Prüfungen verwendet.
+- **Einschränkungen:** WebKit ohne OffscreenCanvas unterstützt Analyse, aber keine Worker-Komprimierung (entsprechende Tests übersprungen). Kein hartes Parser-Speicherlimit; eingebettete Schriften, besondere Farbräume und maskierte Bilder bleiben unverändert. Signaturen werden ungültig, PDF/A wird nicht garantiert. Größen können steigen. P11 liefert erst die Benutzeroberfläche.
+
 Ein Eintrag pro Arbeitspunkt (siehe [implementation-plan.md](implementation-plan.md)).
 Die Verbindung zur Git-Historie entsteht über die Arbeitspunkt-ID in der Commit-Nachricht.
 

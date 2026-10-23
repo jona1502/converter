@@ -6,6 +6,8 @@ import { playwright } from '@vitest/browser-playwright';
 export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts'],
+    // Bild-/PDF-Fixtures beanspruchen viel Speicher; keine parallelen Testdateien.
+    fileParallelism: false,
     browser: {
       enabled: true,
       provider: playwright(),
