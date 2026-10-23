@@ -21,44 +21,5 @@ const formats = formatList(INPUT_FORMATS);
       <ImageConverter client:load />
     </div>
 
-    <section class="page-section max-w-3xl" aria-labelledby="fragen">
-      <h2 id="fragen" class="section-title">Häufige Fragen</h2>
-      <div class="prose-content mt-6">
-        <h3>Welches Format sollte ich wählen?</h3>
-        <p>
-          WebP erzeugt meist die kleinsten Dateien und unterstützt Transparenz. JPEG eignet sich für Fotos
-          und wird praktisch überall angezeigt, speichert aber keine Transparenz. PNG speichert verlustfrei
-          und mit Transparenz, die Dateien sind dafür oft deutlich größer.
-        </p>
-
-        <h3>Warum ist das Ergebnis größer als das Original?</h3>
-        <p>
-          Das kommt vor, etwa wenn ein stark komprimiertes JPEG in das verlustfreie PNG umgewandelt wird.
-          Die Werkzeuge zeigen die tatsächliche Größe jedes Ergebnisses an und kennzeichnen größere
-          Ergebnisse deutlich.
-        </p>
-
-        <h3>Was passiert mit transparenten Bereichen?</h3>
-        <p>
-          WebP, PNG und ICO behalten die Transparenz. JPEG und BMP können in diesem Werkzeug keine Transparenz speichern; transparente
-          Bereiche werden deshalb mit der gewählten Hintergrundfarbe gefüllt (Standard: Weiß).
-        </p>
-
-        <h3>Bleiben Metadaten erhalten?</h3>
-        <p>
-          Nein. Beim Konvertieren wird jedes Bild neu kodiert. Dabei werden EXIF-Daten einschließlich
-          einer GPS-Position und eingebettete Farbprofile entfernt oder verändert. Die Ausrichtung von
-          Fotos wird vorher angewendet, damit das Ergebnis richtig herum erscheint.
-          {' '}<a href="/lokale-verarbeitung">Mehr zur lokalen Verarbeitung</a>
-        </p>
-
-        <h3>Warum ist ein Format nicht auswählbar?</h3>
-        <p>
-          Die Umwandlung nutzt die Bildfunktionen Ihres Browsers. Kann der Browser ein Format nicht
-          erzeugen – ältere Safari-Versionen etwa kein WebP –, ist es deaktiviert, statt dass still ein
-          anderes Format geliefert wird. Animierte Bilder werden nicht unterstützt.
-        </p>
-      </div>
-    </section>
   </div>
 </BaseLayout>

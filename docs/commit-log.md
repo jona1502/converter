@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P13
+
+- **Commit-Nachricht:** `refactor(site): P13 FAQ von der Konvertierungsseite entfernen`
+- **Änderungen:** Auf Nutzerwunsch gesamten FAQ-Abschnitt einschließlich aller fünf Fragen und Antworten entfernt. Keine weiteren FAQ-Abschnitte in den Werkzeugseiten gefunden.
+- **Prüfung:** Unabhängiger Agent hat den gezielten Seitendiff ohne Befunde freigegeben; Hauptagent prüfte Umfang und Suchtreffer.
+- **Checks:** `npm run build` unter Node 24 erfolgreich, sieben statische Seiten erzeugt. Kein neuer Test für die reine Textentfernung.
+- **Einschränkungen:** Keine neuen; bestehende Verarbeitungshinweise bleiben im Werkzeug und auf der Infoseite.
+
 ## P12
 
 - **Commit-Nachricht:** `docs(release): P12 unabhängige Abschlussprüfung dokumentieren`

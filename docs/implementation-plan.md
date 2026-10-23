@@ -57,6 +57,9 @@ dokumentiert in [commit-log.md](commit-log.md).
 
 Weitere Korrekturpunkte werden bei Bedarf als P13+ ergänzt.
 
+### P13 – FAQ entfernen
+Auf Nutzerwunsch den vollständigen Abschnitt „Häufige Fragen“ von der Konvertierungsseite entfernt. Status: erledigt. Prüfung: Produktionsbuild und unabhängiges Review.
+
 P02 und P03 laufen parallel (getrennte Dateien, gemeinsamer Vertrag `types.ts`).
 P09 wurde nachträglich auf Wunsch des Nutzers ergänzt (Icons und weitere Formate) und wird vor P04
 umgesetzt, damit die Werkzeugoberfläche alle Formate von Beginn an kennt. Die IDs bleiben stabil;
