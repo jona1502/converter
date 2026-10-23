@@ -24,13 +24,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p>
         Die Ergebnisse entstehen ebenfalls im Browser und werden Ihnen zum Herunterladen angeboten.
       </p>
+      <p>
+        PDF-Dateien verarbeitet eine lokal ausgelieferte PDF-Bibliothek in einem eigenen Hintergrund-Thread.
+        Die drei Qualitätsstufen werden nacheinander berechnet. Nach jeder fertigen Variante zeigt das Werkzeug deren
+        tatsächliche Ergebnisgröße an. Texte und Vektoren werden nicht als ganze Seiten in Bilder umgewandelt.
+      </p>
 
       <h2>Was mit Ihren Dateien geschieht</h2>
       <ul>
         <li>Dateien und Ergebnisse werden nicht hochgeladen.</li>
         <li>
           Sie liegen nur im Arbeitsspeicher des Browsers. Wenn Sie eine Datei entfernen, die Auswahl
-          zurücksetzen oder den Tab schließen, werden sie verworfen.
+          zurücksetzen oder das Werkzeug verlassen, werden die Referenzen und Ergebnis-URLs freigegeben.
+          Wann der Browser den Speicher tatsächlich zurückgewinnt, bestimmt seine Speicherverwaltung.
         </li>
         <li>
           Die Seite speichert Dateien nicht in Browser-Speichern wie Local Storage, IndexedDB oder
@@ -60,7 +66,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <h2>Metadaten und Farben</h2>
       <p>
-        Beim Konvertieren, Komprimieren und Skalieren wird jedes Bild neu kodiert. Dabei werden
+        In den Bildwerkzeugen wird beim Konvertieren, Komprimieren und Skalieren jedes Bild neu kodiert. Dabei werden
         Metadaten entfernt oder verändert. Das betrifft insbesondere:
       </p>
       <ul>
@@ -93,9 +99,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           kann zum Beispiel WebP-Dateien erzeugen. Nicht verfügbare Ausgabeformate werden im Werkzeug
           als nicht verfügbar gekennzeichnet und nicht still durch ein anderes ersetzt.
         </li>
-        <li>Animierte Bilder (animiertes PNG oder WebP) werden nicht unterstützt.</li>
+        <li>Animierte Bilder (PNG, WebP, GIF und AVIF-Bildfolgen) werden nicht unterstützt.</li>
         <li>Die Werkzeuge benötigen JavaScript.</li>
       </ul>
+      <h2>Grenzen der PDF-Komprimierung</h2>
+      <p>
+        Nur sicher unterstützte Rasterbilder werden neu kodiert. Bilder mit Transparenzmasken,
+        speziellen Farbprofilen oder nicht unterstützten Filtern bleiben unverändert. Eingebettete
+        Schriften werden nicht verkleinert. Bereits optimierte und textlastige PDFs können gleich groß
+        oder größer werden. Dokumentmetadaten werden durch dieses Werkzeug nicht gezielt bereinigt.
+      </p>
+      <p>
+        Neuschreiben kann digitale Signaturen ungültig machen; behalten Sie das Original.
+        PDF/A-Konformität wird nicht garantiert. Verschlüsselte Dateien werden abgelehnt.
+        Die PDF-Komprimierung benötigt unter anderem OffscreenCanvas im Hintergrund-Thread.
+        Fehlt die Unterstützung, zeigt das Werkzeug einen Hinweis. Große oder komplexe Dokumente
+        können trotz Grenzwerten den verfügbaren Arbeitsspeicher überschreiten.
+      </p>
     </div>
   </article>
 </BaseLayout>

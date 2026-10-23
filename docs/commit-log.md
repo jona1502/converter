@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P08
+
+- **Commit-Nachricht:** `docs(project): P08 Bedienung Architektur und Grenzen dokumentieren`
+- **Änderungen:** README mit Installation, Start/Prüfbefehlen, Architektur, Formaten, Datenschutz und konkreten Grenzen. Infoseite um PDF-Verarbeitung, Signaturen, Browsergrenzen und präzise Speicherfreigabe ergänzt; Bild-Metadatenaussagen abgegrenzt. Größen-/Einheitenpräzisierungen im Plan und fehlenden Abstand vor FAQ-Link korrigiert.
+- **Prüfung:** Zwei unabhängige Agenten prüften Konsistenz mit Code und Verhalten. Hinweise zu 50 MiB, Anzeige nach jeder Variante und exakter MB-Schwelle übernommen. Hauptagent sichtete gerenderte Konverter-/PDF-Seiten zusätzlich visuell.
+- **Checks:** Typprüfung 89 Dateien ohne Befunde; letzter Produktionsbuild erfolgreich. Änderungen sind überwiegend Dokumentation; vollständige Prüfung läuft im Abschlussarbeitspunkt P12.
+- **Einschränkungen:** Hosting/Rechtstexte und echte Safari/iOS-Prüfung bleiben Betreiberaufgaben. Keine Deployment-Konfiguration erstellt. Die ursprüngliche Übergabedatei bleibt wie angefordert uncommittet.
+
 ## P07
 
 - **Commit-Nachricht:** `test(release): P07 Datenschutz und Barrierefreiheit prüfen`

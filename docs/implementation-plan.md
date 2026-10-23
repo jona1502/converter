@@ -49,7 +49,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 | P05 | Werkzeug „Bilder komprimieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
 | P06 | Werkzeug „Bilder skalieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
 | P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06, P11 | erledigt |
-| P08 | README und Projektdokumentation | Hauptagent | P07 | offen |
+| P08 | README und Projektdokumentation | Hauptagent | P07 | erledigt |
 | P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | erledigt |
 | P10 | PDF-Komprimierungskern (Analyse, drei Stufen, Bild-Neukodierung im Worker) | Subagent „PDF“ | P01 | erledigt |
 | P11 | Werkzeug „PDF komprimieren“ mit drei Varianten | Subagent „Werkzeuge“ | P04, P10 | erledigt |
