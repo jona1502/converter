@@ -43,7 +43,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 | ID | Titel | Verantwortung | Abhängig von | Status |
 | --- | --- | --- | --- | --- |
 | P01 | Projektgrundlage, Schnittstellenvertrag, Prüfwerkzeuge, Plan | Hauptagent | – | erledigt |
-| P02 | Bildverarbeitungskern mit Worker und Browser-Tests | Subagent „Kern“ | P01 | offen |
+| P02 | Bildverarbeitungskern mit Worker und Browser-Tests | Subagent „Kern“ | P01 | erledigt |
 | P03 | Seitengerüst, Gestaltungssystem, Startseite, Erklärseite, 404-Seite | Subagent „Oberfläche“ | P01 | erledigt |
 | P04 | Gemeinsame Werkzeugoberfläche und Werkzeug „Bilder konvertieren“ | Subagent „Werkzeuge“ | P02, P03, P09 | offen |
 | P05 | Werkzeug „Bilder komprimieren“ | Subagent „Werkzeuge“ | P04 | offen |
@@ -51,12 +51,24 @@ dokumentiert in [commit-log.md](commit-log.md).
 | P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06 | offen |
 | P08 | README und Projektdokumentation | Hauptagent | P07 | offen |
 | P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | offen |
-| P10+ | Korrekturpunkte aus der abschließenden Prüfung (werden bei Bedarf ergänzt) | – | – | – |
+| P10 | PDF-Komprimierungskern (Analyse, drei Stufen, Bild-Neukodierung im Worker) | Subagent „PDF“ | P01 | offen |
+| P11 | Werkzeug „PDF komprimieren“ mit drei Varianten | Subagent „Werkzeuge“ | P04, P10 | offen |
+| P12+ | Korrekturpunkte aus der abschließenden Prüfung (werden bei Bedarf ergänzt) | – | – | – |
 
 P02 und P03 laufen parallel (getrennte Dateien, gemeinsamer Vertrag `types.ts`).
 P09 wurde nachträglich auf Wunsch des Nutzers ergänzt (Icons und weitere Formate) und wird vor P04
 umgesetzt, damit die Werkzeugoberfläche alle Formate von Beginn an kennt. Die IDs bleiben stabil;
 die Reihenfolge der Commits ist daher P01, P02, P03, P09, P04 …
+P10/P11 (PDF-Komprimierung) wurden ebenfalls nachträglich auf Wunsch des Nutzers aufgenommen;
+der ursprüngliche Ausschluss von PDF-Werkzeugen für den ersten Release ist damit aufgehoben.
+Technikentscheidung des Nutzers: `@cantoo/pdf-lib` (MIT, gepflegter Fork von pdf-lib) mit eigener
+Bild-Neukodierung statt AGPL-lizenzierter WASM-Lösungen (MuPDF, Ghostscript).
+
+## Einheitliche Größenangaben
+Für alle Werkzeuge gilt (`src/lib/format.ts`): unter 1.000.000 Bytes in KB, ab 1.000.000 Bytes in
+MB, dezimal (1 KB = 1.000 Bytes, 1 MB = 1.000.000 Bytes), deutsche Zahlenformatierung
+(`Intl.NumberFormat('de-DE')`). Prozentuale Änderung gegenüber dem Original mit Vorzeichen;
+größere oder gleich große Ergebnisse werden deutlich gekennzeichnet.
 P05 und P06 laufen parallel; Einträge in `src/data/tools.ts` pflegt der Hauptagent.
 
 ### P01 – Projektgrundlage
@@ -123,11 +135,41 @@ Tastaturbedienung, Mobilansicht, automatisierte Barrierefreiheitsprüfung (axe),
 - Fähigkeitsprüfung für die Dekodierung (z. B. AVIF) statt Annahmen.
 - Browser-Tests: Ausgabe dekodierbar, Struktur der ICO/BMP-Datei, Größen, Transparenz.
 
+### P10 – PDF-Komprimierungskern (`src/lib/pdf/`, `tests/unit/pdf/`)
+- Analyse nach Dateiauswahl: Signatur `%PDF-`, Seitenzahl, verschlüsselt (→ verständlich
+  ablehnen), Anzahl/Art der Bild-XObjects (DCT, Flate, sonstige), deren Byte-Anteil.
+- Drei Stufen mit unterschiedlichen Einstellungen (Hohe Qualität / Ausgewogen / Kleine Datei):
+  maximale Bildauflösung (Pixel der längsten Kante bzw. effektive DPI, sofern ermittelbar) und
+  JPEG-Qualität; zusätzlich für alle Stufen verlustfreie Optimierung (Objekt-Streams,
+  Flate-Kompression unkomprimierter Streams, Entfernen unreferenzierter Objekte, soweit pdf-lib es erlaubt).
+- Bild-Neukodierung: DCT (JPEG) über `createImageBitmap`, Flate-Rasterbilder (DeviceRGB/DeviceGray,
+  8 bit) über `DecompressionStream`; Bilder mit SMask/Maske, Indexfarben, 16 bit, JPX, JBIG2, CCITT,
+  Decode-Arrays oder unbekannten Farbräumen bleiben unverändert. Ein Bild wird nur ersetzt, wenn
+  das neue kleiner ist.
+- Text, Schriften, Vektorgrafiken und Struktur (Lesezeichen, Links, Formulare) werden nicht verändert;
+  keine Rasterung ganzer Seiten.
+- Verarbeitung im Web Worker, Varianten strikt nacheinander, Abbruch, Status je Variante
+  (wartet / analysiert / verarbeitet Bild x von y / speichert / fertig / Fehler) – nur echte Zähler.
+- Speichergrenzen: max. Eingabegröße (z. B. 100 MB), max. Summe der Ergebnisse im Speicher,
+  Begrenzung der Bildpixel; Überschreitung verständlich melden.
+- Tests im Browser mit programmatisch erzeugten PDFs (Text, Vektor, JPEG- und Flate-Bilder,
+  Bild mit Transparenzmaske, verschlüsselte/beschädigte Datei): Ergebnis ist ein gültiges PDF
+  (mit pdf-lib erneut ladbar, Seitenzahl gleich, Text-Operatoren erhalten), Stufen unterscheiden
+  sich, Bildpixel verkleinert, nicht unterstützte Bilder unverändert, Größen sind echt gemessen.
+
+### P11 – Werkzeug „PDF komprimieren“ (`/pdf/komprimieren`)
+Eine PDF wählen (Drag-and-drop und Dateiauswahl), Analyse anzeigen, drei Varianten nacheinander
+im Hintergrund erzeugen, echter Status je Variante, nach Fertigstellung tatsächliche Größe und
+prozentuale Änderung, Kennzeichnung „größer als das Original“ bzw. „keine Einsparung“, Auswahl und
+Download je Variante, Zurücksetzen und neue Auswahl geben Ergebnisse, Worker und Objekt-URLs frei.
+Ehrlicher Hinweis, wenn die PDF kaum komprimierbare Inhalte hat (z. B. keine Bilder) und welche
+Inhalte unverändert bleiben. E2E-Test.
+
 ### P08 – Dokumentation
 README (Voraussetzungen, Befehle, Architektur, Datenschutzverhalten, Formate, Grenzen).
 
 ## Spätere Erweiterungen (nicht Teil dieses Releases)
-PDF-Werkzeuge, Audio- und Videokonvertierung, weitere Bildformate (z. B. AVIF- und GIF-Export),
+Weitere PDF-Werkzeuge, Audio- und Videokonvertierung, weitere Bildformate (z. B. AVIF- und GIF-Export),
 ZIP-Download aller Ergebnisse. Für Office-Konvertierung (DOCX ↔ PDF) und PDF-Komprimierung in
 Qualitätsstufen ist ein separater, optionaler Verarbeitungsdienst denkbar; dessen Planung erfolgt
 außerhalb dieses Releases.

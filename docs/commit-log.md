@@ -51,3 +51,35 @@ Die Verbindung zur Git-Historie entsteht über die Arbeitspunkt-ID in der Commit
   Impressum/Datenschutzerklärung fehlen bewusst und sind vor einer Veröffentlichung vom Betreiber
   zu ergänzen. Die Aussage „Dateien werden beim Entfernen verworfen“ wird erst mit P04/P07
   implementiert bzw. getestet.
+
+## P02
+
+- **Commit-Nachricht:** `feat(images): P02 Bildverarbeitungskern hinzufügen`
+- **Änderungen:** Kern unter `src/lib/image/`: Formaterkennung über Signaturen, Header-Abmessungen
+  (PNG, JPEG-SOFn, WebP VP8/VP8L/VP8X), EXIF-Orientierung, Erkennung animierter PNG/WebP
+  (`sniff.ts`, `probe.ts`), Grenzwerte und speicherabhängige Parallelität (`limits.ts`), Zielgröße
+  (`resize.ts`), bereinigte und eindeutige Dateinamen (`filename.ts`), Zeichnen/Kodieren mit
+  schrittweiser Verkleinerung, JPEG-Hintergrund, Prüfung von MIME-Typ und Signatur des Ergebnisses
+  (`encode.ts`, `canvas.ts`), Pipeline mit Grenzprüfung vor und nach dem Dekodieren
+  (`pipeline.ts`), Worker mit Protokoll und Prozessor mit Warteschlange, Abbruch, `dispose` und
+  Rückfall auf den Hauptthread (`worker.ts`, `worker-protocol.ts`, `processor.ts`, `errors.ts`).
+  Browser-Tests in `tests/unit/`. Zusätzlich im Plan: Arbeitspunkte P10/P11 (PDF-Komprimierung,
+  Wunsch des Nutzers, Technikentscheidung `@cantoo/pdf-lib`) und Regel für Größenangaben.
+- **Prüfung:** Review durch separaten Subagent (kein kritischer/hoher Befund; zusätzlich
+  Sniffer-Fuzzing mit 200.000 Zufallseingaben ohne Ausnahme). Behoben: `transparencyFlattened`
+  prüft echte Alphawerte statt Header-Vermutung, zeitabhängige Prozessor-Tests deterministisch,
+  Tests mit vom Browser kodiertem WebP, JPEG-Eingaben, Orientierungen 3/6/8 und Nachweis, dass bei
+  Grenzverletzung nicht dekodiert wird; Worker-Leck bei `postMessage`-Fehler, `getEncodeSupport`
+  nach `dispose`, Erkennung ungedrehter Bitmaps, Grenzprüfung der dekodierten Bitmap, Freigabe
+  temporärer Canvas, Bidi-Zeichen und reservierte Windows-Namen in Dateinamen, weniger Casts.
+- **Checks:** `npm run check` (0 Fehler, 0 Warnungen, 0 Hinweise); Vitest für die Bildkern-Tests
+  in Chromium, Firefox und WebKit: 24 Testdateien (8 × 3 Browser), 255 bestanden, 3 übersprungen
+  (Test „Browser ohne WebP-Encoder“ – alle drei Testbrowser kodieren WebP); `npm run build`
+  erfolgreich (laut Subagent).
+- **Einschränkungen:** WebKit bietet kein OffscreenCanvas; dort läuft die Verarbeitung im
+  Hauptthread. Der echte Fall „Browser kodiert WebP nicht“ (Safari) ist nur über einen
+  nachgestellten Encoder getestet. EXIF-Orientierung wird nur in JPEG-Headern ausgewertet
+  (maßgeblich bleibt die dekodierte Bitmap). Zerstörte Bilddaten bei intaktem Header dekodieren
+  manche Browser ohne Fehler zu teilweise leeren Bildern; das ist nicht zuverlässig erkennbar.
+  Abbruch im Hauptthread verwirft nur das Ergebnis, die laufende Canvas-Arbeit läuft zu Ende.
+  Der Worker im Produktionsbuild wird erst mit P04 (erste Seite, die den Kern lädt) prüfbar.
