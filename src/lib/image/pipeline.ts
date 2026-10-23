@@ -1,9 +1,11 @@
 import { encodeImage } from './encode';
-import { isWithinPixelLimits } from './limits';
+import { detectDecodeSupport } from './capabilities';
+import { extractLargestIcoEntry } from './sniff-formats';
+import { bmpFileSize, LIMITS, isWithinPixelLimits } from './limits';
 import { abortedError } from './errors';
 import { probeImage } from './probe';
 import { computeTargetSize } from './resize';
-import { IMAGE_FORMATS, ImageProcessingError, type ProcessOptions, type ProcessResult } from './types';
+import { DEFAULT_ICO_SIZES, ICO_SIZES, IMAGE_FORMATS, ImageProcessingError, type ProcessOptions, type ProcessResult } from './types';
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -23,6 +25,13 @@ export function validateProcessOptions(options: ProcessOptions): void {
     throw invalid('Hintergrundfarbe muss im Format #rrggbb angegeben werden.');
   }
   if (options.resize === null || typeof options.resize !== 'object') throw invalid('Größenänderung fehlt.');
+  if (options.format === 'ico') {
+    if (options.resize.mode !== 'none') throw invalid('ICO verwendet eigene Symbolgroessen.');
+    const sizes = options.icoSizes ?? DEFAULT_ICO_SIZES;
+    if (!Array.isArray(sizes) || !sizes.length || new Set(sizes).size !== sizes.length || sizes.some(s => !ICO_SIZES.includes(s))) {
+      throw invalid('Ungueltige ICO-Groessen.');
+    }
+  }
 }
 
 function throwIfAborted(signal: AbortSignal | undefined): void {
@@ -60,7 +69,17 @@ export async function runPipeline(file: Blob, options: ProcessOptions, signal?: 
   computeTargetSize(probe, options.resize);
   throwIfAborted(signal);
 
-  const bitmap = await decode(file);
+  if (!(await detectDecodeSupport())[probe.format]) {
+    throw new ImageProcessingError('decode-unsupported', 'Dieser Browser kann das Eingabeformat nicht dekodieren.');
+  }
+  let source: Blob = file;
+  if (probe.format === 'ico') {
+    const entry = extractLargestIcoEntry(new Uint8Array(await file.arrayBuffer()));
+    if (!entry) throw new ImageProcessingError('decode-failed', 'ICO-Eintrag ist beschädigt.');
+    source = new Blob([entry as Uint8Array<ArrayBuffer>], { type: 'image/x-icon' });
+  }
+  throwIfAborted(signal);
+  const bitmap = await decode(source);
   try {
     throwIfAborted(signal);
     const sourceWidth = bitmap.width;
@@ -81,6 +100,10 @@ export async function runPipeline(file: Blob, options: ProcessOptions, signal?: 
       throw new ImageProcessingError('decode-failed', 'EXIF-Orientierung wurde beim Dekodieren nicht angewendet.');
     }
     const target = computeTargetSize({ width: sourceWidth, height: sourceHeight }, options.resize);
+    if (options.format === 'bmp' && bmpFileSize(target.width, target.height) > LIMITS.maxBmpOutputBytes) {
+      throw new ImageProcessingError('dimensions-too-large', 'BMP-Ausgabe überschreitet das Speicherlimit.');
+    }
+    const icoSize = Math.max(...(options.icoSizes ?? DEFAULT_ICO_SIZES));
     const encoded = await encodeImage({
       source: bitmap,
       width: target.width,
@@ -89,6 +112,7 @@ export async function runPipeline(file: Blob, options: ProcessOptions, signal?: 
       quality: options.quality,
       background: options.background,
       sourceMayHaveTransparency: probe.mayHaveTransparency,
+      icoSizes: options.icoSizes,
     });
     throwIfAborted(signal);
     return {
@@ -97,9 +121,9 @@ export async function runPipeline(file: Blob, options: ProcessOptions, signal?: 
       mime: encoded.mime,
       sourceWidth,
       sourceHeight,
-      width: target.width,
-      height: target.height,
-      upscaled: target.upscaled,
+      width: options.format === 'ico' ? icoSize : target.width,
+      height: options.format === 'ico' ? icoSize : target.height,
+      upscaled: options.format === 'ico' ? icoSize > Math.max(sourceWidth, sourceHeight) : target.upscaled,
       transparencyFlattened: encoded.transparencyFlattened,
     };
   } finally {

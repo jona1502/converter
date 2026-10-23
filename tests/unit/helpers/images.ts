@@ -2,7 +2,7 @@
 import type { ImageFormat } from '../../../src/lib/image/types';
 import { ascii, blobBytes, concat, crc32, u16be, u16le, u24le, u32be, u32le } from './bytes';
 
-const MIME: Record<ImageFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const MIME: Record<ImageFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp', ico: 'image/x-icon' };
 
 type Draw = (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
 

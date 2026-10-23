@@ -33,7 +33,7 @@ import {
 } from './helpers/images';
 
 const support = await detectEncodeSupport();
-const encodable = IMAGE_FORMATS.filter((f) => support[f]);
+const encodable = IMAGE_FORMATS.filter((f) => support[f] && f !== 'ico');
 
 function opts(format: ImageFormat, extra: Partial<ProcessOptions> = {}): ProcessOptions {
   return { format, quality: 0.9, background: '#ffffff', resize: { mode: 'none' }, ...extra };

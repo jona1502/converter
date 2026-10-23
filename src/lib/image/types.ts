@@ -5,11 +5,26 @@
  * gemeinsam genutzt. Änderungen nur abgestimmt vornehmen.
  */
 
-/** Unterstützte Ein- und Ausgabeformate. */
-export type ImageFormat = 'jpeg' | 'png' | 'webp';
+/**
+ * Eingabeformate, erkannt anhand der Dateibytes (nicht der Endung).
+ * Ob der Browser ein Eingabeformat tatsächlich dekodiert, liefert ImageProcessor.getDecodeSupport().
+ */
+export type InputFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'ico' | 'avif';
 
-export const IMAGE_FORMATS: readonly ImageFormat[] = ['jpeg', 'png', 'webp'];
+export const INPUT_FORMATS: readonly InputFormat[] = ['jpeg', 'png', 'webp', 'gif', 'bmp', 'ico', 'avif'];
 
+/** Ausgabeformate. */
+export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'bmp' | 'ico';
+
+export const OUTPUT_FORMATS: readonly OutputFormat[] = ['jpeg', 'png', 'webp', 'bmp', 'ico'];
+
+/** Ausgabeformat (aus Kompatibilitätsgründen beibehaltener Name für OutputFormat). */
+export type ImageFormat = OutputFormat;
+
+/** Alle Ausgabeformate (aus Kompatibilitätsgründen beibehaltener Name für OUTPUT_FORMATS). */
+export const IMAGE_FORMATS: readonly ImageFormat[] = OUTPUT_FORMATS;
+
+/** Beschreibung eines Ausgabeformats. */
 export interface FormatInfo {
   /** MIME-Typ, den der Encoder liefern muss. */
   readonly mime: string;
@@ -18,22 +33,64 @@ export interface FormatInfo {
   /** Anzeigename. */
   readonly label: string;
   /**
-   * Ob ein Qualitätsparameter beim Kodieren im Browser tatsächlich wirkt.
-   * Bei PNG ignorieren Browser den Qualitätswert, daher false.
+   * Ob ein Qualitätsparameter beim Kodieren tatsächlich wirkt.
+   * Bei PNG ignorieren Browser den Qualitätswert, BMP und ICO sind verlustfrei, daher false.
    */
   readonly supportsQuality: boolean;
-  /** Ob das Format einen Alphakanal speichern kann. */
+  /** Ob das Format einen Alphakanal speichert (sonst Füllung mit ProcessOptions.background). */
   readonly supportsTransparency: boolean;
+  /**
+   * 'canvas': kodiert der Browser (Canvas toBlob/convertToBlob).
+   * 'custom': eigener Encoder des Kerns (BMP; ICO mit vom Browser kodierten PNG-Einträgen).
+   */
+  readonly encoder: 'canvas' | 'custom';
+  /**
+   * Ob ProcessOptions.resize gilt. Bei ICO legen stattdessen icoSizes die Größen fest;
+   * resize muss dort { mode: 'none' } sein, sonst 'invalid-options'.
+   */
+  readonly supportsResize: boolean;
 }
 
-export const FORMAT_INFO: Readonly<Record<ImageFormat, FormatInfo>> = {
-  jpeg: { mime: 'image/jpeg', extension: 'jpg', label: 'JPEG', supportsQuality: true, supportsTransparency: false },
-  png: { mime: 'image/png', extension: 'png', label: 'PNG', supportsQuality: false, supportsTransparency: true },
-  webp: { mime: 'image/webp', extension: 'webp', label: 'WebP', supportsQuality: true, supportsTransparency: true },
+export const FORMAT_INFO: Readonly<Record<OutputFormat, FormatInfo>> = {
+  jpeg: { mime: 'image/jpeg', extension: 'jpg', label: 'JPEG', supportsQuality: true, supportsTransparency: false, encoder: 'canvas', supportsResize: true },
+  png: { mime: 'image/png', extension: 'png', label: 'PNG', supportsQuality: false, supportsTransparency: true, encoder: 'canvas', supportsResize: true },
+  webp: { mime: 'image/webp', extension: 'webp', label: 'WebP', supportsQuality: true, supportsTransparency: true, encoder: 'canvas', supportsResize: true },
+  bmp: { mime: 'image/bmp', extension: 'bmp', label: 'BMP', supportsQuality: false, supportsTransparency: false, encoder: 'custom', supportsResize: true },
+  ico: { mime: 'image/x-icon', extension: 'ico', label: 'ICO (Symbol)', supportsQuality: false, supportsTransparency: true, encoder: 'custom', supportsResize: false },
 };
 
-/** Ergebnis der Kodierungs-Fähigkeitsprüfung: welche Ausgabeformate der Browser wirklich erzeugt. */
-export type EncodeSupport = Readonly<Record<ImageFormat, boolean>>;
+/** Beschreibung eines Eingabeformats, z. B. für das accept-Attribut der Dateiauswahl. */
+export interface InputFormatInfo {
+  /** Gängige MIME-Typen (der erste ist der übliche). */
+  readonly mimes: readonly string[];
+  /** Gängige Dateiendungen ohne Punkt. */
+  readonly extensions: readonly string[];
+  readonly label: string;
+}
+
+export const INPUT_FORMAT_INFO: Readonly<Record<InputFormat, InputFormatInfo>> = {
+  jpeg: { mimes: ['image/jpeg'], extensions: ['jpg', 'jpeg', 'jfif'], label: 'JPEG' },
+  png: { mimes: ['image/png'], extensions: ['png'], label: 'PNG' },
+  webp: { mimes: ['image/webp'], extensions: ['webp'], label: 'WebP' },
+  gif: { mimes: ['image/gif'], extensions: ['gif'], label: 'GIF (nur unbewegt)' },
+  bmp: { mimes: ['image/bmp', 'image/x-ms-bmp'], extensions: ['bmp', 'dib'], label: 'BMP' },
+  ico: { mimes: ['image/x-icon', 'image/vnd.microsoft.icon'], extensions: ['ico'], label: 'ICO' },
+  avif: { mimes: ['image/avif'], extensions: ['avif'], label: 'AVIF (nur unbewegt)' },
+};
+
+/** Ergebnis der Kodierungs-Fähigkeitsprüfung: welche Ausgabeformate wirklich erzeugt werden können. */
+export type EncodeSupport = Readonly<Record<OutputFormat, boolean>>;
+
+/** Ergebnis der Dekodierungs-Fähigkeitsprüfung: welche Eingabeformate der Browser wirklich dekodiert. */
+export type DecodeSupport = Readonly<Record<InputFormat, boolean>>;
+
+/** Mögliche Kantenlängen eines ICO-Eintrags in Pixeln. */
+export type IcoSize = 16 | 32 | 48 | 64 | 128 | 256;
+
+export const ICO_SIZES: readonly IcoSize[] = [16, 32, 48, 64, 128, 256];
+
+/** Standardgrößen für ICO, wenn ProcessOptions.icoSizes fehlt. */
+export const DEFAULT_ICO_SIZES: readonly IcoSize[] = [16, 32, 48, 256];
 
 export interface Dimensions {
   readonly width: number;
@@ -92,7 +149,7 @@ export type ResizeOptions =
 
 export interface ProcessOptions {
   /** Zielformat. Wird nie still ersetzt: liefert der Browser es nicht, -> 'encode-unsupported'. */
-  readonly format: ImageFormat;
+  readonly format: OutputFormat;
   /**
    * Qualität 0..1 (außerhalb -> 'invalid-options').
    * Wird nur verwendet, wenn FORMAT_INFO[format].supportsQuality, sonst ignoriert.
@@ -100,50 +157,70 @@ export interface ProcessOptions {
   readonly quality: number;
   /**
    * Hintergrundfarbe als #rrggbb (sonst 'invalid-options'), mit der transparente Bereiche
-   * gefüllt werden, wenn das Zielformat keine Transparenz unterstützt (JPEG).
+   * gefüllt werden, wenn das Zielformat keine Transparenz unterstützt (JPEG, BMP).
+   * Bei ICO ungenutzt (Rand und Transparenz bleiben transparent), muss aber gültig sein.
    */
   readonly background: string;
+  /** Größenänderung. Bei ICO nur { mode: 'none' } erlaubt (sonst 'invalid-options'), siehe icoSizes. */
   readonly resize: ResizeOptions;
+  /**
+   * Nur für format 'ico': enthaltene Größen (je Eintrag ein quadratisches PNG). Standard DEFAULT_ICO_SIZES.
+   * Mindestens eine Größe, nur Werte aus ICO_SIZES, keine Duplikate – sonst 'invalid-options'.
+   * Jede Größe: Bild mit erhaltenem Seitenverhältnis eingepasst (contain), zentriert, transparenter Rand.
+   * Kleinere Quellen werden vergrößert (erlaubt); dann ist ProcessResult.upscaled true.
+   * Bei anderen Formaten ignoriert.
+   */
+  readonly icoSizes?: readonly IcoSize[];
 }
 
 /** Ergebnis der Vorabprüfung einer Datei anhand ihrer Bytes (nicht der Endung oder file.type). */
 export interface ProbeResult {
-  readonly format: ImageFormat;
+  /** Erkanntes Eingabeformat. Ob der Browser es dekodiert, sagt ImageProcessor.getDecodeSupport(). */
+  readonly format: InputFormat;
   /**
    * Abmessungen aus dem Dateiheader, nach Anwendung einer erkannten EXIF-Orientierung.
    * Dienen der Anzeige und der Grenzprüfung vor dem Dekodieren. Maßgeblich für die
    * Verarbeitung sind die Abmessungen der dekodierten Bitmap.
+   * ICO: größter Eintrag. AVIF: größte ispe-Angabe (ggf. nach Drehung per irot).
    */
   readonly width: number;
   readonly height: number;
   /** Erkannte EXIF-Orientierung 1..8 (1 = keine Drehung oder nicht vorhanden). */
   readonly orientation: number;
-  /** Ob die Datei einen Alphakanal haben kann (PNG mit Alpha/tRNS, WebP mit Alpha). Heuristisch. */
+  /**
+   * Ob die Datei einen Alphakanal haben kann (PNG mit Alpha/tRNS, WebP/AVIF mit Alpha, GIF mit
+   * Transparenzindex, 32-bit-BMP, ICO immer). Heuristisch.
+   */
   readonly mayHaveTransparency: boolean;
 }
 
 export interface ProcessResult {
   readonly blob: Blob;
-  readonly format: ImageFormat;
+  readonly format: OutputFormat;
   /** Tatsächlicher, geprüfter MIME-Typ des Ergebnisses (stimmt mit FORMAT_INFO[format].mime überein). */
   readonly mime: string;
   /** Abmessungen der dekodierten, orientierungskorrigierten Quelle. */
   readonly sourceWidth: number;
   readonly sourceHeight: number;
+  /** Abmessungen des Ergebnisses; bei ICO die des größten Eintrags (quadratisch). */
   readonly width: number;
   readonly height: number;
-  /** Ob das Ergebnis in Breite oder Höhe größer als die Quelle ist. */
+  /**
+   * Ob das Ergebnis in Breite oder Höhe größer als die Quelle ist.
+   * ICO: ob mindestens ein Eintrag die Quelle vergrößert darstellt.
+   */
   readonly upscaled: boolean;
   /** Ob transparente Bereiche mit der Hintergrundfarbe gefüllt wurden (Zielformat ohne Alpha). */
   readonly transparencyFlattened: boolean;
 }
 
 export type ImageErrorCode =
-  | 'unsupported-type' // keine JPEG/PNG/WebP-Signatur
+  | 'unsupported-type' // keine Signatur eines Eingabeformats (INPUT_FORMATS)
   | 'file-too-large' // Dateigröße über Limit
   | 'dimensions-too-large' // Eingabe- oder Zielabmessungen über Limit, oder Canvas dieser Größe nicht nutzbar
-  | 'animated-unsupported' // animiertes PNG/WebP
-  | 'decode-failed' // beschädigt oder vom Browser nicht dekodierbar
+  | 'animated-unsupported' // animiertes PNG/WebP/GIF, AVIF-Bildfolge
+  | 'decode-unsupported' // Format erkannt, aber dieser Browser dekodiert es nicht (z. B. AVIF)
+  | 'decode-failed' // beschädigt oder trotz unterstütztem Format nicht dekodierbar
   | 'invalid-options' // ungültige Einstellungen (z. B. Breite 0)
   | 'encode-unsupported' // Browser liefert das Zielformat nicht (falscher MIME-Typ)
   | 'encode-failed' // Kodierung fehlgeschlagen oder leeres Ergebnis
@@ -183,10 +260,13 @@ export interface ProcessCallOptions {
  *     { width: number; height: number; upscaled: boolean }
  *     Reine Funktion, Regeln siehe ResizeOptions.
  *
- *   buildOutputFileName(originalName: string, format: ImageFormat, suffix: string): string
+ *   buildOutputFileName(originalName: string, format: OutputFormat, suffix: string): string
  *     Entfernt die bisherige Endung, ersetzt Pfadtrenner und Steuerzeichen, kürzt überlange
  *     Namen, fällt bei leerem Namen auf "bild" zurück und hängt -suffix und die Endung des
  *     Zielformats an, z. B. ("Urlaub.PNG", 'webp', 'konvertiert') -> "Urlaub-konvertiert.webp".
+ *
+ *   makeUniqueFileNames(names: string[]): string[]
+ *     Eindeutige Namen im Stapel (ohne Groß-/Kleinschreibung), z. B. "a.webp", "a-2.webp".
  *
  *   createImageProcessor(): ImageProcessor
  *
@@ -195,6 +275,12 @@ export interface ProcessCallOptions {
 export interface ImageProcessor {
   /** Kodierungsfähigkeiten des Kontexts, in dem verarbeitet wird (Worker oder Hauptthread). Gecacht. */
   getEncodeSupport(): Promise<EncodeSupport>;
+  /**
+   * Dekodierungsfähigkeiten des Kontexts, in dem verarbeitet wird, per echtem Dekodierversuch
+   * kleiner eingebetteter Beispieldateien. Nicht dekodierbare Formate liefern bei process()
+   * 'decode-unsupported'. Gecacht.
+   */
+  getDecodeSupport(): Promise<DecodeSupport>;
   /**
    * Verarbeitet eine Datei: führt selbst probeImage aus, dekodiert (Orientierung aus der Datei),
    * berechnet die Zielgröße, kodiert und prüft den MIME-Typ des Ergebnisses.

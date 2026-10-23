@@ -1,5 +1,5 @@
 import type { SerializedError } from './errors';
-import type { EncodeSupport, ProcessOptions, ProcessResult } from './types';
+import type { DecodeSupport, EncodeSupport, ProcessOptions, ProcessResult } from './types';
 
 /** Nachrichten Hauptthread -> Worker. */
 export type WorkerRequest =
@@ -13,6 +13,7 @@ export type WorkerResponse =
       readonly type: 'capabilities';
       readonly id: number;
       readonly support: EncodeSupport;
+      readonly decodeSupport: DecodeSupport;
       /** Ob der Worker dekodieren und zeichnen kann (createImageBitmap + OffscreenCanvas mit 2D-Kontext). */
       readonly usable: boolean;
     }

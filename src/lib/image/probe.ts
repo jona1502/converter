@@ -24,7 +24,7 @@ export async function probeImage(file: Blob): Promise<ProbeResult> {
 
   let sniff: SniffResult | null = sniffImage(await readBytes(file.slice(0, HEAD_BYTES)));
   if (sniff === null) {
-    throw new ImageProcessingError('unsupported-type', 'Keine JPEG-, PNG- oder WebP-Signatur gefunden.');
+    throw new ImageProcessingError('unsupported-type', 'Keine unterstützte Bildsignatur gefunden.');
   }
   if (!sniff.complete && file.size > HEAD_BYTES) {
     // Header reicht über den Anfang hinaus (z. B. große APP-Segmente vor SOF): ganze Datei auswerten.

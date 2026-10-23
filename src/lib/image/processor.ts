@@ -1,10 +1,11 @@
-import { detectEncodeSupport } from './capabilities';
+import { detectDecodeSupport, detectEncodeSupport } from './capabilities';
 import { abortedError, deserializeError, toImageError } from './errors';
 import { getConcurrency } from './limits';
 import { runPipeline, validateProcessOptions } from './pipeline';
 import {
   ImageProcessingError,
   type EncodeSupport,
+  type DecodeSupport,
   type ImageProcessor,
   type ProcessCallOptions,
   type ProcessOptions,
@@ -54,6 +55,7 @@ interface Job {
 interface ModeInfo {
   readonly mode: ExecutionMode;
   readonly support: EncodeSupport;
+  readonly decodeSupport: DecodeSupport;
 }
 
 /**
@@ -141,7 +143,7 @@ export function createImageProcessor(config: ImageProcessorOptions = {}): CoreIm
         if (response.type === 'capabilities' && response.usable && slots.has(current)) {
           releaseSlot(current);
           if (disposed) destroySlot(current);
-          return { mode: 'worker', support: response.support };
+          return { mode: 'worker', support: response.support, decodeSupport: response.decodeSupport };
         }
       } catch {
         // Worker nicht erzeugbar, nicht ladbar oder ohne nötige APIs: Rückfall auf Hauptthread.
@@ -150,7 +152,7 @@ export function createImageProcessor(config: ImageProcessorOptions = {}): CoreIm
       }
       if (slot) destroySlot(slot);
     }
-    return { mode: 'main', support: await detectEncodeSupport() };
+    return { mode: 'main', support: await detectEncodeSupport(), decodeSupport: await detectDecodeSupport() };
   }
 
   function ensureMode(): Promise<ModeInfo> {
@@ -240,6 +242,11 @@ export function createImageProcessor(config: ImageProcessorOptions = {}): CoreIm
     async getEncodeSupport(): Promise<EncodeSupport> {
       if (disposed) throw abortedError('Prozessor wurde beendet.');
       return (await ensureMode()).support;
+    },
+
+    async getDecodeSupport(): Promise<DecodeSupport> {
+      if (disposed) throw abortedError('Prozessor wurde beendet.');
+      return (await ensureMode()).decodeSupport;
     },
 
     async getExecutionMode(): Promise<ExecutionMode> {

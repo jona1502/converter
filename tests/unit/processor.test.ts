@@ -62,7 +62,7 @@ function scriptWorker(source: string): () => Worker {
 const hangingWorker = scriptWorker(`
   self.onmessage = (e) => {
     if (e.data.type === 'capabilities') {
-      postMessage({ type: 'capabilities', id: e.data.id, support: { jpeg: true, png: true, webp: true }, usable: true });
+      postMessage({ type: 'capabilities', id: e.data.id, support: { jpeg: true, png: true, webp: true, bmp: true, ico: true }, decodeSupport: { jpeg: true, png: true, webp: true, gif: false, bmp: true, ico: true, avif: false }, usable: true });
     } else {
       postMessage({ type: 'received', id: -1 });
     }
@@ -100,6 +100,10 @@ describe('createImageProcessor', () => {
     const support = await p.getEncodeSupport();
     expect(support.png).toBe(true);
     expect(support.jpeg).toBe(true);
+    const decodeSupport = await p.getDecodeSupport();
+    expect(decodeSupport.png).toBe(true);
+    expect(decodeSupport.jpeg).toBe(true);
+    expect(decodeSupport.bmp).toBe(true);
 
     const source = await renderRequired('png', 30, 20, halfTransparent);
     const result = await p.process(source, jpegOptions);

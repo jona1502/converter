@@ -1,18 +1,22 @@
 import { canvasToBlob, createCanvas, getContext2D, releaseCanvas, type AnyCanvas, type AnyContext2D } from './canvas';
+import { assembleIco, encodeBmp, fitIntoSquare, type IcoImage } from './custom-encoders';
 import { detectFormat } from './sniff';
-import { FORMAT_INFO, ImageProcessingError, type ImageFormat } from './types';
+import { DEFAULT_ICO_SIZES, FORMAT_INFO, ImageProcessingError, type IcoSize, type OutputFormat } from './types';
 
 export interface EncodeParams {
   /** Dekodierte, orientierungskorrigierte Quelle. */
   readonly source: ImageBitmap;
+  /** Zielgröße (bei ICO ungenutzt, dort gelten icoSizes). */
   readonly width: number;
   readonly height: number;
-  readonly format: ImageFormat;
+  readonly format: OutputFormat;
   readonly quality: number;
   /** #rrggbb */
   readonly background: string;
   /** Laut Probe kann die Quelle transparente Bereiche haben. */
   readonly sourceMayHaveTransparency: boolean;
+  /** Nur ICO: Größen der Einträge (Standard DEFAULT_ICO_SIZES). */
+  readonly icoSizes?: readonly IcoSize[];
 }
 
 export interface EncodeOutput {
@@ -40,7 +44,7 @@ function prepare(ctx: AnyContext2D): void {
  * (kein stiller Formatwechsel), Signatur passt nicht zum Format -> 'encode-failed'.
  * Gibt den geprüften Blob zurück (blob.type entspricht FORMAT_INFO[format].mime).
  */
-export async function verifyEncodedBlob(blob: Blob | null, format: ImageFormat): Promise<Blob> {
+export async function verifyEncodedBlob(blob: Blob | null, format: OutputFormat): Promise<Blob> {
   const { mime } = FORMAT_INFO[format];
   if (!blob || blob.size === 0) throw new ImageProcessingError('encode-failed', 'Der Browser lieferte ein leeres Ergebnis.');
   if (blob.type !== mime) {
@@ -48,11 +52,12 @@ export async function verifyEncodedBlob(blob: Blob | null, format: ImageFormat):
   }
   let head: Uint8Array;
   try {
-    head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
+    head = new Uint8Array(await blob.slice(0, 64).arrayBuffer());
   } catch (error) {
     throw new ImageProcessingError('encode-failed', `Ergebnis nicht lesbar: ${String(error)}`);
   }
-  if (detectFormat(head) !== format) {
+  const detected: string | null = detectFormat(head);
+  if (detected !== format) {
     throw new ImageProcessingError('encode-failed', `Ergebnis hat nicht die Signatur von ${mime}.`);
   }
   return blob;
@@ -112,48 +117,101 @@ function hasTranslucentPixels(ctx: AnyContext2D, width: number, height: number):
   }
 }
 
+/** Zeichnet die (ggf. schrittweise verkleinerte) Quelle in das Rechteck dx, dy, dw, dh. */
+function drawScaled(ctx: AnyContext2D, source: ImageBitmap, dx: number, dy: number, dw: number, dh: number): void {
+  const temps: AnyCanvas[] = [];
+  try {
+    const drawSource = downscaleSteps(source, dw, dh, temps);
+    prepare(ctx);
+    ctx.drawImage(drawSource, dx, dy, dw, dh);
+  } finally {
+    for (const t of temps) releaseCanvas(t);
+  }
+}
+
+/**
+ * Legt den Hintergrund hinter den vorhandenen Inhalt (entspricht Füllen vor dem Zeichnen).
+ * Liefert, ob vorher tatsächlich (teil)transparente Pixel vorhanden waren – der Header allein
+ * (z. B. RGBA-PNG) sagt das nicht sicher.
+ */
+function flatten(ctx: AnyContext2D, width: number, height: number, background: string, check: boolean): boolean {
+  const translucent = check && hasTranslucentPixels(ctx, width, height);
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+  ctx.globalCompositeOperation = 'source-over';
+  return translucent;
+}
+
+async function toBlobChecked(canvas: AnyCanvas, mime: string, quality: number | undefined, large: boolean, w: number, h: number): Promise<Blob | null> {
+  let blob: Blob | null;
+  try {
+    blob = await canvasToBlob(canvas, mime, quality);
+  } catch (error) {
+    if (large) throw unusableCanvas(w, h);
+    throw new ImageProcessingError('encode-failed', `Kodierung fehlgeschlagen: ${String(error)}`);
+  }
+  // Leeres Ergebnis bei großer Fläche: typische Canvas-Flächengrenze (z. B. Safari).
+  if ((!blob || blob.size === 0) && large) throw unusableCanvas(w, h);
+  return blob;
+}
+
+/** ICO: je Größe ein quadratisches, transparent umrandetes PNG; danach Zusammenbau. */
+async function encodeIco(source: ImageBitmap, sizes: readonly IcoSize[]): Promise<Blob> {
+  const images: IcoImage[] = [];
+  for (const size of sizes) {
+    const canvas = createCanvas(size, size);
+    try {
+      const ctx = canvas ? getContext2D(canvas) : null;
+      if (!canvas || !ctx) throw unusableCanvas(size, size);
+      const fit = fitIntoSquare(source.width, source.height, size);
+      drawScaled(ctx, source, fit.x, fit.y, fit.width, fit.height);
+      const png = await verifyEncodedBlob(await toBlobChecked(canvas, FORMAT_INFO.png.mime, undefined, false, size, size), 'png');
+      images.push({ size, png });
+    } finally {
+      releaseCanvas(canvas);
+    }
+  }
+  return assembleIco(images);
+}
+
 /** Zeichnet die Quelle in Zielgröße und kodiert sie im Zielformat. */
 export async function encodeImage(params: EncodeParams): Promise<EncodeOutput> {
   const { source, width, height, format, quality, background } = params;
   const info = FORMAT_INFO[format];
+
+  if (format === 'ico') {
+    const blob = await encodeIco(source, params.icoSizes ?? DEFAULT_ICO_SIZES);
+    const verified = await verifyEncodedBlob(blob, 'ico');
+    return { blob: verified, mime: verified.type, transparencyFlattened: false };
+  }
+
   const large = width * height > LARGE_CANVAS_PIXELS;
-  const temps: AnyCanvas[] = [];
   let target: AnyCanvas | null = null;
   try {
     target = createCanvas(width, height);
     const ctx = target ? getContext2D(target) : null;
     if (!target || !ctx) throw unusableCanvas(width, height);
+    drawScaled(ctx, source, 0, 0, width, height);
 
-    const drawSource = downscaleSteps(source, width, height, temps);
-    prepare(ctx);
-    ctx.drawImage(drawSource, 0, 0, width, height);
-    for (const t of temps.splice(0)) releaseCanvas(t);
-
-    let transparencyFlattened = false;
-    if (!info.supportsTransparency) {
-      // Nur melden, wenn tatsächlich (teil)transparente Pixel vorhanden sind – der Header allein
-      // (z. B. RGBA-PNG) sagt das nicht sicher.
-      transparencyFlattened = params.sourceMayHaveTransparency && hasTranslucentPixels(ctx, width, height);
-      // Hintergrund hinter den vorhandenen Inhalt legen (entspricht Füllen vor dem Zeichnen).
-      ctx.globalCompositeOperation = 'destination-over';
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, width, height);
-      ctx.globalCompositeOperation = 'source-over';
-    }
+    const transparencyFlattened = info.supportsTransparency
+      ? false
+      : flatten(ctx, width, height, background, params.sourceMayHaveTransparency);
 
     let blob: Blob | null;
-    try {
-      blob = await canvasToBlob(target, info.mime, info.supportsQuality ? quality : undefined);
-    } catch (error) {
-      if (large) throw unusableCanvas(width, height);
-      throw new ImageProcessingError('encode-failed', `Kodierung fehlgeschlagen: ${String(error)}`);
+    if (format === 'bmp') {
+      try {
+        blob = encodeBmp(ctx, width, height);
+      } catch (error) {
+        if (large) throw unusableCanvas(width, height);
+        throw new ImageProcessingError('encode-failed', `BMP-Kodierung fehlgeschlagen: ${String(error)}`);
+      }
+    } else {
+      blob = await toBlobChecked(target, info.mime, info.supportsQuality ? quality : undefined, large, width, height);
     }
-    // Leeres Ergebnis bei großer Fläche: typische Canvas-Flächengrenze (z. B. Safari).
-    if ((!blob || blob.size === 0) && large) throw unusableCanvas(width, height);
     const verified = await verifyEncodedBlob(blob, format);
     return { blob: verified, mime: verified.type, transparencyFlattened };
   } finally {
-    for (const t of temps) releaseCanvas(t);
     releaseCanvas(target);
   }
 }

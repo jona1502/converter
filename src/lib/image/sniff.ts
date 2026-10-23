@@ -4,10 +4,12 @@
  * Alle Leser prüfen Grenzen selbst; abgeschnittene oder fehlerhafte Daten führen zu
  * fehlenden Angaben (null), nie zu Exceptions oder Endlosschleifen.
  */
-import type { ImageFormat } from './types';
+import { ascii, byte, has, positiveOrNull, u16be, u16le, u24le, u32be, u32le } from './bytes';
+import { isAvif, isBmp, isGif, isIco, sniffAvif, sniffBmp, sniffGif, sniffIco } from './sniff-formats';
+import type { InputFormat } from './types';
 
 export interface SniffResult {
-  readonly format: ImageFormat;
+  readonly format: InputFormat;
   /** Breite laut Header (vor Anwendung der EXIF-Orientierung), null wenn nicht ermittelbar. */
   readonly width: number | null;
   /** Höhe laut Header (vor Anwendung der EXIF-Orientierung), null wenn nicht ermittelbar. */
@@ -25,50 +27,15 @@ export interface SniffResult {
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
 
-function byte(b: Uint8Array, o: number): number {
-  return b[o] ?? 0;
-}
-
-function has(b: Uint8Array, o: number, n: number): boolean {
-  return o >= 0 && o + n <= b.length;
-}
-
-function ascii(b: Uint8Array, o: number, n: number): string {
-  if (!has(b, o, n)) return '';
-  let s = '';
-  for (let i = 0; i < n; i++) s += String.fromCharCode(byte(b, o + i));
-  return s;
-}
-
-function u16be(b: Uint8Array, o: number): number {
-  return (byte(b, o) << 8) | byte(b, o + 1);
-}
-
-function u16le(b: Uint8Array, o: number): number {
-  return byte(b, o) | (byte(b, o + 1) << 8);
-}
-
-function u24le(b: Uint8Array, o: number): number {
-  return byte(b, o) | (byte(b, o + 1) << 8) | (byte(b, o + 2) << 16);
-}
-
-function u32be(b: Uint8Array, o: number): number {
-  return byte(b, o) * 0x1000000 + ((byte(b, o + 1) << 16) | (byte(b, o + 2) << 8) | byte(b, o + 3));
-}
-
-function u32le(b: Uint8Array, o: number): number {
-  return byte(b, o + 3) * 0x1000000 + ((byte(b, o + 2) << 16) | (byte(b, o + 1) << 8) | byte(b, o));
-}
-
-function positiveOrNull(n: number): number | null {
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
-/** Erkennt JPEG, PNG oder WebP an der Signatur; sonst null. */
-export function detectFormat(b: Uint8Array): ImageFormat | null {
+/** Erkennt ein Eingabeformat an der Signatur; sonst null. */
+export function detectFormat(b: Uint8Array): InputFormat | null {
   if (has(b, 0, 3) && byte(b, 0) === 0xff && byte(b, 1) === 0xd8 && byte(b, 2) === 0xff) return 'jpeg';
   if (has(b, 0, 8) && PNG_SIGNATURE.every((v, i) => byte(b, i) === v)) return 'png';
   if (has(b, 0, 12) && ascii(b, 0, 4) === 'RIFF' && ascii(b, 8, 4) === 'WEBP') return 'webp';
+  if (isGif(b)) return 'gif';
+  if (isBmp(b)) return 'bmp';
+  if (isAvif(b)) return 'avif';
+  if (isIco(b)) return 'ico';
   return null;
 }
 
@@ -81,6 +48,14 @@ export function sniffImage(b: Uint8Array): SniffResult | null {
       return sniffJpeg(b);
     case 'webp':
       return sniffWebp(b);
+    case 'gif':
+      return sniffGif(b);
+    case 'bmp':
+      return sniffBmp(b);
+    case 'ico':
+      return sniffIco(b);
+    case 'avif':
+      return sniffAvif(b);
     default:
       return null;
   }

@@ -3,7 +3,7 @@ import { getConcurrency, LIMITS } from '../../src/lib/image/limits';
 
 describe('LIMITS', () => {
   it('entspricht den Grenzwerten des Plans', () => {
-    expect(LIMITS).toEqual({ maxFileBytes: 50 * 1024 * 1024, maxPixels: 40_000_000, maxEdge: 16384, maxFiles: 30 });
+    expect(LIMITS).toEqual({ maxFileBytes: 50 * 1024 * 1024, maxPixels: 40_000_000, maxEdge: 16384, maxFiles: 30, maxBmpOutputBytes: 100 * 1024 * 1024 });
   });
 });
 

@@ -8,7 +8,17 @@ export const LIMITS = {
   maxEdge: 16_384,
   /** Maximale Anzahl Dateien pro Stapel. */
   maxFiles: 30,
+  /**
+   * Maximale Größe einer BMP-Ausgabe in Bytes (100 MB). BMP ist unkomprimiert (24 bit ≈ 3 Byte/Pixel);
+   * beim Zusammensetzen liegen Pixeldaten kurzzeitig doppelt im Speicher. Entspricht ca. 34 MP.
+   */
+  maxBmpOutputBytes: 100 * 1024 * 1024,
 } as const;
+
+/** Dateigröße eines 24-bit-BMP (54 Byte Kopf, Zeilen auf 4 Byte aufgefüllt). */
+export function bmpFileSize(width: number, height: number): number {
+  return 54 + Math.ceil((width * 3) / 4) * 4 * height;
+}
 
 /** Teilmenge von Navigator/WorkerNavigator, die für die Parallelität ausgewertet wird. */
 export interface ConcurrencyHints {

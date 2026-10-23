@@ -3,7 +3,7 @@
  * Erzeugt über new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }).
  */
 import { canProcessInContext } from './canvas';
-import { detectEncodeSupport } from './capabilities';
+import { detectDecodeSupport, detectEncodeSupport } from './capabilities';
 import { serializeError } from './errors';
 import { runPipeline } from './pipeline';
 import type { WorkerRequest, WorkerResponse } from './worker-protocol';
@@ -20,8 +20,9 @@ async function handle(request: WorkerRequest): Promise<WorkerResponse> {
     if (request.type === 'capabilities') {
       const usable = canProcessInContext();
       const support = await detectEncodeSupport();
+      const decodeSupport = await detectDecodeSupport();
       // Ohne PNG-Kodierung ist die Canvas im Worker offensichtlich nicht brauchbar.
-      return { type: 'capabilities', id: request.id, support, usable: usable && support.png };
+      return { type: 'capabilities', id: request.id, support, decodeSupport, usable: usable && support.png };
     }
     const result = await runPipeline(request.file, request.options);
     return { type: 'process', id: request.id, result };

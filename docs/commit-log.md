@@ -3,6 +3,14 @@
 Ein Eintrag pro Arbeitspunkt (siehe [implementation-plan.md](implementation-plan.md)).
 Die Verbindung zur Git-Historie entsteht über die Arbeitspunkt-ID in der Commit-Nachricht.
 
+## P09
+
+- **Commit-Nachricht:** `feat(images): P09 ICO und BMP sowie weitere Eingabeformate ergänzen`
+- **Änderungen:** Eigene 24-bit-BMP- und PNG-basierte ICO-Encoder; wählbare ICO-Größen mit transparentem Rand. Headerprüfung für statische GIF/BMP/ICO/AVIF, größter ICO-Eintrag, echte Decoder-Fähigkeitsprüfung in Worker und Hauptthread. BMP-Ausgabe auf 100 MiB begrenzt. Schnittstellen und Browser-Tests erweitert.
+- **Prüfung:** Separater Agent hat Integrationslücken gefunden und behoben; Hauptagent hat Pipeline, Encoder, Decoder-Prüfung und Worker-Vertrag unabhängig geprüft. Übergabestand war noch nicht integriert.
+- **Checks:** Hauptagent: `npm run check` (0 Fehler/Warnungen/Hinweise), `npm run build` erfolgreich; gezielte Browser-Tests für erweiterte Formate, Pipeline, Prozessor, Limits und Typen: 168 bestanden, 3 bestehende übersprungen. Agent: vollständiger oberster Unit-Testsatz einschließlich Größenformatierung: 303 bestanden, 3 übersprungen, Chromium/Firefox/WebKit.
+- **Einschränkungen:** Eingabedekodierung browserabhängig; Animation wird abgelehnt. AVIF-Abmessungen werden konservativ aus den Headerangaben bestimmt. BMP ist unkomprimiert und ohne Alpha; ICO enthält PNG-Einträge für aktuelle Programme. Die übersprungenen Tests betreffen den fehlenden WebP-Encoder, den alle Testbrowser besitzen.
+
 ## P01
 
 - **Commit-Nachricht:** `feat(project): P01 Astro-Projektgrundlage einrichten`
