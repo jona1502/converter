@@ -21,7 +21,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 
 ## Grenzwerte (in `src/lib/image/limits.ts`)
 
-- Dateigröße: max. 50 MB pro Datei
+- Dateigröße: max. 50 MiB (52.428.800 Bytes) pro Datei
 - Eingabe und Ausgabe: max. 40 Megapixel (≈ 160 MB RGBA pro Bitmap), max. 16 384 px Kantenlänge
 - Stapel: max. 30 Dateien; weitere Dateien werden mit Hinweis abgelehnt, nicht still gekürzt
 - Parallelität: 2 gleichzeitige Verarbeitungen, 1 bei `navigator.deviceMemory` ≤ 4 oder
@@ -48,12 +48,14 @@ dokumentiert in [commit-log.md](commit-log.md).
 | P04 | Gemeinsame Werkzeugoberfläche und Werkzeug „Bilder konvertieren“ | Subagent „Werkzeuge“ | P02, P03, P09 | erledigt |
 | P05 | Werkzeug „Bilder komprimieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
 | P06 | Werkzeug „Bilder skalieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
-| P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06 | offen |
+| P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06, P11 | erledigt |
 | P08 | README und Projektdokumentation | Hauptagent | P07 | offen |
 | P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | erledigt |
 | P10 | PDF-Komprimierungskern (Analyse, drei Stufen, Bild-Neukodierung im Worker) | Subagent „PDF“ | P01 | erledigt |
 | P11 | Werkzeug „PDF komprimieren“ mit drei Varianten | Subagent „Werkzeuge“ | P04, P10 | erledigt |
-| P12+ | Korrekturpunkte aus der abschließenden Prüfung (werden bei Bedarf ergänzt) | – | – | – |
+| P12 | Abschließende unabhängige Prüfung und Prüfbericht | Hauptagent + Reviewer | P07, P08 | offen |
+
+Weitere Korrekturpunkte werden bei Bedarf als P13+ ergänzt.
 
 P02 und P03 laufen parallel (getrennte Dateien, gemeinsamer Vertrag `types.ts`).
 P09 wurde nachträglich auf Wunsch des Nutzers ergänzt (Icons und weitere Formate) und wird vor P04

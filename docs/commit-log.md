@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P07
+
+- **Commit-Nachricht:** `test(release): P07 Datenschutz und Barrierefreiheit prüfen`
+- **Änderungen:** Querschnittstests für alle vier Werkzeuge: Context-Netzwerkereignisse, WebSockets, Dateinamen, Window-Speichernutzung, CSP, URL-Widerruf, Tab/Enter-Dateiauswahl, lange Namen und mobile Ergebnisse. Statischer Audit der Worker-Kernquellen, axe-WCAG-Prüfung nach Verarbeitung. E2E auf zwei Worker begrenzt, axe-Abhängigkeit ergänzt.
+- **Prüfung:** Unabhängiger Agent fand und schloss Lücken im ursprünglichen Audit (Origin, Worker-Anfragen, PDF/weitere Tools, befüllte Zustände). Hauptagent prüfte finale Tests und eng begrenzte Browser-Ausnahmen.
+- **Checks:** 52 Tests registriert. Vollrunde: 51/52 bestanden einschließlich aller 16 axe-Prüfungen. Ein WebKit-spezifischer Allowlistfehler behoben; betroffener Test anschließend unter Node 24.21.0 1/1 bestanden. Typprüfung danach 89 Dateien ohne Befunde. Vollständige Release-Prüfung folgt P12.
+- **Einschränkungen:** Window-Instrumentierung erfasst keine Worker-Speicher-APIs; statischer Quellaudit ergänzt sie, ist aber kein formaler Sicherheitsbeweis. Native WebKit-Selects erzeugen selbst in skriptfreiem Minimal-HTML einen exakt eingegrenzten CSP-Stilattribut-Event, den der Test ausnimmt; tatsächliche Inline-Styles bleiben verboten. WebKit kennzeichnet lokale Blob-Dekodierung und eigene Modul-Worker als XHR; nur diese lokalen GET-Fälle sind zusätzlich zugelassen. Anwendungs-CSP unverändert streng.
+
 ## P11
 
 - **Commit-Nachricht:** `feat(tools): P11 PDF-Komprimierung mit drei echten Ergebnisgrößen ergänzen`
