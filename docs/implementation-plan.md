@@ -47,7 +47,7 @@ dokumentiert in [commit-log.md](commit-log.md).
 | P03 | Seitengerüst, Gestaltungssystem, Startseite, Erklärseite, 404-Seite | Subagent „Oberfläche“ | P01 | erledigt |
 | P04 | Gemeinsame Werkzeugoberfläche und Werkzeug „Bilder konvertieren“ | Subagent „Werkzeuge“ | P02, P03, P09 | erledigt |
 | P05 | Werkzeug „Bilder komprimieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
-| P06 | Werkzeug „Bilder skalieren“ | Subagent „Werkzeuge“ | P04 | offen |
+| P06 | Werkzeug „Bilder skalieren“ | Subagent „Werkzeuge“ | P04 | erledigt |
 | P07 | Querschnitts-E2E: Netzwerk/Datenschutz, Ressourcen, Barrierefreiheit, Mobilansicht | Subagent „Prüfung“ | P04–P06 | offen |
 | P08 | README und Projektdokumentation | Hauptagent | P07 | offen |
 | P09 | Weitere Bildformate: ICO- und BMP-Export, GIF/BMP/ICO/AVIF-Eingabe | Subagent „Kern“ | P02 | erledigt |

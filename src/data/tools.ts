@@ -51,7 +51,7 @@ export const TOOLS: readonly Tool[] = [
     description: 'Bilder auf eine neue Breite oder Höhe bringen oder prozentual verkleinern bzw. vergrößern.',
     href: '/bilder/skalieren',
     category: 'bilder',
-    available: false,
+    available: true,
   },
 ];
 

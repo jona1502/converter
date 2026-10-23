@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageResizer from '../../components/tools/ImageResizer';
+---
+<BaseLayout title="Bilder skalieren" description="Bildgröße lokal im Browser ändern: Prozent, Breite oder Höhe wählen, Seitenverhältnis erhalten und Ergebnis herunterladen.">
+  <div class="page-container"><h1 class="page-title">Bilder skalieren</h1>
+    <p class="page-lead">Ändern Sie die Abmessungen Ihrer Bilder in Prozent oder Pixeln. Die Verarbeitung erfolgt auf Ihrem Gerät, ohne Upload.</p>
+    <div class="page-section"><ImageResizer client:load /></div>
+  </div>
+</BaseLayout>

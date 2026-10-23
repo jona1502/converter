@@ -241,10 +241,12 @@ export function useImageBatch() {
   }, [releaseAll, update]);
 
   const processAll = useCallback(
-    async (options: ProcessOptions, suffix: SuffixInput = ''): Promise<RunSummary> => {
+    async (options: ProcessOptions | ((entry: BatchEntry) => ProcessOptions), suffix: SuffixInput = ''): Promise<RunSummary> => {
       const processor = processorRef.current;
       const targets = entriesRef.current.filter(isProcessable);
       if (!processor || processingRef.current || targets.length === 0) return { total: 0, done: 0, failed: 0 };
+      // Einstellungen pro Datei einmalig festhalten (z. B. Originalformat bei gemischten Stapeln).
+      const resolvedOptions = targets.map(entry => typeof options === 'function' ? options(entry) : options);
 
       processingRef.current = true;
       setIsProcessing(true);
@@ -253,8 +255,8 @@ export function useImageBatch() {
       // Vorherige Ergebnisse freigeben, bevor neue entstehen.
       for (const entry of targets) revokeUrl(entry.id);
       const names = makeUniqueFileNames(
-        targets.map((entry) =>
-          buildOutputFileName(entry.name, options.format, typeof suffix === 'function' ? suffix(entry, options) : suffix),
+        targets.map((entry, index) =>
+          buildOutputFileName(entry.name, resolvedOptions[index]!.format, typeof suffix === 'function' ? suffix(entry, resolvedOptions[index]!) : suffix),
         ),
       );
       const targetIds = new Set(targets.map((entry) => entry.id));
@@ -273,7 +275,7 @@ export function useImageBatch() {
           const controller = new AbortController();
           controllersRef.current.set(entry.id, controller);
           try {
-            const result = await processor.process(entry.file, options, {
+            const result = await processor.process(entry.file, resolvedOptions[index]!, {
               signal: controller.signal,
               onStart: () => {
                 if (!controller.signal.aborted && exists(entry.id)) patch(entry.id, { status: 'processing' });

@@ -1,5 +1,13 @@
 # Commit-Log
 
+## P06
+
+- **Commit-Nachricht:** `feat(tools): P06 Bildskalierung mit Originalformat ergänzen`
+- **Änderungen:** Prozent- und Pixelgrößen, Seitenverhältnis standardmäßig erhalten, Vergrößerung bewusst aktivieren, Originalformat pro Datei oder wählbares Zielformat. Gemeinsamer Hook löst Einstellungen einmal je Datei auf; Namen und Kodierung verwenden denselben Snapshot. Werkzeug freigeschaltet.
+- **Prüfung:** Unabhängiges Review durch Hauptagent und zwei weitere Agenten, keine Blocker. Finalen Hinweis für nicht unterstützte Browser präzisiert. Nicht kodierbare Originalformate werden sichtbar blockiert statt ersetzt.
+- **Checks:** Agent unter Node 24: Typprüfung ohne Befunde, Produktionsbuild erfolgreich und P05/P06-E2E 12/12 in Chromium/Firefox/WebKit/mobil bestanden. Abgedeckt: gemischter PNG/JPEG-Stapel, Prozentwerte, Upscale-Sperre/Freigabe, Verhältnis und exakte Zielmaße.
+- **Einschränkungen:** GIF/AVIF/ICO können im Skalierwerkzeug nicht als Originalformat ausgegeben werden; ein anderes Zielformat ist nötig. Neukodierung und Kernlimits gelten auch bei Originalformat.
+
 ## P05
 
 - **Commit-Nachricht:** `feat(tools): P05 Bildkomprimierung ergänzen`
