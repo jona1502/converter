@@ -1,36 +1,23 @@
-# MI converter – Backend (FastAPI)
+# MI converter – FastAPI
 
-Serververarbeitung für die Website „MI converter“. Vertrag: [`../docs/backend/api-contract.md`](../docs/backend/api-contract.md), Plan: [`../docs/fastapi-backend-plan.md`](../docs/fastapi-backend-plan.md).
+Installation, Architektur und Datenschutz: [Projekt-README](../README.md). Vertrag: [api-contract.md](../docs/backend/api-contract.md).
 
-## Lokale Befehle (im Verzeichnis `backend/`)
+Python 3.13, reproduzierbare Abhängigkeiten über `uv.lock`. Im Verzeichnis `backend/`:
 
 ```sh
-uv sync                                   # Umgebung aus uv.lock (inkl. Dev-Werkzeuge)
-uv run pytest                             # Tests
-uv run ruff check . && uv run ruff format --check .   # Lint + Format
-uv run mypy                               # Typprüfung (strict)
-uv run python scripts/export_openapi.py   # openapi.json neu erzeugen (Test prüft Drift)
-
-# Entwicklungsserver mit Auto-Reload (Doku unter http://127.0.0.1:8000/api/v1/docs)
-CONVERTER_ENVIRONMENT=development CONVERTER_SESSION_COOKIE_SECURE=false \
-CONVERTER_STORAGE_DIR=./.data/storage uv run uvicorn app.main:app --reload
+uv sync --frozen
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
+uv run pytest
+uv run python scripts/export_openapi.py --check
+uv run python scripts/smoke_stack.py --base-url http://localhost:8080
 ```
 
-`CONVERTER_ENVIRONMENT` ist standardmäßig `production` und verlangt dann `CONVERTER_SECRET_KEY` (≥ 32 Zeichen) und `CONVERTER_ALLOWED_ORIGINS`. Alle Einstellungen: `app/core/config.py`. Das Storage-Verzeichnis muss existieren (sonst meldet `/health/ready` `503`).
+Tests benötigen PostgreSQL auf Compose-Port 55432 und Valkey auf 56379. Sie erzeugen und löschen eigene Testdatenbanken. `CONVERTER_TEST_DATABASE_URL` darf niemals auf Nutzdaten zeigen; Name muss `test` enthalten.
 
-Container: `docker build -t converter-backend backend` (Nutzer `10001`, Port `8000`, Volume `/data/storage`).
+Der vollständige Linux-Stack wird im Projektverzeichnis mit `docker compose up -d --build --wait` gestartet. API allein verarbeitet keine Aufträge: Worker, Dispatcher und Cleanup gehören dazu. Windows dient als Entwicklungsumgebung; die Parser-Netzwerk-/Ressourcenisolation wird in Linux-Containern erzwungen.
 
-## Struktur
+Alle Variablen stehen in `app/core/config.py` mit Präfix `CONVERTER_`. Standardmodus `production` verlangt Secret, Secure-Cookie, erlaubte Origins und Datenbank. Readiness prüft Dateispeicher, DB, Broker und Formate; Liveness nur den API-Prozess. Interaktive Doku ist in Entwicklungsbetrieb unter `/api/v1/docs` abrufbar.
 
-```text
-app/main.py          uvicorn-Einstieg (app.main:app)
-app/factory.py       create_app(settings): Middleware, Fehlerhandler, Router
-app/api/             Endpunkte (health), errors.py (Fehlercodes/-format), middleware.py
-app/schemas/         Pydantic-Antwortmodelle (camelCase im JSON)
-app/core/            config.py (Settings), logs.py (JSON-Logs), readiness.py (Ready-Checks)
-app/storage/         Dateispeicher; checks.py prüft Beschreibbarkeit
-app/db, jobs, worker, processing/   folgen ab B03–B08
-migrations/          Alembic (ab B03)
-scripts/             export_openapi.py
-tests/               pytest
-```
+Nach Vertragsänderungen `uv run python scripts/export_openapi.py`, anschließend im Projektverzeichnis `npm run api:types`. CI prüft OpenAPI- und Typdrift. Der kleine Generator benötigt keine weitere JavaScript-Abhängigkeit.

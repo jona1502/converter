@@ -1404,7 +1404,7 @@
     },
     "/api/v1/session": {
       "get": {
-        "description": "Liefert das CSRF-Token für schreibende Anfragen.\n\nDas Cookie wird bei jedem Aufruf neu gesetzt (Max-Age = Sitzungsdauer),\ndamit Browser- und Serverablauf zusammenpassen. Das Neuanlage-Limit je\nClient-IP folgt in B09.",
+        "description": "Liefert das CSRF-Token für schreibende Anfragen.\n\nDas Cookie wird bei jedem Aufruf neu gesetzt (Max-Age = Sitzungsdauer),\ndamit Browser- und Serverablauf zusammenpassen. Neue Sitzungen werden\npro vertrauenswürdig ermittelter Client-IP begrenzt.",
         "operationId": "get_session_api_v1_session_get",
         "responses": {
           "200": {

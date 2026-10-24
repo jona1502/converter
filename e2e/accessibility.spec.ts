@@ -7,7 +7,7 @@ for (const tool of [
   { path: '/bilder/konvertieren', action: 'Konvertieren', pdf: false },
   { path: '/bilder/komprimieren', action: 'Komprimieren', pdf: false },
   { path: '/bilder/skalieren', action: 'Skalieren', pdf: false },
-  { path: '/pdf/komprimieren', action: '', pdf: true },
+  { path: '/pdf/komprimieren', action: 'Komprimieren', pdf: true },
 ]) {
   test(`${tool.path}: automatisierte Barrierefreiheit nach Verarbeitung`, async ({ page }) => {
     await page.goto(tool.path);
@@ -30,14 +30,8 @@ for (const tool of [
       name: tool.pdf ? 'zugang.pdf' : 'zugang.png',
       mimeType: tool.pdf ? 'application/pdf' : 'image/png', buffer: bytes,
     });
-    if (tool.pdf) {
-      const unsupported = page.getByText(/^Dieser Browser unterstützt die lokale PDF-Komprimierung nicht vollständig\./).first();
-      await expect(page.locator('a[download]').first().or(unsupported)).toBeVisible({ timeout: 60_000 });
-      if (!(await unsupported.isVisible())) await expect(page.locator('a[download]')).toHaveCount(3, { timeout: 60_000 });
-    } else {
-      await page.getByRole('button', { name: tool.action, exact: true }).click();
-      await expect(page.locator('a[download]').first()).toBeVisible();
-    }
+    await page.getByRole('button', { name: tool.action, exact: true }).click();
+    await expect(page.locator('a[download]')).toHaveCount(tool.pdf ? 3 : 1, {timeout: 60_000});
     // One useful populated state per tool; keyboard and responsive behaviour are
     // separately exercised in privacy.spec.ts. No axe rules are disabled.
     const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();

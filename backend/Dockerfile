@@ -40,6 +40,8 @@ COPY --from=build /opt/venv /opt/venv
 WORKDIR /app
 # Code gehört root und ist für den Laufzeitnutzer nur lesbar.
 COPY app ./app
+COPY migrations ./migrations
+COPY alembic.ini ./alembic.ini
 
 USER 10001:10001
 EXPOSE 8000

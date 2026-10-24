@@ -16,7 +16,7 @@ test('Navbar zeigt drei Werkzeuggruppen und Informationslink', async ({ page }) 
   await page.goto('/');
   await expect(navigation(page).locator('summary')).toHaveCount(3);
   for (const group of groups) await expect(summary(page, group.label)).toBeVisible();
-  await expect(navigation(page).getByRole('link', { name: 'Lokale Verarbeitung', exact: true })).toBeVisible();
+  await expect(navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true })).toBeVisible();
 });
 
 test('Desktop-Hover öffnet die verfügbaren Werkzeuge jeder Gruppe', async ({ page, isMobile }) => {

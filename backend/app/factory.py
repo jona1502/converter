@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from redis import Redis
 
 from app.api import API_PREFIX, capabilities, health, jobs, results, session
 from app.api.errors import INTERNAL_ERROR_RESPONSE, install_error_handlers
@@ -30,7 +31,13 @@ def build_readiness(settings: Settings, database: Database | None) -> ReadinessR
     if database is not None:
         registry.register("database", database_check(database))
     registry.register("capabilities", capabilities.ready)
-    # Ab B04/B05: "redis", "capabilities".
+    if settings.redis_url is not None:
+        broker = Redis.from_url(
+            settings.redis_url.get_secret_value(), socket_timeout=2, socket_connect_timeout=2
+        )
+        registry.register("redis", lambda: bool(broker.ping()))
+    elif settings.environment != "test":
+        registry.register("redis", lambda: False)
     return registry
 
 

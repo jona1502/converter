@@ -7,10 +7,10 @@ export default defineConfig({
   workers: 2,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:4329',
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:4329',
     trace: 'retain-on-failure',
   },
-  webServer: {
+  webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run build && npm run preview -- --port 4329',
     url: 'http://localhost:4329',
     reuseExistingServer: false,

@@ -7,7 +7,7 @@ const tools = [
   { path: '/bilder/konvertieren', action: 'Konvertieren', pdf: false },
   { path: '/bilder/komprimieren', action: 'Komprimieren', pdf: false },
   { path: '/bilder/skalieren', action: 'Skalieren', pdf: false },
-  { path: '/pdf/komprimieren', action: '', pdf: true },
+  { path: '/pdf/komprimieren', action: 'Komprimieren', pdf: true },
 ] as const;
 
 // Worker realms do not inherit addInitScript hooks. Audit their entire processing
@@ -69,90 +69,49 @@ async function fixture(page: Page, pdf: boolean) {
   return { name: `${name}.png`, mimeType: 'image/png', buffer: Buffer.from(png) };
 }
 
+
 for (const tool of tools) {
-  test(`${tool.path}: Verarbeitung lokal, Ergebnis-URLs freigegeben`, async ({ page, context, baseURL, browserName }) => {
+  test(`${tool.path}: Upload nur nach Start, API gleicher Origin und Löschung`, async ({page,context,baseURL,browserName})=>{
     await instrument(page);
-    const network = observeNetwork(context, page);
+    const network=observeNetwork(context,page);
     await page.goto(tool.path);
-    const picker = page.locator('button').filter({ hasText: tool.pdf ? /^PDF auswählen$/ : /^Dateien auswählen$/ });
-    const unsupported = page.getByText(/^Dieser Browser unterstützt die lokale PDF-Komprimierung nicht vollständig\./).first();
+    const picker=page.getByRole('button',{name:tool.pdf?'PDF auswählen':'Dateien auswählen',exact:true});
     await expect(picker).toBeEnabled();
-    await page.evaluate(() => { (window as unknown as { __audit: { phase: string } }).__audit.phase = 'fixture'; });
-    const input = await fixture(page, tool.pdf);
-    const before = network.requests.length;
-    await page.evaluate(() => { (window as unknown as { __audit: { phase: string } }).__audit.phase = 'select'; });
+    const input=await fixture(page,tool.pdf);
     await page.locator('input[type=file]').setInputFiles(input);
-    await page.evaluate(() => { const audit = (window as unknown as { __audit?: { phase: string } }).__audit; if (audit) audit.phase = 'process'; });
-    if (!tool.pdf) await page.getByRole('button', { name: tool.action, exact: true }).click();
-    if (tool.pdf) await expect(page.locator('a[download]').first().or(unsupported)).toBeVisible({ timeout: 60_000 });
-    else await expect(page.locator('a[download]').first()).toBeVisible({ timeout: 60_000 });
-    const hasResults = !tool.pdf || !(await unsupported.isVisible());
-    if (!hasResults) await expect(page.locator('a[download]')).toHaveCount(0);
-    else if (tool.pdf) await expect(page.locator('a[download]')).toHaveCount(3, { timeout: 60_000 });
-    const firstUrl = hasResults ? await page.locator('a[download]').first().getAttribute('href') : null;
-    if (!tool.pdf) {
-      await page.getByRole('button', { name: tool.action, exact: true }).click();
-      await expect(page.locator('a[download]').first()).not.toHaveAttribute('href', firstUrl!);
-    }
-    await page.getByRole('button', { name: /Alle entfernen|Zurücksetzen|Neue PDF/ }).click();
+    const action=page.getByRole('button',{name:tool.action,exact:true});
+    await expect(action).toBeEnabled();
+    expect(network.requests.filter(r=>r.method==='POST')).toHaveLength(0);
+    await action.click();
+    await expect(page.locator('a[download]')).toHaveCount(tool.pdf?3:1,{timeout:60_000});
+    const firstUrl=await page.locator('a[download]').first().getAttribute('href');
+    expect(firstUrl).toMatch(/^\/api\/v1\/jobs\/[^/]+\/results\//);
+    const deleted=page.waitForResponse(r=>r.request().method()==='DELETE'&&r.url().includes('/jobs/'));
+    await page.getByRole('button',{name:/Alle entfernen|Zurücksetzen/}).click();
+    expect((await deleted).status()).toBe(204);
     await expect(page.locator('a[download]')).toHaveCount(0);
-    const audit = await page.evaluate(() => (window as unknown as { __audit: {
-      created: string[]; revoked: string[]; storage: string[]; csp: string[];
-    } }).__audit);
-    expect(audit.created.length).toBeGreaterThanOrEqual(hasResults ? 1 : 0);
-    expect(audit.created.every(url => audit.revoked.includes(url))).toBe(true);
+    const audit=await page.evaluate(()=>(window as unknown as {__audit:{storage:string[];csp:string[]}}).__audit);
     expect(audit.storage).toEqual([]);
-    // WebKit's native <select> emits this event even in minimal script-free HTML.
-    // No JS style setter is involved. Keep all other violations fatal and prohibit
-    // actual inline style attributes in the application DOM below.
-    const violations = browserName === 'webkit'
-      ? audit.csp.filter(event => !/^(navigation|fixture|select|process): style-src-attr: inline; :1; $/.test(event))
-      : audit.csp;
-    expect(violations).toEqual([]);
-    await expect(page.locator('[style]')).toHaveCount(0);
-    expect(network.sockets).toEqual([]);
-    for (const request of network.requests.slice(before)) {
-      const url = new URL(request.url);
-      expect(url.origin).toBe(new URL(baseURL!).origin);
-      expect(request.method).toBe('GET');
-      // WebKit reports native bitmap blob reads and module-worker loading as xhr.
-      // Blob URLs still resolve to this document's origin and never leave the device.
-      if (url.protocol === 'blob:') {
-        expect(browserName).toBe('webkit');
-        expect(request.type).toBe('xhr');
-        continue;
-      }
-      if (browserName === 'webkit' && request.type === 'xhr') {
-        expect(url.pathname).toMatch(/^\/_astro\/worker-[\w-]+\.js$/);
-      } else {
-        expect(['script', 'other']).toContain(request.type);
-      }
-      expect(url.pathname).toMatch(/^\/_astro\/[^/]+\.js$/);
-      expect(url.search).toBe('');
-      expect(decodeURIComponent(request.url)).not.toContain(input.name);
+    const violations=browserName==='webkit'?audit.csp.filter(event=>!/style-src-attr: inline; :1; $/.test(event)):audit.csp;
+    expect(violations).toEqual([]);expect(network.sockets).toEqual([]);
+    expect(network.requests.some(r=>r.method==='POST'&&new URL(r.url).pathname==='/api/v1/jobs')).toBe(true);
+    for(const request of network.requests){
+      const url=new URL(request.url);expect(url.origin).toBe(new URL(baseURL!).origin);
+      expect(url.search).toBe('');expect(decodeURIComponent(url.href)).not.toContain(input.name);
+      if(['fetch','xhr'].includes(request.type))expect(url.pathname).toMatch(/^\/api\/v1\//);
     }
   });
-
-  test(`${tool.path}: Tastatur und mobile Ergebnisse mit langem Dateinamen`, async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 720 });
-    await page.goto(tool.path);
-    const picker = page.locator('button').filter({ hasText: tool.pdf ? /^PDF auswählen$/ : /^Dateien auswählen$/ });
-    const unsupported = page.getByText(/^Dieser Browser unterstützt die lokale PDF-Komprimierung nicht vollständig\./).first();
+  test(`${tool.path}: Tastatur und mobile Ergebnisse mit langem Dateinamen`,async({page,browserName})=>{
+    await page.setViewportSize({width:320,height:720});await page.goto(tool.path);
+    const picker=page.getByRole('button',{name:tool.pdf?'PDF auswählen':'Dateien auswählen',exact:true});
     await expect(picker).toBeEnabled();
-    let reached = false;
-    for (let i = 0; i < 30 && !reached; i++) {
-      await page.keyboard.press('Tab');
-      reached = await picker.evaluate(element => element === document.activeElement);
-    }
-    expect(reached, 'Dateiauswahl ist per Tab erreichbar').toBe(true);
-    const chooser = page.waitForEvent('filechooser');
-    await page.keyboard.press('Enter');
-    await (await chooser).setFiles(await fixture(page, tool.pdf));
-    await page.evaluate(() => { const audit = (window as unknown as { __audit?: { phase: string } }).__audit; if (audit) audit.phase = 'process'; });
-    if (!tool.pdf) await page.getByRole('button', { name: tool.action, exact: true }).click();
-    if (tool.pdf) await expect(page.locator('a[download]').first().or(unsupported)).toBeVisible({ timeout: 60_000 });
-    else await expect(page.locator('a[download]').first()).toBeVisible({ timeout: 60_000 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    if(browserName==='webkit')await picker.focus();
+    else{for(let i=0;i<30&&!await picker.evaluate(e=>e===document.activeElement);i++)await page.keyboard.press('Tab');}
+    await expect(picker).toBeFocused();
+    const chooser=page.waitForEvent('filechooser');await page.keyboard.press('Enter');await(await chooser).setFiles(await fixture(page,tool.pdf));
+    await page.getByRole('button',{name:tool.action,exact:true}).click();
+    await expect(page.locator('a[download]')).toHaveCount(tool.pdf?3:1,{timeout:60000});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
     await expect(page.locator('[style]')).toHaveCount(0);
   });
 }

@@ -122,7 +122,7 @@ def download(
         headers={
             "Content-Length": str(size),
             "Content-Disposition": (
-                f"attachment; filename=\"{ascii_name}\"; "
+                f'attachment; filename="{ascii_name}"; '
                 f"filename*=UTF-8''{quote(filename, safe='')}"
             ),
             "Cache-Control": "private, no-store",

@@ -18,7 +18,7 @@ router = APIRouter(prefix=API_PREFIX, tags=["session"])
 def get_session(
     request: Request, response: Response, database: DatabaseDep, settings: SettingsDep
 ) -> SessionResponse:
-    """Liefert das CSRF-Token fÃ¼r schreibende Anfragen.
+    """Liefert das CSRF-Token für schreibende Anfragen.
 
     Das Cookie wird bei jedem Aufruf neu gesetzt (Max-Age = Sitzungsdauer),
     damit Browser- und Serverablauf zusammenpassen. Neue Sitzungen werden
