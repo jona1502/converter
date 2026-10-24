@@ -129,7 +129,7 @@ def _reset(database: Database) -> None:
     with database.engine.begin() as connection:
         connection.execute(
             text(
-                "TRUNCATE outbox, job_results, jobs, upload_reservations, sessions "
+                "TRUNCATE stale_attempts, outbox, job_results, jobs, upload_reservations, sessions "
                 "RESTART IDENTITY CASCADE"
             )
         )

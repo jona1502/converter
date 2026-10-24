@@ -1,4 +1,4 @@
-"""``GET /api/v1/session``: anonyme Sitzung anlegen oder erneuern (Vertrag §3)."""
+"""``GET /api/v1/session``: anonyme Sitzung anlegen oder erneuern (Vertrag Â§3)."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from fastapi import APIRouter, Request, Response
 from app.api import API_PREFIX
 from app.api.auth import cookie_name, create_session, optional_session
 from app.api.deps import DatabaseDep, SettingsDep
+from app.core.rate_limits import check_limits, client_ip
 from app.core.security import csrf_token
 from app.schemas.session import SessionResponse
 
@@ -17,14 +18,18 @@ router = APIRouter(prefix=API_PREFIX, tags=["session"])
 def get_session(
     request: Request, response: Response, database: DatabaseDep, settings: SettingsDep
 ) -> SessionResponse:
-    """Liefert das CSRF-Token für schreibende Anfragen.
+    """Liefert das CSRF-Token fÃ¼r schreibende Anfragen.
 
     Das Cookie wird bei jedem Aufruf neu gesetzt (Max-Age = Sitzungsdauer),
-    damit Browser- und Serverablauf zusammenpassen. Das Neuanlage-Limit je
-    Client-IP folgt in B09.
+    damit Browser- und Serverablauf zusammenpassen. Neue Sitzungen werden
+    pro vertrauenswürdig ermittelter Client-IP begrenzt.
     """
     session = optional_session(request, database, settings)
     if session is None:
+        check_limits(
+            settings,
+            [("new-session", client_ip(request, settings), settings.session_new_per_minute)],
+        )
         with database.session() as db, db.begin():
             session = create_session(db, settings)
     response.set_cookie(

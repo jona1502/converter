@@ -49,6 +49,13 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Review:** `backend_b03` prüfte PDF-Kern und API/Download, Hauptagent den kompletten Stack.
 - **Prüfung:** Echter PDF-Integrationstest prüft alle drei Varianten mit pikepdf, Seitenzahl, Formularfeld und Annotation. Separater HTTP-Smoke über Proxy/Dispatcher/Celery erfolgreich. Recovery-/Teilresultat-Erhalt ist zusätzlich in B04-Tests abgedeckt.
 
+## B09
+
+- **Änderungen:** Prozessübergreifende Redis-/Valkey-Raten, initiale Idempotenzsperren, Replaylimits, aktive Upload-/Auftragsquoten, Speicherprüfung sowie wiederholbares Cleanup für Ablauf, Löschung, Uploadreste, Sitzungen und verwaiste Versuche. StaleAttempt-Migration hält Crashrest-Bytes bis zur sicheren physischen Entfernung reserviert. Linux-Parser bekommt unabhängigen Kernel-Walltimer und Parent-Death-Signal.
+- **Review:** `backend_b03` unabhängig, Hauptagent zusätzlich; behoben: inkonsistente Quotensnapshots, vorzeitige Budgetfreigabe bei Workercrash, gleicher Fehler bei Ablauf/Löschung während Verarbeitung und CHECK-Verletzung beim Leaseentzug.
+- **Prüfung:** 22 Lifecycle-/Runtime-/Migrationsprüfungen durch Reviewer gegen dedizierte Testdatenbank bestanden; gezielte Valkey-Limits/Fail-closed-Tests vorhanden. Ruff, Format und mypy des gesamten aktuellen Backends grün. Vollständiger Abschlusslauf folgt B13.
+- **Grenzen:** Bei Crash können Arbeitsreserven konservativ bis zum sicheren Parserende plus Cleanup gehalten werden. Kein sofortiges Löschen bei abgestelltem Stack oder gestörter Datenbank versprechen. Rateprüfung zählt Erstellversuche vor Annahme; bestehende idempotente Wiederholungen verbrauchen keine neuen Erstellraten.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`

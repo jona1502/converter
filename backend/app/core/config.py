@@ -92,6 +92,8 @@ class Settings(BaseSettings):
     global_max_active_jobs: PositiveInt = 50
     session_creates_per_minute: PositiveInt = 10
     ip_creates_per_minute: PositiveInt = 10
+    session_replays_per_minute: PositiveInt = 30
+    session_new_per_minute: PositiveInt = 30
 
     image_timeout_seconds: PositiveInt = 120
     pdf_timeout_seconds: PositiveInt = 300
@@ -149,6 +151,21 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _check_production(self) -> Self:
+        if self.session_ttl_seconds < self.job_ttl_seconds:
+            raise ValueError("session_ttl_seconds must cover job_ttl_seconds")
+        if (
+            self.physical_delete_max_seconds
+            < max(
+                self.download_max_seconds,
+                self.image_timeout_seconds + self.cleanup_interval_seconds,
+                self.pdf_timeout_seconds + self.cleanup_interval_seconds,
+            )
+            + self.cleanup_interval_seconds
+            + 10
+        ):
+            raise ValueError(
+                "physical_delete_max_seconds must cover download, parser timeout and cleanup grace"
+            )
         key = self.secret_key.get_secret_value() if self.secret_key else None
         if key is not None and len(key) < MIN_SECRET_KEY_LENGTH:
             msg = f"secret_key muss mindestens {MIN_SECRET_KEY_LENGTH} Zeichen lang sein"

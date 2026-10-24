@@ -23,11 +23,12 @@ from pydantic import ValidationError
 from starlette.requests import ClientDisconnect
 
 from app.api import API_PREFIX
-from app.api.auth import CurrentSessionDep, WriteSessionDep
+from app.api.auth import CurrentSession, CurrentSessionDep, WriteSessionDep
 from app.api.deps import DatabaseDep, SettingsDep, StorageDep
 from app.api.errors import ApiError, ApiErrorCode, ErrorResponse, fields_from_errors
 from app.api.upload import OPTIONS_MAX_BYTES, FileSink, UploadedFile, boundary_from, read_upload
 from app.core.config import Settings
+from app.core.rate_limits import check_limits, client_ip, replay_guard, submission_guard
 from app.db.engine import Database
 from app.jobs.acceptance import (
     Acceptance,
@@ -330,6 +331,25 @@ async def create_job(
     boundary_from(request.headers.get("content-type"))
     _check_declared_length(request, settings)
 
+    if idempotency_key is None:
+        return await _submit_job(request, session, settings, database, storage, None)
+    guard = submission_guard(settings, "idempotency-lock", f"{session.id}:{idempotency_key}")
+    await anyio.to_thread.run_sync(guard.__enter__)
+    try:
+        return await _submit_job(request, session, settings, database, storage, idempotency_key)
+    finally:
+        with anyio.CancelScope(shield=True):
+            await anyio.to_thread.run_sync(guard.__exit__, None, None, None)
+
+
+async def _submit_job(
+    request: Request,
+    session: CurrentSession,
+    settings: Settings,
+    database: Database,
+    storage: LocalStorage,
+    idempotency_key: str | None,
+) -> Response:
     if idempotency_key is not None:
 
         def lookup() -> bool:
@@ -340,9 +360,23 @@ async def create_job(
                 return existing is not None
 
         if await anyio.to_thread.run_sync(lookup):
-            acceptance = await _replay(request, settings, database, session.id, idempotency_key)
+            guard = replay_guard(settings, session.id)
+            await anyio.to_thread.run_sync(guard.__enter__)
+            try:
+                acceptance = await _replay(request, settings, database, session.id, idempotency_key)
+            finally:
+                with anyio.CancelScope(shield=True):
+                    await anyio.to_thread.run_sync(guard.__exit__, None, None, None)
             return _job_response(acceptance)
 
+    await anyio.to_thread.run_sync(
+        check_limits,
+        settings,
+        [
+            ("create-session", str(session.id), settings.session_creates_per_minute),
+            ("create-ip", client_ip(request, settings), settings.ip_creates_per_minute),
+        ],
+    )
     acceptance = await _create(request, settings, database, storage, session.id, idempotency_key)
     return _job_response(acceptance)
 

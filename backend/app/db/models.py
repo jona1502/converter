@@ -255,3 +255,19 @@ class StorageUsage(Base):
 
     id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
     reserved_bytes: Mapped[int] = mapped_column(BigInteger, server_default="0")
+
+
+class StaleAttempt(Base):
+    """Budget held until an abandoned parser cannot recreate its files."""
+
+    __tablename__ = "stale_attempts"
+    __table_args__ = (
+        CheckConstraint("reserved_bytes >= 0", name="reserved_bytes"),
+        Index(None, "reap_after"),
+        Index(None, "job_id"),
+    )
+
+    lease_token: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    job_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("jobs.id"))
+    reserved_bytes: Mapped[int] = mapped_column(BigInteger)
+    reap_after: Mapped[datetime] = mapped_column(TIMESTAMP)

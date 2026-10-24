@@ -16,6 +16,7 @@ Vertrag §4 Schritt 3 und §7 „Speicherbudget“:
 
 from __future__ import annotations
 
+import shutil
 import uuid
 from dataclasses import dataclass
 from datetime import timedelta
@@ -27,7 +28,7 @@ from sqlalchemy.orm import Session
 from app.api.errors import ApiError, ApiErrorCode
 from app.core.config import Settings
 from app.db.engine import Database
-from app.db.models import StorageUsage, UploadReservation
+from app.db.models import Job, StorageUsage, UploadReservation
 from app.storage.local import spool_key
 
 # Fester Schlüssel für pg_advisory_xact_lock („conv“ als Zahl).
@@ -66,11 +67,30 @@ def release_bytes(db: Session, amount: int) -> None:
 def reserve_upload(database: Database, settings: Settings, session_id: uuid.UUID) -> Reservation:
     """Legt eine Upload-Reservierung an oder wirft ``503 storage-full``."""
     amount = settings.max_upload_input_bytes
+    if shutil.disk_usage(settings.storage_dir).free < amount:
+        raise ApiError(
+            ApiErrorCode.STORAGE_FULL, 503, "Freier Dateispeicher reicht nicht aus.", retry_after=60
+        )
     reservation_id = uuid.uuid4()
     key = spool_key(reservation_id)
     with database.session() as db, db.begin():
         db.execute(select(func.pg_advisory_xact_lock(ADMISSION_LOCK_KEY)))
-        # B09: hier aktive Aufträge + Reservierungen zählen (Sitzung/global).
+        active = ["queued", "running"]
+        # One statement snapshot: acceptance atomically replaces a reservation
+        # with a job while not holding this advisory lock.
+        owners = list(
+            db.execute(
+                select(Job.session_id)
+                .where(Job.state.in_(active), Job.deleted_at.is_(None), Job.expires_at > func.now())
+                .union_all(select(UploadReservation.session_id))
+            ).scalars()
+        )
+        if owners.count(session_id) >= settings.session_max_active_jobs:
+            raise ApiError(
+                ApiErrorCode.SESSION_JOB_LIMIT, 429, "Zu viele aktive Auftraege.", retry_after=2
+            )
+        if len(owners) >= settings.global_max_active_jobs:
+            raise ApiError(ApiErrorCode.SERVER_BUSY, 503, "Annahme ausgelastet.", retry_after=5)
         if not reserve_bytes(db, amount, settings.storage_budget_bytes):
             raise ApiError(
                 ApiErrorCode.STORAGE_FULL,

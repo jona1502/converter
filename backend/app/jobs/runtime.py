@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from sqlalchemy import func, select, update
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.db.engine import Database
-from app.db.models import Job, JobResult, OutboxEntry
+from app.db.models import Job, JobResult, OutboxEntry, StaleAttempt
 from app.jobs.admission import release_bytes, reserve_bytes
 from app.jobs.domain import OutboxKind
 
@@ -209,7 +209,25 @@ def cancel(db: Session, job: Job) -> str:
     return "requested"
 
 
-def recover(database: Database) -> int:
+def retire_attempt(db: Session, job: Job, now: datetime, settings: Settings | None) -> None:
+    """Transfer the still-existing disk reservation to a timed stale lease."""
+    if job.lease_token is not None:
+        maximum = (
+            max(settings.image_timeout_seconds, settings.pdf_timeout_seconds) if settings else 300
+        )
+        db.add(
+            StaleAttempt(
+                job_id=job.id,
+                lease_token=job.lease_token,
+                reserved_bytes=job.working_bytes,
+                reap_after=now + timedelta(seconds=maximum + 10),
+            )
+        )
+    job.working_bytes = 0
+    job.lease_token, job.lease_expires_at = None, None
+
+
+def recover(database: Database, settings: Settings | None = None) -> int:
     count = 0
     with database.session() as db, db.begin():
         jobs = list(
@@ -229,8 +247,7 @@ def recover(database: Database) -> int:
                 )
                 is not None
             )
-            release_bytes(db, job.working_bytes)
-            job.working_bytes = 0
+            retire_attempt(db, job, now, settings)
             job.lease_token, job.lease_expires_at, job.phase, job.progress = None, None, None, None
             if job.expires_at <= now:
                 job.state = "expired"

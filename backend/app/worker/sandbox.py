@@ -5,6 +5,7 @@ from __future__ import annotations
 import ctypes
 import errno
 import importlib
+import os
 import platform
 
 
@@ -13,6 +14,17 @@ def isolate(memory_bytes: int, timeout_seconds: int, output_bytes: int) -> None:
         # Windows ist ausschließlich Entwicklungs-/Testumgebung.
         return
     resource = importlib.import_module("resource")
+
+    # Der Kernel beendet auch bei blockiertem C-Parser und nach einem Crash des
+    # überwachenden Workers. SIGALRM hat bewusst keinen Python-Handler.
+    signals = importlib.import_module("signal")
+    signals.signal(signals.SIGALRM, signals.SIG_DFL)
+    signals.alarm(timeout_seconds + 1)
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(1, signals.SIGKILL, 0, 0, 0):
+        raise OSError(ctypes.get_errno(), "parent-death signal unavailable")
+    if os.getppid() == 1:
+        raise RuntimeError("parent already exited")
 
     resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
     resource.setrlimit(resource.RLIMIT_CPU, (timeout_seconds, timeout_seconds + 1))
@@ -52,6 +64,9 @@ def deny_network() -> None:
         Filter(0x15, 1, 0, arch),
         Filter(0x06, 0, 0, 0x80000000),
         Filter(0x20, 0, 0, 0),
+        # Block x32 syscall-number aliases as well as unsupported ABI numbers.
+        Filter(0x35, 0, 1, 0x40000000),
+        Filter(0x06, 0, 0, 0x80000000),
     ]
     for number in blocked:
         instructions.extend(

@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 from app.core.config import Settings
 from app.db.engine import Database
-from app.db.models import Job, JobResult, OutboxEntry, StorageUsage
+from app.db.models import Job, JobResult, OutboxEntry, StaleAttempt, StorageUsage
 from app.jobs import runtime
 from app.jobs.dispatcher import dispatch_once
 from app.worker.runner import run_job
@@ -83,7 +83,9 @@ def test_expired_lease_cannot_publish_heartbeat_or_finish(
         job = db.get(Job, job_id)
         assert job and job.state == "succeeded" and job.working_bytes == 0
         usage = db.get(StorageUsage, 1)
-        assert usage and usage.reserved_bytes == job.reserved_bytes
+        stale_bytes = sum(db.scalars(select(StaleAttempt.reserved_bytes)))
+        assert usage and usage.reserved_bytes == job.reserved_bytes + stale_bytes
+        assert stale_bytes == settings.image_max_output_bytes
 
 
 def test_cancellation_wins_over_late_publication(

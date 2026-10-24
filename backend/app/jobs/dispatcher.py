@@ -54,7 +54,7 @@ def main() -> None:
     database = Database(settings.database_url.get_secret_value(), pool_size=2)
     while True:
         try:
-            recover(database)
+            recover(database, settings)
             dispatch_once(
                 database,
                 lambda job_id: celery_app.send_task(

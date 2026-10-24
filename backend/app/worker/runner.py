@@ -153,7 +153,13 @@ def run_job(job_id: str, settings: Settings | None = None) -> None:
             process.kill()
             return_code = process.wait(timeout=5)
         if return_code != 0 and error is None:
-            error = "memory-limit" if return_code in {-9, -11} else "worker-failed"
+            error = (
+                "timeout"
+                if return_code in {-14, -24}
+                else "memory-limit"
+                if return_code in {-9, -11}
+                else "worker-failed"
+            )
     except Exception:
         error = "worker-failed"
     finally:
