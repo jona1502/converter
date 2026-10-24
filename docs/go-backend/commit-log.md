@@ -33,6 +33,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Review:** `go_converter` unabhängig, insbesondere Fehler bei unklarer Commitantwort. Behoben: nach möglicherweise erfolgreichem Commit keine angenommene Eingabedatei löschen. Advisorylock und unabhängiger Reconcile erhalten Dateien/Budget, wenn Datenbankzustand unklar bleibt. Prospektive Job-ID entspricht Reservierungs-ID, damit Cleanup unklare Promotionen zuordnen kann.
 - **Prüfung:** Echte PostgreSQL-Regressionsprüfungen für parallele Annahme, verlorene Commitantwort, Replay/Konflikt und wiederholte Bereinigung; scoped `go test -race` und `go vet` grün. Kein Testzugriff auf Nutzdatenbank.
 
+## G06
+
+- **Änderungen:** PostgreSQL-Outbox als dauerhafte Queue ohne Celery, atomare Claims, Heartbeat, Publish/Finish, begrenzte Recovery und Prozesssteuerung mit Concurrency 1. Unklare Veröffentlichung und fehlgeschlagene Dateilöschung halten Reservierungen bis Recovery/Cleanup.
+- **Review:** `go_converter` unabhängig; nach Commit-Uncertainty-Korrektur keine bestätigten hohen/mittleren Befunde im Jobs-/Runtimebereich.
+- **Prüfung:** Jobs-/Store-/Storage-/Ratelimitprüfungen einschließlich Race und Vet grün; neue DB-/Workerregressionen prüfen Claims, Publish, Timeout, Cancel, exhausted/storage-full Claims und erhaltene PDF-Teilergebnisse.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
