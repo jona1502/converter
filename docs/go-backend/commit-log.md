@@ -27,6 +27,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Review:** Hauptagent unabhängig vom vorbereiteten Claude-Code: Sessionhash/CSRF, SQL-Parameter, Migrationsübernahme, Download-Lease, Pfad-/Rechte-/fsync-Regeln und Testdatenabgrenzung gelesen. `go_converter` zusätzlich Storage/Jobs unabhängig geprüft.
 - **Prüfung:** Go-Baseline einschließlich auth/store/storage/testdb/cmd-migrate gegen isolierten PostgreSQL-Stack grün; `go vet` und Race-Detector ohne Befund. Schema-Snapshot und vorhandene Alembic-Revision werden durch Migrationstests verglichen.
 
+## G05
+
+- **Änderungen:** Go-Annahmedienst mit Upload-/Speicherreservierungen, Aktivquoten, atomarer Finalisierung/Outbox, Fingerprints, stabiler Idempotenz, sicheren Namen und prozessübergreifenden Valkey-Limits. Fachliche Operationen sind getrennt von HTTP testbar; Handler werden nach dem Prozessadapter in G08 verdrahtet.
+- **Review:** `go_converter` unabhängig, insbesondere Fehler bei unklarer Commitantwort. Behoben: nach möglicherweise erfolgreichem Commit keine angenommene Eingabedatei löschen. Advisorylock und unabhängiger Reconcile erhalten Dateien/Budget, wenn Datenbankzustand unklar bleibt. Prospektive Job-ID entspricht Reservierungs-ID, damit Cleanup unklare Promotionen zuordnen kann.
+- **Prüfung:** Echte PostgreSQL-Regressionsprüfungen für parallele Annahme, verlorene Commitantwort, Replay/Konflikt und wiederholte Bereinigung; scoped `go test -race` und `go vet` grün. Kein Testzugriff auf Nutzdatenbank.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`

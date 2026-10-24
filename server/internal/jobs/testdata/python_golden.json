@@ -1,0 +1,3311 @@
+{
+ "names": [
+  {
+   "name": "",
+   "displayImage": "bild",
+   "displayPdf": "dokument",
+   "pdf": {
+    "high": "dokument-high.pdf",
+    "balanced": "dokument-balanced.pdf",
+    "small": "dokument-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": ".",
+   "displayImage": "bild",
+   "displayPdf": "dokument",
+   "pdf": {
+    "high": "dokument-high.pdf",
+    "balanced": "dokument-balanced.pdf",
+    "small": "dokument-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "..",
+   "displayImage": "bild",
+   "displayPdf": "dokument",
+   "pdf": {
+    "high": "dokument-high.pdf",
+    "balanced": "dokument-balanced.pdf",
+    "small": "dokument-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "...",
+   "displayImage": "bild",
+   "displayPdf": "dokument",
+   "pdf": {
+    "high": "dokument-high.pdf",
+    "balanced": "dokument-balanced.pdf",
+    "small": "dokument-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "a",
+   "displayImage": "a",
+   "displayPdf": "a",
+   "pdf": {
+    "high": "a-high.pdf",
+    "balanced": "a-balanced.pdf",
+    "small": "a-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "a.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "a-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "a.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "a-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "a-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "a-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "photo.jpg",
+   "displayImage": "photo.jpg",
+   "displayPdf": "photo.jpg",
+   "pdf": {
+    "high": "photo-high.pdf",
+    "balanced": "photo-balanced.pdf",
+    "small": "photo-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "photo.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "photo-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "photo.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "photo-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "photo-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "photo-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "Photo.JPEG",
+   "displayImage": "Photo.JPEG",
+   "displayPdf": "Photo.JPEG",
+   "pdf": {
+    "high": "Photo-high.pdf",
+    "balanced": "Photo-balanced.pdf",
+    "small": "Photo-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "Photo.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "Photo-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "Photo.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "Photo-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "Photo-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "Photo-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": ".hidden",
+   "displayImage": "hidden",
+   "displayPdf": "hidden",
+   "pdf": {
+    "high": "hidden-high.pdf",
+    "balanced": "hidden-balanced.pdf",
+    "small": "hidden-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "hidden.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "hidden-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "hidden.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "hidden-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "hidden-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "hidden-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": ".hidden.png",
+   "displayImage": "hidden.png",
+   "displayPdf": "hidden.png",
+   "pdf": {
+    "high": "hidden-high.pdf",
+    "balanced": "hidden-balanced.pdf",
+    "small": "hidden-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "hidden.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "hidden-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "hidden.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "hidden-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "hidden-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "hidden-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "a.b.c",
+   "displayImage": "a.b.c",
+   "displayPdf": "a.b.c",
+   "pdf": {
+    "high": "a.b-high.pdf",
+    "balanced": "a.b-balanced.pdf",
+    "small": "a.b-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "a.b.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "a.b-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "a.b.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "a.b-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "a.b-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "a.b-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "name.",
+   "displayImage": "name",
+   "displayPdf": "name",
+   "pdf": {
+    "high": "name-high.pdf",
+    "balanced": "name-balanced.pdf",
+    "small": "name-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "name.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "name-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "name.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "name-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "name-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "name-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "name..",
+   "displayImage": "name",
+   "displayPdf": "name",
+   "pdf": {
+    "high": "name-high.pdf",
+    "balanced": "name-balanced.pdf",
+    "small": "name-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "name.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "name-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "name.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "name-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "name-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "name-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "a..png",
+   "displayImage": "a.png",
+   "displayPdf": "a.png",
+   "pdf": {
+    "high": "a-high.pdf",
+    "balanced": "a-balanced.pdf",
+    "small": "a-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "a.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "a-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "a.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "a-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "a-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "a-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "  spaced   name .jpg",
+   "displayImage": "spaced name.jpg",
+   "displayPdf": "spaced name.jpg",
+   "pdf": {
+    "high": "spaced name-high.pdf",
+    "balanced": "spaced name-balanced.pdf",
+    "small": "spaced name-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "spaced name.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "spaced name-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "spaced name.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "spaced name-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "spaced name-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "spaced name-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": " . lead.png",
+   "displayImage": "lead.png",
+   "displayPdf": "lead.png",
+   "pdf": {
+    "high": "lead-high.pdf",
+    "balanced": "lead-balanced.pdf",
+    "small": "lead-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "lead.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "lead-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "lead.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "lead-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "lead-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "lead-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "tab\tname.png",
+   "displayImage": "tabname.png",
+   "displayPdf": "tabname.png",
+   "pdf": {
+    "high": "tabname-high.pdf",
+    "balanced": "tabname-balanced.pdf",
+    "small": "tabname-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "tabname.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "tabname-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "tabname.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "tabname-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "tabname-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "tabname-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "new\nline.png",
+   "displayImage": "newline.png",
+   "displayPdf": "newline.png",
+   "pdf": {
+    "high": "newline-high.pdf",
+    "balanced": "newline-balanced.pdf",
+    "small": "newline-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "newline.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "newline-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "newline.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "newline-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "newline-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "newline-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "nul\u0000byte.png",
+   "displayImage": "nulbyte.png",
+   "displayPdf": "nulbyte.png",
+   "pdf": {
+    "high": "nulbyte-high.pdf",
+    "balanced": "nulbyte-balanced.pdf",
+    "small": "nulbyte-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "nulbyte.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "nulbyte-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "nulbyte.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "nulbyte-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "nulbyte-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "nulbyte-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "del\u007fchar.png",
+   "displayImage": "delchar.png",
+   "displayPdf": "delchar.png",
+   "pdf": {
+    "high": "delchar-high.pdf",
+    "balanced": "delchar-balanced.pdf",
+    "small": "delchar-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "delchar.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "delchar-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "delchar.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "delchar-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "delchar-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "delchar-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "c1\u0085\u009fchars.png",
+   "displayImage": "c1chars.png",
+   "displayPdf": "c1chars.png",
+   "pdf": {
+    "high": "c1chars-high.pdf",
+    "balanced": "c1chars-balanced.pdf",
+    "small": "c1chars-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "c1chars.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "c1chars-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "c1chars.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "c1chars-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "c1chars-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "c1chars-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "a/b\\c:d*e?f\"g<h>i|j.png",
+   "displayImage": "a_b_c_d_e_f_g_h_i_j.png",
+   "displayPdf": "a_b_c_d_e_f_g_h_i_j.png",
+   "pdf": {
+    "high": "a_b_c_d_e_f_g_h_i_j-high.pdf",
+    "balanced": "a_b_c_d_e_f_g_h_i_j-balanced.pdf",
+    "small": "a_b_c_d_e_f_g_h_i_j-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "a_b_c_d_e_f_g_h_i_j.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "a_b_c_d_e_f_g_h_i_j-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "a_b_c_d_e_f_g_h_i_j.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "a_b_c_d_e_f_g_h_i_j-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "a_b_c_d_e_f_g_h_i_j-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "a_b_c_d_e_f_g_h_i_j-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "../../etc/passwd",
+   "displayImage": "_._etc_passwd",
+   "displayPdf": "_._etc_passwd",
+   "pdf": {
+    "high": "_-high.pdf",
+    "balanced": "_-balanced.pdf",
+    "small": "_-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "C:\\Users\\x\\bild.png",
+   "displayImage": "C__Users_x_bild.png",
+   "displayPdf": "C__Users_x_bild.png",
+   "pdf": {
+    "high": "C__Users_x_bild-high.pdf",
+    "balanced": "C__Users_x_bild-balanced.pdf",
+    "small": "C__Users_x_bild-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "C__Users_x_bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "C__Users_x_bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "C__Users_x_bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "C__Users_x_bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "C__Users_x_bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "C__Users_x_bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "\u202ertl.png",
+   "displayImage": "rtl.png",
+   "displayPdf": "rtl.png",
+   "pdf": {
+    "high": "rtl-high.pdf",
+    "balanced": "rtl-balanced.pdf",
+    "small": "rtl-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "rtl.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "rtl-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "rtl.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "rtl-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "rtl-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "rtl-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "bidi\u200e\u200f\u061c\u2066\u2069.png",
+   "displayImage": "bidi.png",
+   "displayPdf": "bidi.png",
+   "pdf": {
+    "high": "bidi-high.pdf",
+    "balanced": "bidi-balanced.pdf",
+    "small": "bidi-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bidi.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bidi-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bidi.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bidi-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bidi-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bidi-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u00a0y.png",
+   "displayImage": "x y.png",
+   "displayPdf": "x y.png",
+   "pdf": {
+    "high": "x y-high.pdf",
+    "balanced": "x y-balanced.pdf",
+    "small": "x y-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x y.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x y-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x y.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x y-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x y-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x y-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u2028y.png",
+   "displayImage": "x y.png",
+   "displayPdf": "x y.png",
+   "pdf": {
+    "high": "x y-high.pdf",
+    "balanced": "x y-balanced.pdf",
+    "small": "x y-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x y.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x y-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x y.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x y-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x y-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x y-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u2029y.png",
+   "displayImage": "x y.png",
+   "displayPdf": "x y.png",
+   "pdf": {
+    "high": "x y-high.pdf",
+    "balanced": "x y-balanced.pdf",
+    "small": "x y-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x y.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x y-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x y.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x y-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x y-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x y-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "\u3000ideo\u3000.png",
+   "displayImage": "ideo.png",
+   "displayPdf": "ideo.png",
+   "pdf": {
+    "high": "ideo-high.pdf",
+    "balanced": "ideo-balanced.pdf",
+    "small": "ideo-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "ideo.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "ideo-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "ideo.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "ideo-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "ideo-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "ideo-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u1680\u2000\u200a\u202f\u205fy.png",
+   "displayImage": "x y.png",
+   "displayPdf": "x y.png",
+   "pdf": {
+    "high": "x y-high.pdf",
+    "balanced": "x y-balanced.pdf",
+    "small": "x y-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x y.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x y-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x y.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x y-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x y-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x y-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u180ey.png",
+   "displayImage": "x\u180ey.png",
+   "displayPdf": "x\u180ey.png",
+   "pdf": {
+    "high": "x\u180ey-high.pdf",
+    "balanced": "x\u180ey-balanced.pdf",
+    "small": "x\u180ey-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x\u180ey.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x\u180ey-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x\u180ey.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x\u180ey-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x\u180ey-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x\u180ey-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u200by.png",
+   "displayImage": "x\u200by.png",
+   "displayPdf": "x\u200by.png",
+   "pdf": {
+    "high": "x\u200by-high.pdf",
+    "balanced": "x\u200by-balanced.pdf",
+    "small": "x\u200by-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x\u200by.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x\u200by-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x\u200by.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x\u200by-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x\u200by-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x\u200by-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x\u001cy\u001fz.png",
+   "displayImage": "xyz.png",
+   "displayPdf": "xyz.png",
+   "pdf": {
+    "high": "xyz-high.pdf",
+    "balanced": "xyz-balanced.pdf",
+    "small": "xyz-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "xyz.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "xyz-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "xyz.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "xyz-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "xyz-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "xyz-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "\u00fcn\u00efc\u00f6d\u00e9.JPG",
+   "displayImage": "\u00fcn\u00efc\u00f6d\u00e9.JPG",
+   "displayPdf": "\u00fcn\u00efc\u00f6d\u00e9.JPG",
+   "pdf": {
+    "high": "\u00fcn\u00efc\u00f6d\u00e9-high.pdf",
+    "balanced": "\u00fcn\u00efc\u00f6d\u00e9-balanced.pdf",
+    "small": "\u00fcn\u00efc\u00f6d\u00e9-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "\u00fcn\u00efc\u00f6d\u00e9-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb.png",
+   "displayImage": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb.png",
+   "displayPdf": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb.png",
+   "pdf": {
+    "high": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-high.pdf",
+    "balanced": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-balanced.pdf",
+    "small": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "\u65e5\u672c\u8a9e\u306e\u30d5\u30a1\u30a4\u30eb-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "emoji\ud83d\ude00\ud83c\udf89.png",
+   "displayImage": "emoji\ud83d\ude00\ud83c\udf89.png",
+   "displayPdf": "emoji\ud83d\ude00\ud83c\udf89.png",
+   "pdf": {
+    "high": "emoji\ud83d\ude00\ud83c\udf89-high.pdf",
+    "balanced": "emoji\ud83d\ude00\ud83c\udf89-balanced.pdf",
+    "small": "emoji\ud83d\ude00\ud83c\udf89-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "emoji\ud83d\ude00\ud83c\udf89.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "emoji\ud83d\ude00\ud83c\udf89-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "emoji\ud83d\ude00\ud83c\udf89.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "emoji\ud83d\ude00\ud83c\udf89-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "emoji\ud83d\ude00\ud83c\udf89-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "emoji\ud83d\ude00\ud83c\udf89-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "CON",
+   "displayImage": "_CON",
+   "displayPdf": "_CON",
+   "pdf": {
+    "high": "_CON-high.pdf",
+    "balanced": "_CON-balanced.pdf",
+    "small": "_CON-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_CON.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_CON-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_CON.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_CON-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_CON-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_CON-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "con.png",
+   "displayImage": "_con.png",
+   "displayPdf": "_con.png",
+   "pdf": {
+    "high": "_con-high.pdf",
+    "balanced": "_con-balanced.pdf",
+    "small": "_con-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_con.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_con-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_con.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_con-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_con-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_con-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "CON.tar.gz",
+   "displayImage": "CON.tar.gz",
+   "displayPdf": "CON.tar.gz",
+   "pdf": {
+    "high": "CON.tar-high.pdf",
+    "balanced": "CON.tar-balanced.pdf",
+    "small": "CON.tar-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "CON.tar.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "CON.tar-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "CON.tar.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "CON.tar-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "CON.tar-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "CON.tar-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "Com1.jpg",
+   "displayImage": "_Com1.jpg",
+   "displayPdf": "_Com1.jpg",
+   "pdf": {
+    "high": "_Com1-high.pdf",
+    "balanced": "_Com1-balanced.pdf",
+    "small": "_Com1-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_Com1.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_Com1-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_Com1.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_Com1-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_Com1-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_Com1-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "lpt9.pdf",
+   "displayImage": "_lpt9.pdf",
+   "displayPdf": "_lpt9.pdf",
+   "pdf": {
+    "high": "_lpt9-high.pdf",
+    "balanced": "_lpt9-balanced.pdf",
+    "small": "_lpt9-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_lpt9.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_lpt9-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_lpt9.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_lpt9-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_lpt9-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_lpt9-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "LPT0.pdf",
+   "displayImage": "LPT0.pdf",
+   "displayPdf": "LPT0.pdf",
+   "pdf": {
+    "high": "LPT0-high.pdf",
+    "balanced": "LPT0-balanced.pdf",
+    "small": "LPT0-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "LPT0.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "LPT0-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "LPT0.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "LPT0-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "LPT0-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "LPT0-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "nul.",
+   "displayImage": "_nul",
+   "displayPdf": "_nul",
+   "pdf": {
+    "high": "_nul-high.pdf",
+    "balanced": "_nul-balanced.pdf",
+    "small": "_nul-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_nul.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_nul-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_nul.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_nul-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_nul-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_nul-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "aux .png",
+   "displayImage": "_aux.png",
+   "displayPdf": "_aux.png",
+   "pdf": {
+    "high": "_aux-high.pdf",
+    "balanced": "_aux-balanced.pdf",
+    "small": "_aux-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_aux.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_aux-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_aux.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_aux-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_aux-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_aux-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "auxiliary.png",
+   "displayImage": "auxiliary.png",
+   "displayPdf": "auxiliary.png",
+   "pdf": {
+    "high": "auxiliary-high.pdf",
+    "balanced": "auxiliary-balanced.pdf",
+    "small": "auxiliary-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "auxiliary.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "auxiliary-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "auxiliary.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "auxiliary-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "auxiliary-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "auxiliary-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "prn . png",
+   "displayImage": "_prn.png",
+   "displayPdf": "_prn.png",
+   "pdf": {
+    "high": "_prn-high.pdf",
+    "balanced": "_prn-balanced.pdf",
+    "small": "_prn-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "_prn.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "_prn-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "_prn.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "_prn-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "_prn-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "_prn-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "com10.png",
+   "displayImage": "com10.png",
+   "displayPdf": "com10.png",
+   "pdf": {
+    "high": "com10-high.pdf",
+    "balanced": "com10-balanced.pdf",
+    "small": "com10-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "com10.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "com10-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "com10.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "com10-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "com10-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "com10-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayImage": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayPdf": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "pdf": {
+    "high": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-high.pdf",
+    "balanced": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-balanced.pdf",
+    "small": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayImage": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayPdf": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "pdf": {
+    "high": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-high.pdf",
+    "balanced": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-balanced.pdf",
+    "small": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayImage": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "displayPdf": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png",
+   "pdf": {
+    "high": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-high.pdf",
+    "balanced": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-balanced.pdf",
+    "small": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb .x.png",
+   "displayImage": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.png",
+   "displayPdf": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.png",
+   "pdf": {
+    "high": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-high.pdf",
+    "balanced": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-balanced.pdf",
+    "small": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc...png",
+   "displayImage": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.png",
+   "displayPdf": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.png",
+   "pdf": {
+    "high": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-high.pdf",
+    "balanced": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-balanced.pdf",
+    "small": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00.png",
+   "displayImage": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00.png",
+   "displayPdf": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00.png",
+   "pdf": {
+    "high": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-high.pdf",
+    "balanced": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-balanced.pdf",
+    "small": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x.eeeeeeeeeeeeeeeeeeee",
+   "displayImage": "x.eeeeeeeeeeeeeeee",
+   "displayPdf": "x.eeeeeeeeeeeeeeee",
+   "pdf": {
+    "high": "x-high.pdf",
+    "balanced": "x-balanced.pdf",
+    "small": "x-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x.ex t",
+   "displayImage": "x.ex t",
+   "displayPdf": "x.ex t",
+   "pdf": {
+    "high": "x-high.pdf",
+    "balanced": "x-balanced.pdf",
+    "small": "x-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x.\u202e",
+   "displayImage": "x",
+   "displayPdf": "x",
+   "pdf": {
+    "high": "x-high.pdf",
+    "balanced": "x-balanced.pdf",
+    "small": "x-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "x. ",
+   "displayImage": "x",
+   "displayPdf": "x",
+   "pdf": {
+    "high": "x-high.pdf",
+    "balanced": "x-balanced.pdf",
+    "small": "x-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "x.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "x-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "x.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "x-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "x-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "x-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "report.final.v2.PDF",
+   "displayImage": "report.final.v2.PDF",
+   "displayPdf": "report.final.v2.PDF",
+   "pdf": {
+    "high": "report.final.v2-high.pdf",
+    "balanced": "report.final.v2-balanced.pdf",
+    "small": "report.final.v2-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "report.final.v2.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "report.final.v2-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "report.final.v2.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "report.final.v2-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "report.final.v2-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "report.final.v2-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "   .pdf",
+   "displayImage": "bild.pdf",
+   "displayPdf": "dokument.pdf",
+   "pdf": {
+    "high": "dokument-high.pdf",
+    "balanced": "dokument-balanced.pdf",
+    "small": "dokument-small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "bild.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "bild-konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "bild.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "bild-komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "bild-skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "bild-skaliert.bmp"
+    }
+   ]
+  },
+  {
+   "name": "-.pdf",
+   "displayImage": "-.pdf",
+   "displayPdf": "-.pdf",
+   "pdf": {
+    "high": "--high.pdf",
+    "balanced": "--balanced.pdf",
+    "small": "--small.pdf"
+   },
+   "image": [
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "jpeg",
+     "name": "-.jpg"
+    },
+    {
+     "tool": "image-convert",
+     "input": "png",
+     "output": "png",
+     "name": "--konvertiert.png"
+    },
+    {
+     "tool": "image-convert",
+     "input": "gif",
+     "output": "ico",
+     "name": "-.ico"
+    },
+    {
+     "tool": "image-compress",
+     "input": "jpeg",
+     "output": "jpeg",
+     "name": "--komprimiert.jpg"
+    },
+    {
+     "tool": "image-resize",
+     "input": "webp",
+     "output": "webp",
+     "name": "--skaliert.webp"
+    },
+    {
+     "tool": "image-resize",
+     "input": "bmp",
+     "output": "bmp",
+     "name": "--skaliert.bmp"
+    }
+   ]
+  }
+ ],
+ "options": [
+  {
+   "input": "{\"tool\":\"image-convert\",\"format\":\"webp\"}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "581a158b566c65250eb9c911012f052c4540902d21db0ba987d3927667b2247b"
+  },
+  {
+   "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":0}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":0.0,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "61d40d6c14beb928bb3c7406674c3af8e19210d40536e0e930d19579017b55be"
+  },
+  {
+   "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":1}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":1.0,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "7ef1115d1cf175f07bd49dcbe26705dfeb50e446d80e09c960312e3b06ea5ecd"
+  },
+  {
+   "input": "{\"tool\":\"image-compress\",\"format\":\"original\",\"quality\":0.5,\"background\":\"#ABCDEF\"}",
+   "canonical": "{\"background\":\"#ABCDEF\",\"format\":\"original\",\"icoSizes\":null,\"quality\":0.5,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-compress\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "faeede345ae874409fbd6889204d07224c6908599a03465246d99922e82bf4b5"
+  },
+  {
+   "input": "{\"tool\":\"image-compress\",\"format\":\"webp\",\"quality\":0.333333333333333314829616256247}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":0.3333333333333333,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-compress\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "0a6b037d56f4363f37fcfecba78782007e09dcf431564784e3d5f918a25b7558"
+  },
+  {
+   "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[256,16]}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"ico\",\"icoSizes\":[256,16],\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "aa2ffb5e3611f3ed392f270054604192eba982168f8657fa1f2cdaa8cdf2b739"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":50,\"allowUpscale\":false}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"mode\":\"percent\",\"percent\":50.0},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "3542931b37ba0b730ef20d3a6b39386b25659a4a413134b02c9ef2b92abd5ad3"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":0.00001,\"allowUpscale\":false}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"mode\":\"percent\",\"percent\":1e-05},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "67e5fda3073aeb34e33edae23060fcb1fa2f4364f3405c0c3170934bb3588fd3"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":1e16,\"allowUpscale\":true}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":true,\"mode\":\"percent\",\"percent\":1e+16},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "1dab439ed06640e7489652b043a61c39374a0b7382f332b1582a8c559c7bbb32"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":1234567890123456.7,\"allowUpscale\":true}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":true,\"mode\":\"percent\",\"percent\":1234567890123456.8},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "263b22f0473d376ef3c7000c8992994a91631756f107bd2fa726a3b1672efbde"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":0.0001,\"allowUpscale\":false}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"mode\":\"percent\",\"percent\":0.0001},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "cd3c23189f63f4b0c2b99b5745be5157a25e5ef08be2ec529e6df6fb34331bf3"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"bmp\",\"resize\":{\"mode\":\"dimensions\",\"width\":800,\"keepAspectRatio\":true,\"allowUpscale\":false}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"bmp\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"height\":null,\"keepAspectRatio\":true,\"mode\":\"dimensions\",\"width\":800},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "6c4f84818832a5fbc67485b981ad11cf86b8d91fb2faa9e4b45082268abae7da"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"jpeg\",\"resize\":{\"mode\":\"dimensions\",\"width\":1,\"height\":2,\"keepAspectRatio\":false,\"allowUpscale\":true}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":true,\"height\":2,\"keepAspectRatio\":false,\"mode\":\"dimensions\",\"width\":1},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "f539f3b88c3768dfa9c77e62c4bdee4f608e2fe9764dc65deaed6597cddd4bcb"
+  },
+  {
+   "input": "{\"tool\":\"image-resize\",\"format\":\"original\",\"resize\":{\"mode\":\"maxEdge\",\"maxEdge\":4096}}",
+   "canonical": "{\"background\":\"#ffffff\",\"format\":\"original\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"maxEdge\":4096,\"mode\":\"maxEdge\"},\"tool\":\"image-resize\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "bbe757579812a305136688240b0724a0ec670cbab8eb8c13b1b82f6f879dc79c"
+  },
+  {
+   "input": "{\"tool\":\"pdf-compress\"}",
+   "canonical": "{\"levels\":[\"high\",\"balanced\",\"small\"],\"tool\":\"pdf-compress\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "172aa79251690363036aed0366f8095732212660c208100a8bc2511a280fbfc6"
+  },
+  {
+   "input": "{\"tool\":\"pdf-compress\",\"levels\":[\"small\",\"high\"]}",
+   "canonical": "{\"levels\":[\"small\",\"high\"],\"tool\":\"pdf-compress\"}",
+   "fileSha256": "3b9c358f36f0a31b6ad3e14f309c7cf198ac9246e8316f9ce543d5b19ac02b80",
+   "fileSize": 12345,
+   "fingerprint": "6a75d8cfecd1348d98c7fa0f7addaa75a720900664582d40b45a9d29cca3deb9"
+  }
+ ],
+ "scalars": [
+  {
+   "value": 0.85,
+   "canonical": "0.85"
+  },
+  {
+   "value": 1.0,
+   "canonical": "1.0"
+  },
+  {
+   "value": 0.0,
+   "canonical": "0.0"
+  },
+  {
+   "value": -0.0,
+   "canonical": "-0.0"
+  },
+  {
+   "value": 0.1,
+   "canonical": "0.1"
+  },
+  {
+   "value": 1e-05,
+   "canonical": "1e-05"
+  },
+  {
+   "value": 0.0001,
+   "canonical": "0.0001"
+  },
+  {
+   "value": 1000000000000000.0,
+   "canonical": "1000000000000000.0"
+  },
+  {
+   "value": 1e+16,
+   "canonical": "1e+16"
+  },
+  {
+   "value": 9999999999999998.0,
+   "canonical": "9999999999999998.0"
+  },
+  {
+   "value": 123456789.125,
+   "canonical": "123456789.125"
+  },
+  {
+   "value": 5e-324,
+   "canonical": "5e-324"
+  },
+  {
+   "value": 1.7976931348623157e+308,
+   "canonical": "1.7976931348623157e+308"
+  },
+  {
+   "value": 2.5e-07,
+   "canonical": "2.5e-07"
+  },
+  {
+   "value": 100.0,
+   "canonical": "100.0"
+  },
+  {
+   "value": 1e+22,
+   "canonical": "1e+22"
+  },
+  {
+   "value": 1e+21,
+   "canonical": "1e+21"
+  },
+  {
+   "value": 0.30000000000000004,
+   "canonical": "0.30000000000000004"
+  },
+  {
+   "value": "",
+   "canonical": "\"\""
+  },
+  {
+   "value": "plain",
+   "canonical": "\"plain\""
+  },
+  {
+   "value": "quote\"back\\slash/",
+   "canonical": "\"quote\\\"back\\\\slash/\""
+  },
+  {
+   "value": "ctl\u0000\u0001\b\t\n\f\r\u001f\u007f",
+   "canonical": "\"ctl\\u0000\\u0001\\b\\t\\n\\f\\r\\u001f\u007f\""
+  },
+  {
+   "value": "uni \u00fc \u65e5\u672c \ud83d\ude00",
+   "canonical": "\"uni \u00fc \u65e5\u672c \ud83d\ude00\""
+  },
+  {
+   "value": "html <a>&amp;</a>",
+   "canonical": "\"html <a>&amp;</a>\""
+  },
+  {
+   "value": "sep\u2028\u2029",
+   "canonical": "\"sep\u2028\u2029\""
+  },
+  {
+   "value": "bidi\u202e",
+   "canonical": "\"bidi\u202e\""
+  },
+  {
+   "value": true,
+   "canonical": "true"
+  },
+  {
+   "value": false,
+   "canonical": "false"
+  },
+  {
+   "value": null,
+   "canonical": "null"
+  },
+  {
+   "value": 0,
+   "canonical": "0"
+  },
+  {
+   "value": -1,
+   "canonical": "-1"
+  },
+  {
+   "value": 9007199254740993,
+   "canonical": "9007199254740993"
+  },
+  {
+   "value": [],
+   "canonical": "[]"
+  },
+  {
+   "value": {},
+   "canonical": "{}"
+  },
+  {
+   "value": {
+    "b": 1,
+    "a": [
+     1,
+     2.0,
+     "x"
+    ],
+    "\u00e4": null,
+    "Z": {}
+   },
+   "canonical": "{\"Z\":{},\"a\":[1,2.0,\"x\"],\"b\":1,\"\u00e4\":null}"
+  }
+ ],
+ "heads": [
+  {
+   "head": "",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "ffd8ffe0",
+   "image": "jpeg",
+   "pdf": false
+  },
+  {
+   "head": "ffd8",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "89504e470d0a1a0a00",
+   "image": "png",
+   "pdf": false
+  },
+  {
+   "head": "89504e470d0a1a",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "52494646000000005745425056503820",
+   "image": "webp",
+   "pdf": false
+  },
+  {
+   "head": "524946460000000057454258",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "474946383761",
+   "image": "gif",
+   "pdf": false
+  },
+  {
+   "head": "4749463839612e2e2e2e",
+   "image": "gif",
+   "pdf": false
+  },
+  {
+   "head": "474946383861",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "424d00000000000000000000000028000000",
+   "image": "bmp",
+   "pdf": false
+  },
+  {
+   "head": "424d00000000000000000000000029000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "424d00000000000000000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00000100010010100000010020006400000016000000",
+   "image": "ico",
+   "pdf": false
+  },
+  {
+   "head": "00000100010010100000010020000000000016000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00000100010010100000010020006400000015000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "000001000100",
+   "image": "ico",
+   "pdf": false
+  },
+  {
+   "head": "000001000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "000002000100",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "000000186674797061766966000000006d6966316d696166",
+   "image": "avif",
+   "pdf": false
+  },
+  {
+   "head": "00000018667479706d696631000000006d69616661766973",
+   "image": "avif",
+   "pdf": false
+  },
+  {
+   "head": "000000186674797068656963000000006d69663168656963",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00000008667479706176696600000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00001388667479706176696600000000",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00000014667479706d69663100000000617669",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "00000020667479706d696631000000006d69616661766966",
+   "image": "avif",
+   "pdf": false
+  },
+  {
+   "head": "255044462d312e370a",
+   "image": null,
+   "pdf": true
+  },
+  {
+   "head": "67617262616765676172626167656761726261676567617262616765676172626167656761726261676567617262616765676172626167656761726261676567617262616765255044462d312e34",
+   "image": null,
+   "pdf": true
+  },
+  {
+   "head": "7878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878255044462d",
+   "image": null,
+   "pdf": true
+  },
+  {
+   "head": "787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878255044462d",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "25504446",
+   "image": null,
+   "pdf": false
+  },
+  {
+   "head": "68656c6c6f20776f726c64",
+   "image": null,
+   "pdf": false
+  }
+ ]
+}
