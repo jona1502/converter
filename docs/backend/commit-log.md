@@ -62,6 +62,12 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Review:** `backend_b03` unabhängig; automatischen Neuupload nach Netzwerkfehler entfernt. Nur explizite Schedulingcodes werden bis zum begrenzten Wartefenster erneut versucht; manuelle Wiederholung nach unklarer Antwort verwendet denselben Schlüssel/Optionssnapshot.
 - **Prüfung:** Astro ohne Befunde, Typdriftprüfung grün. Echter Chromium-Stacklauf: 43 bestanden, ein geräteabhängiger Fall übersprungen. Drei gezielte Clientfehlerprüfungen (429/413/Netzwerk) bestanden. Lokale Engine: 410 bestanden, zehn browserabhängig übersprungen.
 
+## B11
+
+- **Änderungen:** PDF mit ausdrücklichem Start, Analyse, echten Zählern, drei Varianten, Cancel/Reset und Ablauf. Produkttexte auf Serververarbeitung umgestellt, CSP erlaubt nur Same-Origin-Verbindungen. Auf ausdrücklichen Nutzerwunsch großen Einleitungsblock und den gesamten Abschnitt „So funktioniert es“ entfernt; Startseite zeigt direkt Werkzeuge.
+- **Review:** Frontendautor `frontend_review`, unabhängige Prüfung `backend_b03`; anschließend Hauptagent Integration und explizite Nutzervereinfachung. Abbruchzustände sowie PDF/A-Grenze ergänzt.
+- **Prüfung:** Astro-Check 95 Dateien ohne Befunde. Echter Chromium-Lauf einschließlich aller vier Werkzeuge und Downloads vor der letzten Home-Vereinfachung grün; gezielte endgültige Homeprüfung folgt im Checkpoint-Abnahmelauf.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`

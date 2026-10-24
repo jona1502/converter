@@ -34,7 +34,7 @@ export const TOOLS: readonly Tool[] = [
   {
     id: 'pdf-komprimieren',
     title: 'PDF komprimieren',
-    description: 'Drei Qualitätsstufen lokal berechnen und tatsächliche Dateigrößen vergleichen.',
+    description: 'Drei Qualitätsstufen auf dem Server berechnen und tatsächliche Dateigrößen vergleichen.',
     href: '/pdf/komprimieren',
     category: 'pdf',
     operation: 'komprimieren',

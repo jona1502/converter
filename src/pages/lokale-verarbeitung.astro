@@ -1,121 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout
-  title="Lokale Verarbeitung"
-  description="Wie die Werkzeuge Dateien im Browser auf Ihrem Gerät verarbeiten, was mit Metadaten geschieht und wo die Grenzen liegen."
->
+<BaseLayout title="Dateiverarbeitung" description="Upload, Serververarbeitung, temporäre Speicherung und Löschung Ihrer Dateien.">
   <article class="page-container-narrow">
-    <h1 class="page-title">Lokale Verarbeitung</h1>
-    <p class="page-lead">
-      Die Werkzeuge verarbeiten Ihre Dateien im Browser auf Ihrem Gerät. Die Dateien werden dafür
-      nicht an einen Server übertragen.
-    </p>
-
+    <h1 class="page-title">Dateiverarbeitung</h1>
+    <p class="page-lead">Die Werkzeuge verarbeiten Ihre Dateien auf dem Server. Erst mit „Konvertieren“, „Komprimieren“ oder „Skalieren“ werden Dateien hochgeladen.</p>
     <div class="prose-content mt-10">
-      <h2>Wie die Verarbeitung abläuft</h2>
-      <p>
-        Wenn Sie eine Datei auswählen, liest der Browser sie direkt von Ihrem Gerät. Die Umwandlung
-        erledigen eingebaute Browser-Funktionen: Bilder werden dekodiert, auf einer Zeichenfläche
-        (Canvas) neu gezeichnet und im gewünschten Format kodiert. Wo der Browser es unterstützt,
-        geschieht das in einem Web Worker, also in einem Hintergrund-Thread, damit die Seite
-        bedienbar bleibt.
-      </p>
-      <p>
-        Die Ergebnisse entstehen ebenfalls im Browser und werden Ihnen zum Herunterladen angeboten.
-      </p>
-      <p>
-        PDF-Dateien verarbeitet eine lokal ausgelieferte PDF-Bibliothek in einem eigenen Hintergrund-Thread.
-        Die drei Qualitätsstufen werden nacheinander berechnet. Nach jeder fertigen Variante zeigt das Werkzeug deren
-        tatsächliche Ergebnisgröße an. Texte und Vektoren werden nicht als ganze Seiten in Bilder umgewandelt.
-      </p>
-
-      <h2>Was mit Ihren Dateien geschieht</h2>
-      <ul>
-        <li>Dateien und Ergebnisse werden nicht hochgeladen.</li>
-        <li>
-          Sie liegen nur im Arbeitsspeicher des Browsers. Wenn Sie eine Datei entfernen, die Auswahl
-          zurücksetzen oder das Werkzeug verlassen, werden die Referenzen und Ergebnis-URLs freigegeben.
-          Wann der Browser den Speicher tatsächlich zurückgewinnt, bestimmt seine Speicherverwaltung.
-        </li>
-        <li>
-          Die Seite speichert Dateien nicht in Browser-Speichern wie Local Storage, IndexedDB oder
-          dem Cache.
-        </li>
-        <li>Heruntergeladene Ergebnisse speichert Ihr Browser wie jeden anderen Download.</li>
-      </ul>
-
-      <h2>Netzwerk und eingebundene Dienste</h2>
-      <p>
-        Beim Aufruf der Seite lädt Ihr Browser die Seite selbst sowie deren Skripte, Stile und
-        Grafiken vom Webserver. Dabei entstehen gewöhnliche Webserver-Anfragen; ob und wie diese
-        protokolliert werden, hängt vom Hosting ab. Ihre Dateien sind nicht Teil dieser Anfragen.
-      </p>
-      <ul>
-        <li>Es sind keine Analyse- oder Tracking-Dienste eingebunden.</li>
-        <li>
-          Schriften, Skripte und Stile werden nicht von fremden Servern oder CDNs geladen; die Seite
-          verwendet die Systemschrift Ihres Geräts.
-        </li>
-        <li>
-          Eine Content-Security-Policy weist den Browser an, Netzwerkverbindungen aus den Skripten der
-          Seite (etwa <code>fetch</code> oder WebSockets) zu blockieren. Der Code der Hintergrund-Threads
-          enthält keine Netzwerkaufrufe.
-        </li>
-      </ul>
-
-      <h2>Metadaten und Farben</h2>
-      <p>
-        In den Bildwerkzeugen wird beim Konvertieren, Komprimieren und Skalieren jedes Bild neu kodiert. Dabei werden
-        Metadaten entfernt oder verändert. Das betrifft insbesondere:
-      </p>
-      <ul>
-        <li>EXIF-Daten, darunter eine eventuell gespeicherte GPS-Position sowie Kameradaten wie Modell und Aufnahmeeinstellungen,</li>
-        <li>
-          eingebettete Farbprofile – dadurch können Farben im Ergebnis leicht abweichen, vor allem bei
-          Bildern mit erweitertem Farbraum.
-        </li>
-      </ul>
-      <p>
-        Aktuelle Browser übernehmen die in den EXIF-Daten hinterlegte Ausrichtung: Das Bild wird so
-        gespeichert, wie es angezeigt wird, die Drehung steckt danach in den Pixeln selbst.
-      </p>
-      <p>
-        Das Entfernen von Metadaten ist ein Nebeneffekt der Neukodierung, kein geprüftes
-        Bereinigungsverfahren. Wenn Sie sicher sein müssen, dass ein Bild keine Metadaten enthält,
-        prüfen Sie das Ergebnis zusätzlich.
-      </p>
-
-      <h2>Grenzen des Browsers</h2>
-      <ul>
-        <li>
-          Die Verarbeitung nutzt den Arbeitsspeicher Ihres Geräts. Sehr große Bilder oder viele
-          Dateien auf einmal können vor allem auf Mobilgeräten zu langsamer Verarbeitung oder Fehlern
-          führen. Für Dateigröße, Bildabmessungen und Dateianzahl gelten deshalb Grenzwerte, die im
-          jeweiligen Werkzeug angezeigt werden.
-        </li>
-        <li>
-          Welche Formate ein Browser lesen und erzeugen kann, unterscheidet sich. Nicht jeder Browser
-          kann zum Beispiel WebP-Dateien erzeugen. Nicht verfügbare Ausgabeformate werden im Werkzeug
-          als nicht verfügbar gekennzeichnet und nicht still durch ein anderes ersetzt.
-        </li>
-        <li>Animierte Bilder (PNG, WebP, GIF und AVIF-Bildfolgen) werden nicht unterstützt.</li>
-        <li>Die Werkzeuge benötigen JavaScript.</li>
-      </ul>
-      <h2>Grenzen der PDF-Komprimierung</h2>
-      <p>
-        Nur sicher unterstützte Rasterbilder werden neu kodiert. Bilder mit Transparenzmasken,
-        speziellen Farbprofilen oder nicht unterstützten Filtern bleiben unverändert. Eingebettete
-        Schriften werden nicht verkleinert. Bereits optimierte und textlastige PDFs können gleich groß
-        oder größer werden. Dokumentmetadaten werden durch dieses Werkzeug nicht gezielt bereinigt.
-      </p>
-      <p>
-        Neuschreiben kann digitale Signaturen ungültig machen; behalten Sie das Original.
-        PDF/A-Konformität wird nicht garantiert. Verschlüsselte Dateien werden abgelehnt.
-        Die PDF-Komprimierung benötigt unter anderem OffscreenCanvas im Hintergrund-Thread.
-        Fehlt die Unterstützung, zeigt das Werkzeug einen Hinweis. Große oder komplexe Dokumente
-        können trotz Grenzwerten den verfügbaren Arbeitsspeicher überschreiten.
-      </p>
+      <h2>Upload und Verarbeitung</h2>
+      <p>Die Dateiauswahl startet keinen Upload. Der Browser prüft bei Bildern zunächst Dateisignatur und Abmessungen. Nach Ihrem Start werden Datei und Einstellungen an die API dieser Website übertragen. Ein separater Prozess erzeugt die Ergebnisse; die Seite fragt den tatsächlichen Status ab.</p>
+      <h2>Temporäre Speicherung und Löschung</h2>
+      <p>Originale und Ergebnisse liegen temporär im privaten Dateispeicher auf dem Server. Die Ablaufzeit wird beim Auftrag angezeigt. Nach Ablauf ist der Download gesperrt und die Dateien werden automatisch entfernt. Mit „Entfernen“ oder „Zurücksetzen“ fordern Sie die Löschung früher an und sperren den Auftrag.</p>
+      <p>Bei Verbindungsverlust kann ein abgebrochener Upload noch kurzzeitig auf dem Server liegen und wird automatisch bereinigt. Bewahren Sie Ihre Originaldatei auf. Heruntergeladene Ergebnisse bleiben auf Ihrem Gerät.</p>
+      <h2>Anonyme Sitzung</h2>
+      <p>Ein technisch notwendiges Sitzungscookie ordnet Aufträge Ihrem Browser zu. Es ist nicht durch Seitenskripte lesbar. Schreibende Anfragen werden zusätzlich durch ein CSRF-Token geschützt. Dateien und Tokens werden nicht in Local Storage oder IndexedDB gespeichert.</p>
+      <h2>Bilder und Metadaten</h2>
+      <p>Bilder werden neu kodiert. EXIF-Daten einschließlich GPS-Position und Farbprofile werden entfernt oder verändert. Die Bildausrichtung wird berücksichtigt. Animierte Bilder werden abgelehnt. Prüfen Sie wichtige Farben und Metadaten im Ergebnis.</p>
+      <h2>PDF-Dateien</h2>
+      <p>PDFs werden neu geschrieben; digitale Signaturen werden ungültig. Verschlüsselte PDFs werden abgelehnt. Text und Vektoren bleiben erhalten, bestimmte Bilder bleiben unverändert. Eine kleinere Datei ist nicht garantiert; auch größere Ergebnisse sind möglich.</p>
+      <h2>Grenzen und Verbindungen</h2>
+      <p>Die Verarbeitung braucht eine Serververbindung und unterliegt Datei-, Zeit-, Speicher- und Auftragsgrenzen. Ausgabeformate werden vom Server abgefragt. Skripte dürfen nur Verbindungen zum Origin dieser Website aufbauen. Es gibt keinen automatischen Wechsel zur lokalen Verarbeitung.</p>
+      <h2>Angaben vor Veröffentlichung</h2>
+      <p>Diese Seite beschreibt die technische Verarbeitung. Betreiberangaben, Impressum und vollständige rechtliche Datenschutzhinweise müssen vor öffentlicher Veröffentlichung ergänzt werden.</p>
     </div>
   </article>
 </BaseLayout>

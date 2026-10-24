@@ -13,13 +13,13 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   security: {
-    // Content-Security-Policy als <meta>-Tag im Build. connect-src 'none' verhindert
-    // Netzwerkaufrufe (fetch/XHR/WebSocket/Beacon) aus Seitenskripten.
+    // Content-Security-Policy als <meta>-Tag im Build. connect-src 'self' begrenzt
+    // Netzwerkaufrufe aus Seitenskripten auf denselben Origin.
     csp: {
       algorithm: 'SHA-256',
       directives: [
         "default-src 'self'",
-        "connect-src 'none'",
+        "connect-src 'self'",
         "img-src 'self' blob: data:",
         "worker-src 'self'",
         "font-src 'self'",

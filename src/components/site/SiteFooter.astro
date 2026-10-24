@@ -6,8 +6,8 @@ const { siteName } = Astro.props;
 <footer class="site-footer">
   <div class="page-container">
     <p class="footer-note">
-      Dateien werden in Ihrem Browser auf Ihrem Gerät verarbeitet und nicht hochgeladen.{" "}
-      <a href="/lokale-verarbeitung" class="footer-link">Wie die lokale Verarbeitung funktioniert</a>
+      Dateien werden nach ausdrücklichem Start hochgeladen, temporär gespeichert und nach Ablauf gelöscht.{" "}
+      <a href="/lokale-verarbeitung" class="footer-link">Wie die Dateiverarbeitung funktioniert</a>
     </p>
     <nav aria-label="Fußzeile" class="footer-nav">
       {availableToolsByCategory.map(({ category, tools }) => (
@@ -21,7 +21,7 @@ const { siteName } = Astro.props;
       <div>
         <h2 class="footer-heading">Information</h2>
         <ul>
-          <li><a href="/lokale-verarbeitung" class="footer-link">Lokale Verarbeitung</a></li>
+          <li><a href="/lokale-verarbeitung" class="footer-link">Dateiverarbeitung</a></li>
         </ul>
       </div>
     </nav>

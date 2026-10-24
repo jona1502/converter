@@ -2,32 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { availableToolsByCategory } from '../data/tools';
 
-const steps = [
-  { title: 'Dateien wählen', text: 'Dateien auswählen oder in den Bereich ziehen.' },
-  { title: 'Optionen einstellen', text: 'Zielformat, Qualität oder Größe festlegen.' },
-  { title: 'Verarbeiten', text: 'Die Umwandlung läuft im Browser auf Ihrem Gerät.' },
-  { title: 'Herunterladen', text: 'Ergebnisse einzeln speichern.' },
-];
 ---
 <BaseLayout
-  title="Dateien im Browser bearbeiten"
-  description="Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft im Browser auf Ihrem Gerät, Dateien werden nicht hochgeladen."
+  title="Dateien online bearbeiten"
+  description="Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft auf dem Server, Dateien werden nach ausdrücklichem Start hochgeladen."
 >
   <div class="page-container">
-    <section aria-labelledby="titel" class="hero">
-      <p class="page-eyebrow">MI converter</p>
-      <h1 id="titel" class="hero-title mt-2">Dateien direkt im Browser bearbeiten</h1>
-      <p class="hero-lead">
-        Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft im Browser auf Ihrem Gerät –
-        Ihre Dateien werden dabei nicht hochgeladen.
-      </p>
-      <p class="mt-6 text-lg">
-        <a href="/lokale-verarbeitung" class="link link-standalone">Mehr zur lokalen Verarbeitung<span aria-hidden="true"> ›</span></a>
-      </p>
-    </section>
-
-    <section class="page-section sm:mt-24" aria-labelledby="werkzeuge">
-      <h2 id="werkzeuge" class="section-title text-center">Werkzeuge</h2>
+    <section aria-labelledby="werkzeuge">
+      <h1 id="werkzeuge" class="section-title">Werkzeuge</h1>
       {
         availableToolsByCategory.length === 0 ? (
           <p class="notice notice-info mx-auto mt-6 max-w-2xl">
@@ -36,7 +18,7 @@ const steps = [
         ) : (
           availableToolsByCategory.map(({ category, tools }) => (
             <div class="mt-10">
-              <h3 class="section-kicker">{category.title}</h3>
+              <h2 class="section-kicker">{category.title}</h2>
               <ul class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {tools.map((tool) => (
                   <li class="flex">
@@ -61,27 +43,6 @@ const steps = [
       }
     </section>
 
-    {availableToolsByCategory.length > 0 && (
-    <section class="page-section sm:mt-24" aria-labelledby="ablauf">
-      <h2 id="ablauf" class="section-title text-center">So funktioniert es</h2>
-      <ol class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {
-          steps.map((step, index) => (
-            <li class="card flex flex-col gap-3">
-              <span class="step-number" aria-hidden="true">{index + 1}</span>
-              <div>
-                <p class="text-lg font-semibold">{step.title}</p>
-                <p class="mt-1 text-muted">{step.text}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </section>
-    )}
   </div>
 </BaseLayout>
 
-<style>
-  .step-number { font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; line-height: 1; letter-spacing: -.04em; color: var(--color-accent); }
-</style>

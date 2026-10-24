@@ -1,158 +1,93 @@
-import { useEffect, useRef, useState } from 'react';
-import { formatBytes, formatSizeChange } from '../../lib/format';
-import { createPdfCompressor, PDF_LIMITS, PDF_QUALITY_LEVELS, PdfProcessingError, type PdfAnalysis, type PdfCompressor as Compressor, type PdfErrorCode, type PdfQualityLevel, type PdfVariantResult, type PdfVariantStatus } from '../../lib/pdf';
-
-const labels = { high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei' };
-const descriptions = { high: 'Zielauflösung 300 dpi, zusätzlich Pixelgrenze; schonende Bildkomprimierung.', balanced: 'Zielauflösung 150 dpi, zusätzlich Pixelgrenze; mittlere Bildkomprimierung.', small: 'Zielauflösung 100 dpi, zusätzlich Pixelgrenze; stärkere Bildkomprimierung.' };
-const errors: Record<PdfErrorCode, string> = {
-  'not-pdf': 'Die Datei ist keine erkennbare PDF.', encrypted: 'Verschlüsselte PDFs werden nicht unterstützt. Bitte zuerst den Passwortschutz entfernen.',
-  'file-too-large': 'Die PDF überschreitet die Grenze von 100 MB.', 'parse-failed': 'Die PDF ist beschädigt oder kann nicht gelesen werden.',
-  'memory-limit': 'Das Speicherbudget wurde überschritten. Bitte eine kleinere PDF verwenden.', 'save-failed': 'Diese Variante konnte nicht gespeichert werden.',
-  'unsupported-browser': 'Dieser Browser unterstützt die lokale PDF-Komprimierung nicht vollständig. Bitte einen aktuellen Browser mit OffscreenCanvas verwenden.',
-  'invalid-options': 'Die gewählten Einstellungen sind ungültig.', 'worker-failed': 'Die Verarbeitung wurde unerwartet beendet. Möglicherweise reicht der Arbeitsspeicher nicht aus.', aborted: 'Die Verarbeitung wurde abgebrochen.',
-};
-function message(error: unknown): string { return error instanceof PdfProcessingError ? errors[error.code] : 'Die PDF konnte nicht verarbeitet werden.'; }
-function phase(status: PdfVariantStatus | undefined): string {
-  if (!status || status.phase === 'queued') return 'Wartet auf Berechnung';
-  if (status.phase === 'loading') return 'PDF wird geladen …';
-  if (status.phase === 'images') return `Bilder verarbeitet: ${status.current ?? 0} von ${status.total ?? 0}`;
-  if (status.phase === 'saving') return 'PDF wird gespeichert …';
-  if (status.phase === 'error') return errors[status.errorCode ?? 'save-failed'];
-  return 'Fertig';
-}
-type Download = { result: PdfVariantResult; url: string };
-
+import {useEffect, useRef, useState} from 'react';
+import {formatBytes, formatSizeChange} from '../../lib/format';
+import {apiMessage, ApiError, capabilities, cancelJob, createJob, deleteJob, pollJob, type Job} from '../../lib/api/client';
+const levels = ['high','balanced','small'] as const;
+const labels = {high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei'};
 export default function PdfCompressor() {
-  const [ready, setReady] = useState(false);
-  const [name, setName] = useState('');
-  const [analysis, setAnalysis] = useState<PdfAnalysis | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [statuses, setStatuses] = useState<Partial<Record<PdfQualityLevel, PdfVariantStatus>>>({});
-  const [downloads, setDownloads] = useState<Partial<Record<PdfQualityLevel, Download>>>({});
-  const input = useRef<HTMLInputElement>(null);
-  const choose = useRef<HTMLButtonElement>(null);
-  const active = useRef<{ processor: Compressor; controller: AbortController } | null>(null);
+  const [file,setFile] = useState<File | null>(null), [job,setJob] = useState<Job | null>(null);
+  const [ready,setReady] = useState(false), [busy,setBusy] = useState(false);
+  const [error,setError] = useState(''), [notice,setNotice] = useState('');
+  const [limit,setLimit] = useState(100_000_000);
+  const input = useRef<HTMLInputElement>(null), choose = useRef<HTMLButtonElement>(null);
+  const controller = useRef<AbortController | null>(null), jobId = useRef<string | null>(null);
   const generation = useRef(0);
-  const urls = useRef<string[]>([]);
+  const retryKey=useRef<string | null>(null);
+  useEffect(()=>{
+    if(!job||job.state==='expired')return;
+    const timer=setTimeout(()=>setJob(value=>value?{...value,state:'expired',results:value.results.map(result=>({...result,downloadUrl:null}))}:value),Math.max(0,Date.parse(job.expiresAt)-Date.now()));
+    return ()=>clearTimeout(timer);
+  },[job]);
   function release() {
-    generation.current++;
-    active.current?.controller.abort();
-    active.current?.processor.dispose();
-    active.current = null;
-    urls.current.forEach(url => URL.revokeObjectURL(url));
-    urls.current = [];
+    generation.current++; controller.current?.abort(); controller.current = null;
+    if (jobId.current) {void deleteJob(jobId.current).catch(() => {});jobId.current=null;}
   }
   useEffect(() => {
-    setReady(true);
-    const preventFileDrop = (event: DragEvent) => {
-      if (event.dataTransfer?.types.includes('Files')) event.preventDefault();
-    };
-    window.addEventListener('dragover', preventFileDrop);
-    window.addEventListener('drop', preventFileDrop);
-    return () => {
-      window.removeEventListener('dragover', preventFileDrop);
-      window.removeEventListener('drop', preventFileDrop);
-      release();
-    };
-  }, []);
-  function reset() {
-    release(); setName(''); setAnalysis(null); setBusy(false); setError(''); setNotice(''); setStatuses({}); setDownloads({});
-    if (input.current) input.current.value = '';
-    choose.current?.focus();
+    const setup = new AbortController();
+    capabilities(setup.signal).then(value=>{setLimit(value.pdf.maxFileBytes);setReady(true);})
+      .catch(error=>{if(!setup.signal.aborted)setError(apiMessage(error));});
+    const prevent = (event: DragEvent) => {if(event.dataTransfer?.types.includes('Files'))event.preventDefault();};
+    window.addEventListener('dragover',prevent);window.addEventListener('drop',prevent);
+    return ()=>{setup.abort();release();window.removeEventListener('dragover',prevent);window.removeEventListener('drop',prevent);};
+  },[]);
+  function select(files: FileList | File[]) {
+    if(!files.length)return;
+    release();retryKey.current=null;setJob(null);setBusy(false);setError('');setFile(null);
+    setNotice(files.length > 1 ? 'Bitte nur eine PDF auswählen. Ausschließlich die erste Datei wird übernommen.' : '');
+    if(files[0]!.size>limit){setError('Die PDF überschreitet die zulässige Dateigröße.');return;}
+    setFile(files[0]!);
   }
-  async function select(files: FileList | File[]) {
-    if (!files.length) return;
-    release();
-    const id = generation.current;
-    const file = files[0]!;
-    setName(file.name); setAnalysis(null); setDownloads({}); setStatuses({}); setError(''); setBusy(true);
-    setNotice(files.length > 1 ? 'Bitte nur eine PDF auswählen. Es wird ausschließlich die erste Datei verarbeitet.' : '');
-    const processor = createPdfCompressor();
-    const controller = new AbortController();
-    active.current = { processor, controller };
-    try {
-      const a = await processor.analyze(file, controller.signal);
-      if (generation.current !== id) return;
-      setAnalysis(a);
-      await processor.compressAll(file, PDF_QUALITY_LEVELS, {
-        signal: controller.signal,
-        onStatus: status => { if (generation.current === id) setStatuses(old => ({ ...old, [status.level]: status })); },
-        onResult: result => {
-          if (generation.current !== id) return;
-          const url = URL.createObjectURL(result.blob);
-          urls.current.push(url);
-          setDownloads(old => ({ ...old, [result.level]: { result, url } }));
-        },
+  function reset(){release();retryKey.current=null;setFile(null);setJob(null);setBusy(false);setError('');setNotice('');choose.current?.focus();}
+  async function start(){
+    if(!file||busy)return;
+    release();setError('');setJob(null);setBusy(true);
+    const version=generation.current, active=new AbortController();controller.current=active;
+    try{
+      retryKey.current??=crypto.randomUUID();
+      const accepted=await createJob(file,{tool:'pdf-compress',levels:[...levels]},retryKey.current,active.signal,waiting=>{
+        if(version===generation.current)setNotice(waiting?'Wartet auf einen freien Platz auf dem Server. Sie können die Auswahl zurücksetzen.':'');
       });
-    } catch (e) {
-      if (generation.current === id) {
-        setError(message(e));
-        const code = e instanceof PdfProcessingError ? e.code : 'worker-failed';
-        setStatuses(old => {
-          const next = { ...old };
-          for (const level of PDF_QUALITY_LEVELS) {
-            if (next[level]?.phase !== 'done') next[level] = { level, phase: 'error', errorCode: code };
-          }
-          return next;
-        });
-      }
-    }
-    finally {
-      processor.dispose();
-      if (generation.current === id) { setBusy(false); active.current = null; }
-    }
+      retryKey.current=null;
+      if(version!==generation.current){void deleteJob(accepted.id).catch(()=>{});return;}
+      jobId.current=accepted.id;
+      const finished=await pollJob(accepted,active.signal,value=>{if(version===generation.current)setJob(value);});
+      if(version===generation.current&&!['succeeded','partially_succeeded'].includes(finished.state))throw new ApiError(finished.error?.code??finished.state);
+    }catch(error){if(version===generation.current&&!active.signal.aborted)setError(apiMessage(error));}
+    finally{if(version===generation.current){setBusy(false);controller.current=null;}}
   }
-  let stem = Array.from(name.replace(/\.pdf$/i, '')
-    .replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '')
-    .replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, ' ').replace(/^[\s.]+|[\s.]+$/g, ''))
-    .slice(0, 100).join('').replace(/[\s.]+$/, '') || 'dokument';
-  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(stem)) stem = `_${stem}`;
+  const imageAnalysis=job?.analysis?.images;
+  const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
+  const progress=job?.progress;
   return <div className="space-y-6">
-    <div className="notice notice-warn space-y-2">
-      <p>Digitale Signaturen werden durch das Neuschreiben ungültig. Wählen Sie keine signierte PDF aus, deren Signatur gültig bleiben muss.</p>
-      <p>Text und Vektoren bleiben erhalten. Maskierte Bilder, besondere Farbräume und einige Bildformate bleiben unverändert. Eine kleinere Datei ist nicht garantiert.</p>
+    <p className="notice notice-info">Erst mit „Komprimieren“ wird die PDF auf unseren Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Die Ablaufzeit steht beim Auftrag.</p>
+    <div className="notice notice-warn space-y-2"><p>Digitale Signaturen werden beim Neuschreiben ungültig. Wählen Sie keine signierte PDF aus, deren Signatur gültig bleiben muss.</p><p>Text und Vektoren bleiben erhalten. Eine kleinere Datei und PDF/A-Erhalt sind nicht garantiert.</p></div>
+    <div className="drop-zone" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(ready)select(event.dataTransfer.files);}}>
+      <p className="text-lg font-semibold">Eine PDF hier ablegen oder auswählen.</p>
+      <p className="hint">Maximal {formatBytes(limit)}. Die Auswahl startet keinen Upload.</p>
+      <input ref={input} className="sr-only" tabIndex={-1} type="file" accept=".pdf,application/pdf" aria-label="PDF-Datei" onChange={event=>{if(event.target.files)select(event.target.files);event.target.value='';}}/>
+      <div className="flex flex-wrap justify-center gap-3"><button ref={choose} className="btn btn-secondary" disabled={!ready} onClick={()=>input.current?.click()}>PDF auswählen</button>
+      <button className="btn btn-primary" disabled={!ready||!file||busy} onClick={()=>void start()}>Komprimieren</button>
+      {busy&&job&&<button className="btn btn-secondary" onClick={()=>void cancelJob(job.id).catch(error=>setError(apiMessage(error)))}>Abbrechen</button>}
+      {file&&<button className="btn btn-secondary" onClick={reset}>Zurücksetzen</button>}</div>
+      {file&&<p className="break-all">Ausgewählt: {file.name}</p>}
     </div>
-    <div className="drop-zone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (ready) void select(event.dataTransfer.files); }}>
-      <svg className="size-10 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 18v-6m0 0-2.5 2.5M12 12l2.5 2.5" /></svg>
-      <p className="max-w-prose text-lg font-semibold tracking-tight">Eine PDF hier ablegen oder auswählen. Die Verarbeitung läuft auf Ihrem Gerät, ohne Upload.</p>
-      <p className="hint max-w-prose">Maximal {formatBytes(PDF_LIMITS.maxFileBytes)}. Alle drei Varianten werden nacheinander berechnet; bei großen Dateien kann dies dauern.</p>
-      <input ref={input} className="sr-only" type="file" accept=".pdf,application/pdf" aria-label="PDF-Datei" tabIndex={-1} onChange={event => { if (event.target.files) void select(event.target.files); event.target.value = ''; }} />
-      <div className="flex flex-wrap justify-center gap-3">
-        <button ref={choose} type="button" className="btn btn-primary" disabled={!ready} onClick={() => input.current?.click()}>PDF auswählen</button>
-        {name && <button type="button" className="btn btn-secondary" onClick={reset}>Zurücksetzen</button>}
-      </div>
-      {name && <p className="break-all text-sm">Ausgewählt: {name}</p>}
-    </div>
-    <div role="status" aria-live="polite" aria-atomic="true">
-      {busy && !analysis && <p>PDF wird analysiert …</p>}
-      {notice && <p>{notice}</p>}
-      {error && <p className="notice notice-error">{error}</p>}
-      {analysis && <div className="card-muted space-y-2">
-        <p>Original: {formatBytes(analysis.fileSize)} · {analysis.pageCount} Seiten · {analysis.images.total} Bilder, davon {analysis.images.recompressible} grundsätzlich komprimierbar.</p>
-        {analysis.images.recompressible === 0 && <p>Keine neu kodierbaren Bilder gefunden. Es ist nur eine verlustfreie Optimierung möglich; die Einsparung kann gering sein.</p>}
-        {analysis.images.total > analysis.images.recompressible && <p>{analysis.images.total - analysis.images.recompressible} Bilder bleiben unverändert.</p>}
-        {analysis.fontBytes > 0 && <p>Eingebettete Schriften werden nicht verkleinert.</p>}
-        {analysis.limitations.some(l => l.code === 'signatures-invalidated') && <p className="notice notice-warn">Die PDF enthält digitale Signaturen. Die Ergebnisse besitzen keine gültigen ursprünglichen Signaturen.</p>}
-      </div>}
-    </div>
-    {analysis && <div className="grid gap-5 md:grid-cols-3">
-      {PDF_QUALITY_LEVELS.map(level => {
-        const download = downloads[level];
-        const change = download ? formatSizeChange(download.result.originalSize, download.result.size) : null;
-        return <section key={level} className="variant-card" aria-labelledby={`pdf-${level}`}>
-          <h2 id={`pdf-${level}`} className="card-title">{labels[level]}</h2>
-          <p className="hint">{descriptions[level]}</p>
-          <p role="status" aria-live="polite">{phase(statuses[level])}</p>
-          {download && <>
-            <p className="variant-size">{formatBytes(download.result.size)}</p>
-            <p>{change?.percent} · {change?.kind === 'larger' ? 'Größer als das Original' : change?.kind === 'equal' ? 'Keine Einsparung' : 'Kleiner als das Original'}</p>
-            {download.result.imagesSkipped > 0 && <p className="text-sm">{download.result.imagesSkipped} Bilder unverändert übersprungen.</p>}
-            <a className="btn btn-primary mt-auto" href={download.url} download={`${stem}-${level}.pdf`}>{labels[level]} herunterladen</a>
-          </>}
-        </section>;
-      })}
+    <div role="status" aria-live="polite">{notice&&<p>{notice}</p>}{error&&<p className="notice notice-error">{error}</p>}{busy&&<p>{!job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …'}</p>}</div>
+    {job?.analysis&&<div className="card-muted space-y-2">
+      <p>Original: {formatBytes(job.input.size)}{typeof job.analysis.pageCount==='number'?` · ${job.analysis.pageCount} Seiten`:''}{typeof images?.total==='number'?` · ${images.total} Bilder`:''}.</p>
+      {typeof images?.recompressible==='number'&&<p>{images.recompressible} Bilder sind grundsätzlich komprimierbar.</p>}
+      {images?.recompressible===0&&<p>Keine neu kodierbaren Bilder gefunden. Nur verlustfreie Optimierung ist möglich; die Einsparung kann gering sein.</p>}
+      {typeof progress?.current==='number'&&typeof progress?.total==='number'&&<p role="status">Bilder verarbeitet: {progress.current} von {progress.total}</p>}
     </div>}
+    {job&&<><p className="hint">{job.state==='expired'?'Auftrag abgelaufen. Erneut komprimieren, um neue Ergebnisse zu erzeugen.':`Verfügbar bis ${new Date(job.expiresAt).toLocaleString('de-DE')}.`}</p>
+      <div className="grid gap-5 md:grid-cols-3">{levels.map(level=>{
+        const result=job.results.find(result=>result.level===level);
+        const change=result?.size!=null?formatSizeChange(job.input.size,result.size):null;
+        return <section className="variant-card" key={level} aria-labelledby={`pdf-${level}`}><h2 className="card-title" id={`pdf-${level}`}>{labels[level]}</h2>
+          <p>{result?.state==='succeeded'?'Fertig':result?.state==='failed'?'Variante fehlgeschlagen':result?.state==='cancelled'?'Abgebrochen':result?.state==='running'?'Wird verarbeitet …':'Wartet auf Berechnung'}</p>
+          {result?.error&&<p className="field-error">{apiMessage(new ApiError(result.error.code))}</p>}
+          {result?.size!=null&&<><p className="variant-size">{formatBytes(result.size)}</p><p>{change?.percent} · {change?.kind==='larger'?'Größer als das Original':change?.kind==='equal'?'Keine Einsparung':'Kleiner als das Original'}</p></>}
+          {typeof result?.details?.imagesSkipped==='number'&&result.details.imagesSkipped>0&&<p className="hint">{result.details.imagesSkipped} Bilder unverändert übersprungen.</p>}
+          {result?.downloadUrl&&<a className="btn btn-primary mt-auto" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
+        </section>;
+      })}</div></>}
   </div>;
 }
