@@ -16,6 +16,11 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Prüfung:** Konverterautor: Ruff/Format/mypy grün; Windows 168 bestanden, 13 Linux-Sandboxfälle übersprungen. Gepinntes Linux-Testimage mit aktiver Seccomp-/RLIMIT-/Walltimer-/PDEATHSIG-Prüfung: 181 bestanden.
 - **Grenze:** Netzwerk-/Ressourcenschutz ist für Linux vorgesehen; Windows ist Entwicklungsumgebung. Prozessgruppen-/Go-Adapterabnahme folgt G07.
 
+## G03a – Arbeitsartefakte aus dem Index entfernen
+
+- **Änderungen:** Während G03-Staging entstandenes lokales Integrationstestbinary wieder aus der Versionsverwaltung entfernt; `.data/`, Go-Testbinaries und lokale Buildausgaben werden ignoriert. Die lokale Testdatei bleibt erhalten.
+- **Review:** `go_converter` bestätigte die gezielte Indexentfernung und Ignore-Regeln. Keine Produktcodeänderung und keine zusätzliche Testausführung erforderlich.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
