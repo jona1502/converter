@@ -1,0 +1,79 @@
+[
+  {
+    "file": "static.jpeg",
+    "format": "jpeg",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "static.png",
+    "format": "png",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "static.webp",
+    "format": "webp",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "static.gif",
+    "format": "gif",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "static.bmp",
+    "format": "bmp",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "static.ico",
+    "format": "ico",
+    "width": 64,
+    "height": 64,
+    "animated": false
+  },
+  {
+    "file": "static.avif",
+    "format": "avif",
+    "width": 37,
+    "height": 23,
+    "animated": false
+  },
+  {
+    "file": "animated.gif",
+    "format": "gif",
+    "width": 37,
+    "height": 23,
+    "animated": true
+  },
+  {
+    "file": "animated.png",
+    "format": "png",
+    "width": 37,
+    "height": 23,
+    "animated": true
+  },
+  {
+    "file": "animated.webp",
+    "format": "webp",
+    "width": 37,
+    "height": 23,
+    "animated": true
+  },
+  {
+    "file": "animated.avif",
+    "format": "avif",
+    "width": 37,
+    "height": 23,
+    "animated": true
+  }
+]

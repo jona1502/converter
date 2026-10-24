@@ -39,6 +39,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Review:** `go_converter` unabhängig; nach Commit-Uncertainty-Korrektur keine bestätigten hohen/mittleren Befunde im Jobs-/Runtimebereich.
 - **Prüfung:** Jobs-/Store-/Storage-/Ratelimitprüfungen einschließlich Race und Vet grün; neue DB-/Workerregressionen prüfen Claims, Publish, Timeout, Cancel, exhausted/storage-full Claims und erhaltene PDF-Teilergebnisse.
 
+## G07
+
+- **Änderungen:** Begrenzter Go-Python-Adapter mit fester Interpreter-/Argument-/Umgebungs-Allowlist, JSONL-Validierung, Prozessgruppenabbruch, Parent-Death und zuverlässigem Wait. PDF-Retry erhält nur offene Stufen und Restbudget. Eigener Probezyklus publiziert atomare, versionierte Capabilitiesberichte unabhängig vom Verarbeitungsslot; Go-Workerbefehl integriert.
+- **Review:** `go_jobs` unabhängig gelesen; keine bestätigten hohen/mittleren Befunde. Hauptagent hat Linux-Prozessgrenze zusätzlich gelesen.
+- **Prüfung:** Prozess-/Protokolltests, Race und Vet grün; echte gehärtete Linuxintegration: drei Bildoperationen, PDF mit drei Stufen und Capabilitiesprobe bestanden. Fixturedateien bilden statische/animierte Codecs für Headerparität ab.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
