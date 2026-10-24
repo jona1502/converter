@@ -12,11 +12,12 @@ async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 }
 
-test('Navbar zeigt drei Werkzeuggruppen und Informationslink', async ({ page }) => {
+test('Navbar zeigt drei Werkzeuggruppen und Info steht im Footer', async ({ page }) => {
   await page.goto('/');
   await expect(navigation(page).locator('summary')).toHaveCount(3);
   for (const group of groups) await expect(summary(page, group.label)).toBeVisible();
-  await expect(navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true })).toBeVisible();
+  await expect(navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', { name: 'Dateiverarbeitung', exact: true })).toBeVisible();
 });
 
 test('Desktop-Hover öffnet die verfügbaren Werkzeuge jeder Gruppe', async ({ page, isMobile }) => {

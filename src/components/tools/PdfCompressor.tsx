@@ -58,8 +58,6 @@ export default function PdfCompressor() {
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
   return <div className="space-y-6">
-    <p className="notice notice-info">Erst mit „Komprimieren“ wird die PDF auf unseren Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Die Ablaufzeit steht beim Auftrag.</p>
-    <div className="notice notice-warn space-y-2"><p>Digitale Signaturen werden beim Neuschreiben ungültig. Wählen Sie keine signierte PDF aus, deren Signatur gültig bleiben muss.</p><p>Text und Vektoren bleiben erhalten. Eine kleinere Datei und PDF/A-Erhalt sind nicht garantiert.</p></div>
     <div className="drop-zone" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(ready)select(event.dataTransfer.files);}}>
       <p className="text-lg font-semibold">Eine PDF hier ablegen oder auswählen.</p>
       <p className="hint">Maximal {formatBytes(limit)}. Die Auswahl startet keinen Upload.</p>

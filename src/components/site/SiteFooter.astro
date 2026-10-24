@@ -21,7 +21,7 @@ const { siteName } = Astro.props;
       <div>
         <h2 class="footer-heading">Information</h2>
         <ul>
-          <li><a href="/lokale-verarbeitung" class="footer-link">Dateiverarbeitung</a></li>
+          <li><a href="/lokale-verarbeitung" class="footer-link" aria-label="Dateiverarbeitung" aria-current={Astro.url.pathname.replace(/\/+$/, '') === '/lokale-verarbeitung' ? 'page' : undefined}>Info</a></li>
         </ul>
       </div>
     </nav>

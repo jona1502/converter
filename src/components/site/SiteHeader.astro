@@ -35,7 +35,6 @@ const operations: { id: ToolOperation; label: string }[] = [
             </details>
           </li>;
         })}
-        <li class="nav-info"><a href="/lokale-verarbeitung" aria-label="Dateiverarbeitung" aria-current={current === '/lokale-verarbeitung' ? 'page' : undefined}>Info</a></li>
       </ul>
     </nav>
   </div>
@@ -54,11 +53,11 @@ const operations: { id: ToolOperation; label: string }[] = [
   .tool-navigation { position: relative; }
   .nav-groups { display: flex; align-items: center; gap: .15rem; margin: 0; padding: 0; list-style: none; }
   .nav-dropdown { position: relative; }
-  summary, .nav-info a { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: 980px; color: var(--color-ink); opacity: 1; font-size: .875rem; font-weight: 400; letter-spacing: -.01em; text-decoration: none; cursor: pointer; list-style: none; transition: background-color .2s ease, color .2s ease; }
+  summary { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: 980px; color: var(--color-ink); opacity: 1; font-size: .875rem; font-weight: 400; letter-spacing: -.01em; text-decoration: none; cursor: pointer; list-style: none; transition: background-color .2s ease, color .2s ease; }
   summary::-webkit-details-marker { display: none; }
   summary svg { color: var(--color-muted); transition: transform .25s ease; }
-  summary:hover, .nav-info a:hover, details[open] summary { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
-  details[data-active] summary, .nav-info a[aria-current] { color: var(--color-accent); font-weight: 600; }
+  summary:hover, details[open] summary { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
+  details[data-active] summary { color: var(--color-accent); font-weight: 600; }
   details[open] summary svg { transform: rotate(180deg); }
   .nav-panel { position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0; width: 20rem; padding: .45rem; margin: 0; border: 1px solid var(--color-border); border-radius: 1.125rem; background: var(--color-surface); box-shadow: var(--shadow-panel); list-style: none; }
   .nav-groups > li:nth-last-child(2) .nav-panel { left: auto; right: 0; }
@@ -70,7 +69,6 @@ const operations: { id: ToolOperation; label: string }[] = [
   .nav-panel a[aria-current] .nav-tool-title { color: var(--color-accent); }
   .nav-tool-title { font-size: .9375rem; font-weight: 600; letter-spacing: -.015em; }
   .nav-tool-description { font-size: .8125rem; line-height: 1.4; letter-spacing: -.005em; color: var(--color-muted); }
-  .nav-info { margin-left: .25rem; }
   @media (prefers-reduced-motion: no-preference) {
     details[open] .nav-panel { animation: nav-panel-in .18s ease-out; }
   }
@@ -80,9 +78,8 @@ const operations: { id: ToolOperation; label: string }[] = [
     .tool-navigation { width: 100%; }
     .nav-groups { flex-wrap: wrap; justify-content: space-between; gap: 0; }
     .nav-dropdown { position: static; }
-    summary, .nav-info a { gap: .1rem; padding: .4rem .2rem; font-size: .75rem; letter-spacing: -.01em; }
+    summary { gap: .1rem; padding: .4rem .2rem; font-size: .75rem; letter-spacing: -.01em; }
     summary svg { width: 10px; height: 10px; }
-    .nav-info { margin-left: 0; }
     .nav-panel, .nav-groups > li:nth-last-child(2) .nav-panel { left: 0; right: 0; width: 100%; top: calc(100% + .25rem); }
   }
 </style>

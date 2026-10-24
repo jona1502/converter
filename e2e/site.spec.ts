@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const PAGES = [
-  { path: '/', heading: 'Werkzeuge', status: 200 },
+  { path: '/', heading: 'Dateien bearbeiten', status: 200 },
   { path: '/lokale-verarbeitung', heading: 'Dateiverarbeitung', status: 200 },
   { path: '/gibt-es-nicht', heading: 'Seite nicht gefunden', status: 404 },
 ] as const;
@@ -91,12 +91,12 @@ test('Skip-Link ist per Tastatur erreichbar und springt zum Inhalt', async ({ pa
 
 test('Navigation ist per Tastatur bedienbar und markiert die aktive Seite', async ({ page, browserName }) => {
   await page.goto('/');
-  const target = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', {
+  const target = page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', {
     name: 'Dateiverarbeitung',
   });
   if (linksAreTabbable(browserName)) {
     let reached = false;
-    for (let i = 0; i < 15 && !reached; i++) {
+    for (let i = 0; i < 30 && !reached; i++) {
       await page.keyboard.press('Tab');
       reached = await target.evaluate((element) => element === document.activeElement);
     }
@@ -108,7 +108,7 @@ test('Navigation ist per Tastatur bedienbar und markiert die aktive Seite', asyn
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/lokale-verarbeitung\/?$/);
   await expect(
-    page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Dateiverarbeitung' }),
+    page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', { name: 'Dateiverarbeitung' }),
   ).toHaveAttribute('aria-current', 'page');
 });
 

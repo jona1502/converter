@@ -7,11 +7,5 @@ import PdfCompressor from '../../components/tools/PdfCompressor';
     <h1 class="page-title">PDF komprimieren</h1>
     <p class="page-lead">Vergleichen Sie drei berechnete Varianten Ihrer PDF. Die Größen entstehen aus Ihrer Datei und werden nach der Verarbeitung exakt gemessen.</p>
     <div class="page-section"><PdfCompressor client:load /></div>
-    <section class="page-section max-w-3xl prose-content" aria-labelledby="pdf-hinweise">
-      <h2 id="pdf-hinweise" class="section-title">Was wird komprimiert?</h2>
-      <p>Geeignete JPEG- und Rasterbilder werden verkleinert und neu kodiert, wenn dies Bildbytes spart. Die Auflösung hängt von der Qualitätsstufe und der ermittelbaren Darstellungsgröße ab. Ganze Seiten werden nicht in Bilder umgewandelt.</p>
-      <p>Text, Vektoren, Links und Formulare werden nicht absichtlich verändert. Die PDF wird neu geschrieben: Prüfen Sie wichtige Dokumente vor der Weitergabe. Digitale Signaturen werden ungültig. Verschlüsselte Dateien werden abgelehnt.</p>
-      <p>Reine Text-PDFs oder bereits optimierte Dateien werden möglicherweise kaum kleiner oder sogar größer. Bilder mit Masken, ICC-Farbräumen oder nicht unterstützten Kodierungen bleiben unverändert. Die Verarbeitung setzt einen erreichbaren Server voraus.</p>
-    </section>
   </div>
 </BaseLayout>

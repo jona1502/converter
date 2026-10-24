@@ -5,7 +5,6 @@ async function fixture(){const doc=await PDFDocument.create();doc.addPage().draw
 test('PDF erst nach Klick hochladen, drei echte Ergebnisse herunterladen und löschen',async({page})=>{
  await page.goto('/pdf/komprimieren');
  await expect(page.getByRole('button',{name:'PDF auswählen',exact:true})).toBeEnabled();
- await expect(page.getByText('Digitale Signaturen werden beim Neuschreiben ungültig.',{exact:false})).toBeVisible();
  const uploads:string[]=[];page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/jobs'))uploads.push(r.url());});
  await page.getByLabel('PDF-Datei',{exact:true}).setInputFiles(await fixture());
  await expect(page.getByRole('button',{name:'Komprimieren',exact:true})).toBeEnabled();
