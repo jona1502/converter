@@ -105,7 +105,7 @@ def test_unmatched_route_is_not_logged_verbatim(
     client: TestClient, caplog: pytest.LogCaptureFixture
 ) -> None:
     caplog.set_level(logging.INFO, logger="app.request")
-    client.get("/api/v1/jobs/Urlaubsfoto-Anna.jpg")
+    client.get("/unmatched/Urlaubsfoto-Anna.jpg")
     record = next(r for r in caplog.records if r.name == "app.request")
     assert record.levelno == logging.INFO
     line = JsonFormatter().format(record)

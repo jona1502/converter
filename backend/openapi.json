@@ -113,6 +113,417 @@
         "title": "FieldError",
         "type": "object"
       },
+      "ImageOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "background": {
+            "default": "#ffffff",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "title": "Background",
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "jpeg",
+              "png",
+              "webp",
+              "bmp",
+              "ico",
+              "original"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "icoSizes": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    16,
+                    32,
+                    48,
+                    64,
+                    128,
+                    256
+                  ],
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Icosizes"
+          },
+          "quality": {
+            "default": 0.85,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Quality",
+            "type": "number"
+          },
+          "resize": {
+            "discriminator": {
+              "mapping": {
+                "dimensions": "#/components/schemas/ResizeDimensions",
+                "maxEdge": "#/components/schemas/ResizeMaxEdge",
+                "none": "#/components/schemas/ResizeNone",
+                "percent": "#/components/schemas/ResizePercent"
+              },
+              "propertyName": "mode"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResizeNone"
+              },
+              {
+                "$ref": "#/components/schemas/ResizePercent"
+              },
+              {
+                "$ref": "#/components/schemas/ResizeDimensions"
+              },
+              {
+                "$ref": "#/components/schemas/ResizeMaxEdge"
+              }
+            ],
+            "title": "Resize"
+          },
+          "tool": {
+            "enum": [
+              "image-convert",
+              "image-compress",
+              "image-resize"
+            ],
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "format"
+        ],
+        "title": "ImageOptions",
+        "type": "object"
+      },
+      "InputFormat": {
+        "description": "Anhand der Bytes erkanntes Eingabeformat.",
+        "enum": [
+          "jpeg",
+          "png",
+          "webp",
+          "gif",
+          "bmp",
+          "ico",
+          "avif",
+          "pdf"
+        ],
+        "title": "InputFormat",
+        "type": "string"
+      },
+      "JobError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProcessingErrorCode"
+              },
+              {
+                "$ref": "#/components/schemas/ApiErrorCode"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "JobError",
+        "type": "object"
+      },
+      "JobInput": {
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "$ref": "#/components/schemas/InputFormat"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          }
+        },
+        "required": [
+          "name",
+          "size",
+          "format",
+          "width",
+          "height"
+        ],
+        "title": "JobInput",
+        "type": "object"
+      },
+      "JobOptions": {
+        "discriminator": {
+          "mapping": {
+            "image-compress": "#/components/schemas/ImageOptions",
+            "image-convert": "#/components/schemas/ImageOptions",
+            "image-resize": "#/components/schemas/ImageOptions",
+            "pdf-compress": "#/components/schemas/PdfOptions"
+          },
+          "propertyName": "tool"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ImageOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfOptions"
+          }
+        ]
+      },
+      "JobPhase": {
+        "enum": [
+          "analyze",
+          "variant",
+          "encode",
+          "save"
+        ],
+        "title": "JobPhase",
+        "type": "string"
+      },
+      "JobResultView": {
+        "additionalProperties": false,
+        "properties": {
+          "details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "downloadName": {
+            "title": "Downloadname",
+            "type": "string"
+          },
+          "downloadUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Downloadurl"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PdfLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mime": {
+            "title": "Mime",
+            "type": "string"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ResultState"
+          }
+        },
+        "required": [
+          "id",
+          "level",
+          "state",
+          "size",
+          "mime",
+          "downloadName",
+          "downloadUrl",
+          "details",
+          "error"
+        ],
+        "title": "JobResultView",
+        "type": "object"
+      },
+      "JobState": {
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "partially_succeeded",
+          "failed",
+          "cancelled",
+          "expired"
+        ],
+        "title": "JobState",
+        "type": "string"
+      },
+      "JobView": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis"
+          },
+          "cancelRequested": {
+            "title": "Cancelrequested",
+            "type": "boolean"
+          },
+          "createdAt": {
+            "title": "Createdat",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "title": "Expiresat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input": {
+            "$ref": "#/components/schemas/JobInput"
+          },
+          "phase": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobPhase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/JobResultView"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/JobState"
+          },
+          "tool": {
+            "$ref": "#/components/schemas/Tool"
+          },
+          "updatedAt": {
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tool",
+          "state",
+          "phase",
+          "createdAt",
+          "updatedAt",
+          "expiresAt",
+          "input",
+          "progress",
+          "analysis",
+          "results",
+          "error",
+          "cancelRequested"
+        ],
+        "title": "JobView",
+        "type": "object"
+      },
       "LiveResponse": {
         "additionalProperties": false,
         "properties": {
@@ -125,6 +536,57 @@
         },
         "title": "LiveResponse",
         "type": "object"
+      },
+      "PdfLevel": {
+        "enum": [
+          "high",
+          "balanced",
+          "small"
+        ],
+        "title": "PdfLevel",
+        "type": "string"
+      },
+      "PdfOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/PdfLevel"
+            },
+            "minItems": 1,
+            "title": "Levels",
+            "type": "array"
+          },
+          "tool": {
+            "const": "pdf-compress",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "PdfOptions",
+        "type": "object"
+      },
+      "ProcessingErrorCode": {
+        "description": "Fehlercodes in ``job.error.code`` bzw. ``result.error.code``.",
+        "enum": [
+          "decode-failed",
+          "encode-failed",
+          "encrypted",
+          "parse-failed",
+          "result-too-large",
+          "timeout",
+          "memory-limit",
+          "worker-failed",
+          "storage-full",
+          "dimensions-too-large",
+          "animated-unsupported",
+          "unsupported-type"
+        ],
+        "title": "ProcessingErrorCode",
+        "type": "string"
       },
       "ReadyResponse": {
         "additionalProperties": false,
@@ -155,6 +617,164 @@
         ],
         "title": "ReadyResponse",
         "type": "object"
+      },
+      "ResizeDimensions": {
+        "additionalProperties": false,
+        "properties": {
+          "allowUpscale": {
+            "title": "Allowupscale",
+            "type": "boolean"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Height"
+          },
+          "keepAspectRatio": {
+            "title": "Keepaspectratio",
+            "type": "boolean"
+          },
+          "mode": {
+            "const": "dimensions",
+            "title": "Mode",
+            "type": "string"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Width"
+          }
+        },
+        "required": [
+          "mode",
+          "keepAspectRatio",
+          "allowUpscale"
+        ],
+        "title": "ResizeDimensions",
+        "type": "object"
+      },
+      "ResizeMaxEdge": {
+        "additionalProperties": false,
+        "properties": {
+          "maxEdge": {
+            "exclusiveMinimum": 0,
+            "title": "Maxedge",
+            "type": "integer"
+          },
+          "mode": {
+            "const": "maxEdge",
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "maxEdge"
+        ],
+        "title": "ResizeMaxEdge",
+        "type": "object"
+      },
+      "ResizeNone": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "const": "none",
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "ResizeNone",
+        "type": "object"
+      },
+      "ResizePercent": {
+        "additionalProperties": false,
+        "properties": {
+          "allowUpscale": {
+            "title": "Allowupscale",
+            "type": "boolean"
+          },
+          "mode": {
+            "const": "percent",
+            "title": "Mode",
+            "type": "string"
+          },
+          "percent": {
+            "exclusiveMinimum": 0,
+            "title": "Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mode",
+          "percent",
+          "allowUpscale"
+        ],
+        "title": "ResizePercent",
+        "type": "object"
+      },
+      "ResultState": {
+        "enum": [
+          "pending",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "ResultState",
+        "type": "string"
+      },
+      "SessionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "boolean"
+          },
+          "csrfToken": {
+            "title": "Csrftoken",
+            "type": "string"
+          },
+          "expiresAt": {
+            "title": "Expiresat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "csrfToken",
+          "expiresAt",
+          "created"
+        ],
+        "title": "SessionResponse",
+        "type": "object"
+      },
+      "Tool": {
+        "enum": [
+          "image-convert",
+          "image-compress",
+          "image-resize",
+          "pdf-compress"
+        ],
+        "title": "Tool",
+        "type": "string"
       }
     }
   },
@@ -234,6 +854,376 @@
         "summary": "Benötigte Abhängigkeiten erreichbar",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/v1/jobs": {
+      "post": {
+        "operationId": "create_job_api_v1_jobs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "options": {
+                    "description": "JSON nach JobOptions, höchstens 8 KiB; erster Teil",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "options",
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            },
+            "description": "Wiederholung (Idempotent-Replayed: true)"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Timeout"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Auftrag anlegen (Datei hochladen)",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "delete": {
+        "operationId": "delete_job_api_v1_jobs__job_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          }
+        },
+        "summary": "Auftrag löschen",
+        "tags": [
+          "jobs"
+        ]
+      },
+      "get": {
+        "operationId": "get_job_api_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          }
+        },
+        "summary": "Auftrag abfragen",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/api/v1/session": {
+      "get": {
+        "description": "Liefert das CSRF-Token für schreibende Anfragen.\n\nDas Cookie wird bei jedem Aufruf neu gesetzt (Max-Age = Sitzungsdauer),\ndamit Browser- und Serverablauf zusammenpassen. Das Neuanlage-Limit je\nClient-IP folgt in B09.",
+        "operationId": "get_session_api_v1_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          }
+        },
+        "summary": "Anonyme Sitzung anlegen oder erneuern",
+        "tags": [
+          "session"
         ]
       }
     }

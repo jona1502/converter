@@ -340,6 +340,7 @@ recovery:   TX{ running mit abgelaufener Lease ─▶ queued + neuer Outbox-Eint
 cleanup:    expired/deleted/Reservierungen/verwaist ─▶ Dateien löschen ─▶ Metadaten bereinigen
 ```
 
+- Broker ist Valkey 9 (BSD-3-Clause), ein protokollkompatibler Redis-Fork. Grund: Redis ab 8.0 steht nur unter AGPL-3.0, RSALv2 oder SSPL; der Plan schließt neue Lizenzauflagen ohne Not aus. Client (`redis-py`), Celery-Transport (`redis://`) und alle Aussagen zu „Redis“ in Plan und Vertrag gelten unverändert für Valkey.
 - Redis-Nachrichten enthalten nur die Auftrags-ID. PostgreSQL ist die einzige Wahrheit; doppelte Zustellung ist harmlos (Claim schlägt fehl). Celery-Neuzustellung ist kein Recovery-Mechanismus; Wiederaufnahme läuft ausschließlich über Recovery + Outbox.
 - Claim: `UPDATE jobs SET state='running', lease_token=:neu, lease_expires_at=now()+LEASE, attempts=attempts+1, version=version+1 WHERE id=:id AND state='queued' AND deleted_at IS NULL AND cancel_requested_at IS NULL AND expires_at > now() AND attempts < max_attempts RETURNING …`.
 - Jede Schreiboperation des Workers (Heartbeat, Fortschritt, Ergebnis, Endzustand) ist bedingt auf `state='running' AND lease_token=:eigenes AND deleted_at IS NULL`. Schlägt sie fehl, hat der Worker die Lease verloren: Kindprozess beenden, **nur eigene** Dateien löschen, nichts weiter schreiben.

@@ -15,12 +15,23 @@ dependencies = [
     "uvicorn>=0.54.0,<0.55",
     "httptools>=0.9.0,<0.10",
     "uvloop>=0.23.0,<0.24; sys_platform == 'linux'",
+    # Datenbank: synchrones SQLAlchemy 2 + psycopg 3 (siehe README).
+    "sqlalchemy>=2.1.5,<2.2",
+    "alembic>=1.20.0,<2",
+    "psycopg[binary]>=3.3.6,<4",
+    # Streaming-Multipart-Parser für POST /jobs (ohne Form/UploadFile).
+    "python-multipart>=0.0.32,<0.1",
+    "celery[redis]>=5.6,<6",
+    "redis<6.5",
+    "pillow>=12,<14",
+    "pikepdf>=10,<11",
 ]
 
 [dependency-groups]
 dev = [
     "httpx2>=2.13.1,<3",  # von starlette.testclient benötigt (Nachfolger von httpx)
     "mypy>=2.4.0,<3",
+    "pypdfium2>=4,<6",
     "pytest>=9.1.1,<10",
     "ruff>=0.17.1,<0.18",
 ]
@@ -63,6 +74,8 @@ allowed-confusables = ["–"]
 "tests/**" = ["S101", "S105", "S106"]
 # Skripte dürfen auf stdout schreiben.
 "scripts/**" = ["T20"]
+# Migrationen enthalten SQL-Ausdrücke als lange Literale.
+"migrations/versions/**" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -70,7 +83,7 @@ quote-style = "double"
 [tool.mypy]
 python_version = "3.13"
 strict = true
-files = ["app", "tests", "scripts"]
+files = ["app", "tests", "scripts", "migrations"]
 plugins = ["pydantic.mypy"]
 warn_unreachable = true
 

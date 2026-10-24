@@ -1,0 +1,43 @@
+# MI converter – Docker Compose (lokaler Betrieb, keine öffentliche Bereitstellung).
+#
+# Stand B03: nur Datenbank und Broker für Entwicklung und Integrationstests.
+# Ports sind ausschließlich an 127.0.0.1 gebunden. Der vollständige Stack
+# (Proxy, API, Worker, Dispatcher, Cleanup) folgt in B12.
+#
+#   docker compose up -d db broker
+#   CONVERTER_DATABASE_URL=postgresql+psycopg://converter:converter@127.0.0.1:55432/converter
+
+name: mi-converter
+
+services:
+  db:
+    image: postgres:18-alpine@sha256:898c60cb390d1085bc97bdd6a1ae968757421df394b071848b52b1c09c89d6a5
+    environment:
+      POSTGRES_USER: converter
+      POSTGRES_PASSWORD: converter # nur lokal; Produktion über Secrets (B12)
+      POSTGRES_DB: converter
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U converter -d converter"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Redis-kompatibler Broker. Valkey (BSD-3) statt Redis ≥ 8 (AGPL/RSAL/SSPL),
+  # siehe docs/backend/api-contract.md, Abschnitt 7.
+  broker:
+    image: valkey/valkey:9-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:56379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  db-data:

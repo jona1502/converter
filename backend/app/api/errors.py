@@ -12,18 +12,22 @@ weil sie außerhalb der Starlette-Exception-Handler sitzt.
 
 from __future__ import annotations
 
+import logging
 import uuid
-from collections.abc import Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from enum import StrEnum
 from typing import Any, Final
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.logs import request_id_var
 from app.schemas.base import ApiModel
+
+logger = logging.getLogger(__name__)
 
 
 class ApiErrorCode(StrEnum):
@@ -181,27 +185,41 @@ MAX_FIELD_ERRORS: Final = 20
 MAX_FIELD_PATH_LENGTH: Final = 64
 
 
-def _field_path(loc: Sequence[int | str], kind: str) -> str:
-    # "body" ist bei Body-/Formularfeldern nur Rauschen ("body.options.quality"
-    # → "options.quality"); "query", "header" und "path" bleiben erhalten.
-    parts = list(loc[1:] if loc and loc[0] == "body" else loc)
+def _field_path(parts: Sequence[int | str], kind: str) -> str:
     if kind == "extra_forbidden" and parts:
         # Unbekannte Schlüssel stammen vollständig vom Client: Name weglassen,
         # nur das umgebende Objekt nennen.
         parts = parts[:-1]
-    path = ".".join(str(part) for part in parts) or "body"
-    return path[:MAX_FIELD_PATH_LENGTH]
+    return ".".join(str(part) for part in parts)[:MAX_FIELD_PATH_LENGTH]
 
 
-def validation_fields(exc: RequestValidationError) -> list[FieldError]:
-    # Bewusst nur "loc" und "type" auswerten: "input" und "msg" können
-    # Eingabewerte enthalten und gehören nicht in die Antwort.
+def fields_from_errors(
+    errors: Iterable[Mapping[str, Any]],
+    *,
+    prefix: str = "",
+    skip_segments: frozenset[str] = frozenset(),
+    strip_body: bool = True,
+) -> list[FieldError]:
+    """Pydantic-Fehler → ``fields`` (Pfad + Fehlerart), begrenzt und ohne Werte.
+
+    Bewusst nur "loc" und "type" auswerten: "input", "msg" und "ctx" können
+    Eingabewerte enthalten und gehören nicht in die Antwort.
+    ``skip_segments`` entfernt Diskriminator-Tags, die Pydantic in den Pfad
+    einfügt (z. B. ``("image-convert", "quality")`` → ``quality``).
+    """
     fields: list[FieldError] = []
     seen: set[tuple[str, str]] = set()
-    for err in exc.errors():
+    for err in errors:
         kind = str(err.get("type", "invalid"))
+        loc = list(err.get("loc", ()))
+        # "body" ist bei Body-Feldern nur Rauschen ("body.quality" → "quality");
+        # "query", "header" und "path" bleiben erhalten.
+        if strip_body and loc and loc[0] == "body":
+            loc = loc[1:]
+        parts = [prefix] if prefix else []
+        parts += [part for part in loc if not (isinstance(part, str) and part in skip_segments)]
         field = FieldError(
-            path=_field_path(err.get("loc", ()), kind),
+            path=_field_path(parts, kind) or "body",
             code=_FIELD_CODES.get(kind, kind.replace("_", "-")),
         )
         if (field.path, field.code) in seen:
@@ -211,6 +229,10 @@ def validation_fields(exc: RequestValidationError) -> list[FieldError]:
         if len(fields) == MAX_FIELD_ERRORS:
             break
     return fields
+
+
+def validation_fields(exc: RequestValidationError) -> list[FieldError]:
+    return fields_from_errors(exc.errors())
 
 
 # --- Handler ---------------------------------------------------------------
@@ -268,7 +290,20 @@ def internal_error_response() -> JSONResponse:
     )
 
 
+async def _handle_database_unavailable(_request: Request, exc: Exception) -> JSONResponse:
+    """Datenbank nicht erreichbar → 503 service-unavailable (Vertrag §2)."""
+    # Nur der Typ: psycopg-Meldungen enthalten Hostnamen und Ports.
+    logger.warning("Datenbank nicht erreichbar", extra={"errorType": type(exc).__name__})
+    return error_response(
+        ApiErrorCode.SERVICE_UNAVAILABLE,
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Dienst nicht verfügbar.",
+        retry_after=5,
+    )
+
+
 def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ApiError, _handle_api_error)
     app.add_exception_handler(RequestValidationError, _handle_validation_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)
+    app.add_exception_handler(OperationalError, _handle_database_unavailable)

@@ -21,7 +21,7 @@ request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 # Felder, die über ``extra=`` in die Logzeile übernommen werden dürfen.
 ALLOWED_EXTRA_FIELDS: Final = frozenset(
-    {"requestId", "method", "route", "status", "durationMs", "check", "jobId"}
+    {"requestId", "method", "route", "status", "durationMs", "check", "jobId", "errorType"}
 )
 
 _HANDLER_MARKER: Final = "_converter_json_handler"

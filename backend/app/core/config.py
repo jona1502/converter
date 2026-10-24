@@ -66,10 +66,13 @@ class Settings(BaseSettings):
     session_cookie_secure: bool = True
 
     storage_dir: Path = Path("/data/storage")
-    # Datenbank und Redis werden erst ab B03/B04 benötigt. SecretStr, weil die
-    # URLs Passwörter enthalten können und so nie versehentlich geloggt werden.
+    # PostgreSQL (ab B03, in production Pflicht) und Redis/Valkey (ab B04).
+    # SecretStr, weil die URLs Passwörter enthalten können und so nie
+    # versehentlich geloggt werden. "postgresql://" wird automatisch auf den
+    # psycopg-3-Treiber abgebildet.
     database_url: SecretStr | None = None
     redis_url: SecretStr | None = None
+    database_pool_size: Annotated[int, Field(ge=1, le=50)] = 5
 
     health_check_timeout_seconds: Annotated[float, Field(gt=0, le=30)] = 2.0
 
@@ -100,6 +103,10 @@ class Settings(BaseSettings):
 
     # Wird dem Frontend über /capabilities mitgeteilt (ab B05).
     upload_concurrency: PositiveInt = 2
+
+    # Upload (Vertrag §4 POST /jobs): Gesamtdauer eines Uploads und damit
+    # auch Lebensdauer einer Upload-Reservierung.
+    upload_max_seconds: PositiveInt = 600
 
     # --- Validierung ---------------------------------------------------------
     @field_validator("log_level", mode="before")
@@ -154,15 +161,26 @@ class Settings(BaseSettings):
             raise ValueError("session_cookie_secure darf in production nicht false sein")
         if not self.allowed_origins:
             raise ValueError("allowed_origins ist in production Pflicht")
+        if self.database_url is None:
+            raise ValueError("database_url ist in production Pflicht")
         return self
 
     # --- Abgeleitete Werte ---------------------------------------------------
-    @cached_property
+    @property
     def effective_secret_key(self) -> str:
         """Konfigurierter Schlüssel oder (nur außerhalb production) ein Zufallswert."""
         if self.secret_key is not None:
             return self.secret_key.get_secret_value()
+        return self._development_secret_key
+
+    @cached_property
+    def _development_secret_key(self) -> str:
         return secrets.token_urlsafe(MIN_SECRET_KEY_LENGTH)
+
+    @property
+    def max_upload_input_bytes(self) -> int:
+        """Größte Eingabe über alle Werkzeuge (Reservierung vor dem Lesen)."""
+        return max(self.image_max_input_bytes, self.pdf_max_input_bytes)
 
     @property
     def is_production(self) -> bool:

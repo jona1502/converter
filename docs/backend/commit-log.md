@@ -9,6 +9,13 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Prüfung:** Astro-Check ohne Befunde; Produktionsbuild erfolgreich; 92 E2E bestanden, vier geräteabhängig übersprungen. Zusätzliche Dark-Mode-axe-/Überlaufprüfung auf sechs Seiten bei 390 px ohne Befund.
 - **Grenze:** Dies ist die bestehende lokale Oberfläche; Servermigration folgt in B10/B11.
 
+## B03
+
+- **Änderungen:** PostgreSQL-Modelle und Alembic-Migration, anonyme Besitzer mit Cookie/CSRF, validierte Auftragsoptionen, begrenzter Multipart-Stream, Header-/Dimensionsprobe, private Dateien, transaktionale Auftragsannahme mit Outbox und Idempotenz, Status und logisches Löschen. Abhängigkeiten für Verarbeitung/Worker bereits reproduzierbar gesperrt.
+- **Review:** Autor `backend_b03`, Tests `tests_b03`, unabhängiges Review `frontend_review`; Verzeichnis-fsync-Befund behoben und nachgeprüft. Zusätzlich gecachten CSRF-Schlüssel, Uploadkörpergrenzen und Bereinigung bei Fehler nach Rename korrigiert.
+- **Prüfung:** B03-/Basistests gegen dedizierte PostgreSQL-Testdatenbank: 107 bestanden, ein POSIX-Rechtetest unter Windows übersprungen. Scoped Ruff/mypy wurden von Autoren ausgeführt; OpenAPI aktualisiert. Keine Produktdatenbank für Tests zurückgesetzt.
+- **Grenzen:** Dispatcher/Worker folgen B04, Konvertierung/Download B05–B08, Rate-/Aktivquoten und physisches Cleanup B09. Keine fertige Serverkonvertierung mit B03 behauptet.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`

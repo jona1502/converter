@@ -34,6 +34,7 @@ def test_docs_available_outside_production(client: TestClient) -> None:
 def test_docs_disabled_in_production(tmp_path: Path) -> None:
     settings = Settings(
         environment="production",
+        database_url=SecretStr("postgresql://converter:converter@localhost/converter_test"),
         secret_key=SecretStr(TEST_SECRET),
         allowed_origins=["https://converter.example"],
         storage_dir=tmp_path,

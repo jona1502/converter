@@ -13,6 +13,7 @@ from tests.conftest import TEST_SECRET
 
 PRODUCTION: dict[str, Any] = {
     "environment": "production",
+    "database_url": SecretStr("postgresql://converter:converter@localhost/converter_test"),
     "secret_key": SecretStr(TEST_SECRET),
     "allowed_origins": ["https://converter.example"],
 }
@@ -68,6 +69,9 @@ def test_production_rejects_unsafe_settings(override: dict[str, Any], message: s
 
 def test_reads_environment_with_prefix_and_csv_lists(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CONVERTER_ENVIRONMENT", "production")
+    monkeypatch.setenv(
+        "CONVERTER_DATABASE_URL", "postgresql://converter:converter@localhost/converter_test"
+    )
     monkeypatch.setenv("CONVERTER_SECRET_KEY", TEST_SECRET)
     monkeypatch.setenv(
         "CONVERTER_ALLOWED_ORIGINS", "https://Converter.example, http://localhost:4321"
@@ -114,7 +118,7 @@ def test_development_without_secret_uses_stable_ephemeral_key() -> None:
 
 
 def test_secrets_are_not_exposed_in_repr() -> None:
-    s = Settings(**PRODUCTION, database_url=SecretStr("postgresql://u:pw-secret@db/x"))
+    s = Settings(**{**PRODUCTION, "database_url": SecretStr("postgresql://u:pw-secret@db/x")})
     assert TEST_SECRET not in repr(s)
     assert "pw-secret" not in repr(s)
 
@@ -131,6 +135,9 @@ def test_validation_errors_do_not_contain_secrets(
     monkeypatch: pytest.MonkeyPatch, extra_env: dict[str, str]
 ) -> None:
     monkeypatch.setenv("CONVERTER_ENVIRONMENT", "production")
+    monkeypatch.setenv(
+        "CONVERTER_DATABASE_URL", "postgresql://converter:converter@localhost/converter_test"
+    )
     monkeypatch.setenv("CONVERTER_DATABASE_URL", "postgresql://u:pw-secret@db/x")
     monkeypatch.setenv("CONVERTER_REDIS_URL", "redis://:redis-secret@redis:6379/0")
     for name, value in extra_env.items():
