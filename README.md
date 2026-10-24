@@ -1,6 +1,6 @@
 # MI converter
 
-Deutschsprachige Astro/React-Website mit FastAPI-Backend für Bildkonvertierung, Komprimierung, Skalierung und PDF-Komprimierung. Die Website verarbeitet Dateien auf dem Server. Ein Upload beginnt erst nach einem ausdrücklichen Klick auf den Verarbeitungsbutton.
+Deutschsprachige Astro/React-Website mit Go-Backend für Bildkonvertierung, Komprimierung, Skalierung und PDF-Komprimierung. Die Website verarbeitet Dateien auf dem Server. Ein Upload beginnt erst nach einem ausdrücklichen Klick auf den Verarbeitungsbutton.
 
 ## Lokal starten
 
@@ -10,11 +10,11 @@ Voraussetzung: Docker mit Compose und laufender Linux-Container-Engine. Im Proje
 docker compose up -d --build --wait
 ```
 
-Website: **http://localhost:8080**. Der Dienst `migrate` führt die Alembic-Migration aus und endet erfolgreich, bevor API und Worker starten.
+Website: **http://localhost:8080**. Der Dienst `migrate` führt die Go-Schemamigration aus und endet erfolgreich, bevor API und Worker starten.
 
 ```sh
 docker compose ps
-docker compose logs --tail 50 api worker dispatcher cleanup
+docker compose logs --tail 50 api worker cleanup
 docker compose down
 ```
 
@@ -24,10 +24,10 @@ Compose ist für lokalen HTTP-Betrieb konfiguriert: lokale Zugangsdaten, Entwick
 
 ## Architektur und Weg einer Datei
 
-1. Nginx liefert den statischen Astro-Build und leitet `/api/v1/` an FastAPI weiter. Downloads sind keine öffentlichen Dateipfade.
-2. FastAPI verwaltet eine anonyme Sitzung mit HttpOnly-Cookie und CSRF-Schutz. Jeder Auftragszugriff prüft den Besitzer.
+1. Nginx liefert den statischen Astro-Build und leitet `/api/v1/` an die Go-API weiter. Downloads sind keine öffentlichen Dateipfade.
+2. Go verwaltet eine anonyme Sitzung mit HttpOnly-Cookie und CSRF-Schutz. Jeder Auftragszugriff prüft den Besitzer.
 3. Nach Klick auf den Verarbeitungsbutton werden Optionen und eine Datei streamend geprüft. Auftrag und Outbox werden gemeinsam in PostgreSQL angenommen; Antwort: `202`.
-4. Der Dispatcher veröffentlicht die Auftrags-ID über Valkey (Redis-kompatibel) an Celery. PostgreSQL bleibt die Quelle für Status und Wiederanlauf.
+4. Go-Worker beanspruchen die PostgreSQL-Outbox direkt als Queue. PostgreSQL bleibt die Quelle für Status und Wiederanlauf; Valkey verwaltet nur Ratenlimits.
 5. Ein Worker beansprucht den Auftrag mit Lease. Ein separater Linux-Prozess verarbeitet ihn ohne Netzwerksockets und DB-/Broker-Secrets, mit Zeit-, Speicher- und Dateigrößenlimits.
 6. Fertige Dateien werden synchronisiert und in der Datenbank veröffentlicht. Die Oberfläche fragt den Status ab und bietet autorisierte Downloads an.
 7. Cleanup sperrt abgelaufene Aufträge und entfernt Dateien und Metadaten. Download- und alte Worker-Leases werden berücksichtigt.
@@ -45,7 +45,7 @@ Bilder: maximal 52.428.800 Bytes Eingabe, 40 MP, 16.384 px je Kante und 104.857.
 
 PDF: maximal 100.000.000 Bytes Eingabe, 300.000.000 Bytes über alle Ergebnisse und 40 MP je neu kodiertem Bild. Verschlüsselte oder nur durch Reparatur lesbare PDFs werden abgelehnt. Signaturen können ungültig werden; PDF/A-Erhalt ist nicht garantiert. Ergebnisse können größer werden; echte Größen werden angezeigt.
 
-Startwerte: eine Stunde Gültigkeit, 5 GB gemeinsames Dateibudget, 50 aktive Aufträge insgesamt, zehn Erstellversuche pro Minute je Sitzung und Client-IP. Prozesszeitlimit: 120 s Bild, 300 s PDF. Linux-Parser: 1 GiB Adressraum; Workercontainer: 1,5 GiB. Konfiguration: `backend/app/core/config.py`.
+Startwerte: eine Stunde Gültigkeit, 5 GB gemeinsames Dateibudget, 50 aktive Aufträge insgesamt, zehn Erstellversuche pro Minute je Sitzung und Client-IP. Prozesszeitlimit: 120 s Bild, 300 s PDF. Linux-Parser: 1 GiB Adressraum; Workercontainer: 1,5 GiB. Konfiguration: `server/internal/config/config.go`.
 
 Metadaten/Farbprofile können entfernt oder verändert werden. Kein geprüftes Verfahren zur Metadatenbereinigung. Server- und Browserencoder erzeugen nicht dieselben Bytes.
 
@@ -61,33 +61,23 @@ Hostingprotokolle, Impressum und vollständige rechtliche Datenschutzhinweise mu
 
 ## Entwicklung und Tests
 
-Frontend: Node 24 LTS und npm. Backend: Python 3.13 und uv. Echte Integrationsprüfungen benötigen Docker/PostgreSQL/Valkey.
+Frontend: Node 24 LTS und npm. Go benötigt lokal keine Installation: die isolierte Testumgebung enthält den gepinnten Compiler. Python 3.13 und uv werden nur für die privaten Codecs benötigt.
 
 ```sh
 npm ci
 npx playwright install chromium firefox webkit
 npm run check
 npm test
-npm run build
 node scripts/generate-api-types.mjs --check
+docker compose -f server/compose.test.yaml up -d --wait db valkey
+docker compose -f server/compose.test.yaml run --rm go go vet ./...
+docker compose -f server/compose.test.yaml run --rm go go test -race ./...
+uv sync --frozen --project converter
+uv run --project converter pytest converter/tests
+uv run --project converter python scripts/smoke-stack.py
 ```
 
-Die ursprünglichen lokalen Engines unter `src/lib/image` und `src/lib/pdf` bleiben durch Browser-Unit-Tests geprüft. Die Website bietet keinen stillen lokalen Fallback.
-
-```sh
-docker compose up -d --wait db broker
-cd backend
-uv sync --frozen
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy
-uv run python scripts/export_openapi.py --check
-uv run pytest
-```
-
-Der Smoke-Test braucht den vollständigen Stack (`docker compose up -d --build --wait`) und prüft dann im Verzeichnis `backend` mit `uv run python scripts/smoke_stack.py` alle vier Werkzeuge über `http://localhost:8080`.
-
-**Testdatenbanken:** pytest legt `converter_test` und eine Migrationstestdatenbank neu an und löscht deren bisherigen Inhalt. `CONVERTER_TEST_DATABASE_URL` darf ausschließlich eine Testdatenbank enthalten (Name muss `test` enthalten), niemals Nutzdaten. Limitprüfungen verwenden eine getrennte lokale Brokerdatenbank.
+Der Smoke-Test braucht den vollständigen Stack. Go-Tests verwenden separate Testvolumes und Datenbanken; niemals die Testkonfiguration auf Nutzdaten richten. Die bisherigen lokalen Bild-/PDF-Engines bleiben durch Browser-Unit-Tests geprüft; die Website bietet keinen stillen lokalen Fallback.
 
 Die vollständigen E2E laufen gegen den echten Compose-Stack. PowerShell:
 
@@ -102,13 +92,14 @@ Ohne `E2E_BASE_URL` startet Playwright nur den statischen Previewserver; Serverw
 
 ## Im Code orientieren
 
-- `backend/app/api` und `schemas`: HTTP, Besitzerprüfung, validierte Eingaben und Antworten.
-- `backend/app/db`, `backend/migrations`: Modelle und nachvollziehbare Schemaänderungen.
-- `backend/app/jobs`: Annahme, Outbox, Zustände, Recovery und Cleanup.
-- `backend/app/worker`: Celery, Prozessüberwachung und Linux-Isolation.
-- `backend/app/processing`: Bild-/PDF-Algorithmen ohne HTTP-/Datenbankwissen.
-- `src/lib/api`: gemeinsamer Browserclient, Headerprobe und generierte Typen.
-- `infra` und `compose.yaml`: lokaler Gesamtbetrieb.
-- `docs/backend`: API-Vertrag, Commitlog und Machbarkeitsnachweis.
+- `server/internal/httpapi/endpoints`: HTTP, Sitzung, Upload und Downloads.
+- `server/internal/store` und `server/migrations`: PostgreSQL und Schemaänderungen.
+- `server/internal/jobs`: Annahme, Queue, Worker, Recovery und Cleanup.
+- `server/internal/converter`: begrenzte Go-Prozesssteuerung ohne Shell.
+- `converter`: private Pillow-/pikepdf-Codecs ohne FastAPI oder Celery.
+- `api/openapi.json`: kanonischer API-Vertrag; `src/lib/api`: Browserclient.
+- `docs/go-backend`: Architektur, Betriebsanleitung, Prüfergebnisse und Commitlog.
 
-Zum Lernen zuerst Health-/Sitzungsroute, dann `POST /jobs` und den Weg über Outbox/Claim bis zur Verarbeitung lesen. `backend/scripts/smoke_stack.py` demonstriert Upload, Status, Downloadprüfung und Löschung. Bei Fehlern Browserantwort und `requestId`, dann API-/Worker-/Dispatcherlogs prüfen. Keine Dateiinhalte oder Secrets zum Debuggen protokollieren.
+Zum Lernen zuerst die Sitzungsroute lesen, dann `POST /jobs`, die Datenbanktransaktion, den Worker-Claim und den Konvertierungsprozess. `scripts/smoke-stack.py` zeigt den vollständigen HTTP-Ablauf.
+
+`backend/` und `infra/compose.fastapi.yaml` bleiben ausschließlich als getesteter Rückweg und historische Referenz erhalten. Der normale Compose-Stack baut und startet keine FastAPI-/Celery-Dienste. Betriebswechsel: [Go-Betriebsanleitung](docs/go-backend/operations.md).

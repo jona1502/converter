@@ -1,6 +1,6 @@
 # Go-Backend – Übergabe und Umsetzungsauftrag für Claude
 
-Stand: 24.10.2026. Dieser Plan beschreibt die nächste Migration; Go ist noch nicht implementiert.
+Stand: 24.10.2026. Umgesetzt: Go ist der Standardbetrieb auf Port 8080. Dieser ursprüngliche Auftrag bleibt als Planhistorie erhalten. Tatsächliche Ergebnisse und Abweichungen stehen in `go-backend/release-review.md` und im Commitlog.
 
 ## 1. Auftrag und verbindlicher Umfang
 

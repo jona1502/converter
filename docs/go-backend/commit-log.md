@@ -89,3 +89,7 @@ Finale HTTP-Kontexte begrenzt, Privacy-Allowlist und PDF-Hinweis geprueft, Smoke
 ## G12
 
 Standardbetrieb vollstaendig auf Go umgestellt; kein FastAPI/Celery im Zielruntime. Legacy-Quellcode als Rueckweg markiert und bewusst erhalten (Abweichung vom vollstaendigen Entfernen). Beide Betriebswechsel praktisch getestet; Datenvolumes erhalten.
+
+## G13
+
+README, Lernpfad, Planstatus und Abschlussnachweis aktualisiert. Lokale Tests und Messwerte dokumentiert, ohne Geschwindigkeitsversprechen. Offene Grenzen: GitHub-CI nicht ausgefuehrt und letzter unabhaengiger Infrastrukturreview wegen Nutzungslimit nicht erfolgt. Kein Push oder Deployment.
