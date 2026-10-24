@@ -1,10 +1,44 @@
 ---
+import { availableToolsByCategory } from '../../data/tools';
+interface Props { siteName: string }
+const { siteName } = Astro.props;
 ---
-<footer class="border-t border-border bg-surface">
-  <div class="page-container py-8 text-sm text-muted">
-    <p class="max-w-2xl">
+<footer class="site-footer">
+  <div class="page-container">
+    <p class="footer-note">
       Dateien werden in Ihrem Browser auf Ihrem Gerät verarbeitet und nicht hochgeladen.{" "}
-      <a href="/lokale-verarbeitung" class="link">Wie die lokale Verarbeitung funktioniert</a>
+      <a href="/lokale-verarbeitung" class="footer-link">Wie die lokale Verarbeitung funktioniert</a>
     </p>
+    <nav aria-label="Fußzeile" class="footer-nav">
+      {availableToolsByCategory.map(({ category, tools }) => (
+        <div>
+          <h2 class="footer-heading">{category.title}</h2>
+          <ul>
+            {tools.map((tool) => <li><a href={tool.href} class="footer-link">{tool.title}</a></li>)}
+          </ul>
+        </div>
+      ))}
+      <div>
+        <h2 class="footer-heading">Information</h2>
+        <ul>
+          <li><a href="/lokale-verarbeitung" class="footer-link">Lokale Verarbeitung</a></li>
+        </ul>
+      </div>
+    </nav>
+    <p class="footer-legal">{siteName}</p>
   </div>
 </footer>
+
+<style>
+  .site-footer { margin-top: auto; background: var(--color-canvas); color: var(--color-muted); font-size: .8125rem; line-height: 1.45; letter-spacing: -.005em; }
+  .site-footer .page-container { padding-top: 1.25rem; padding-bottom: 1.5rem; }
+  .footer-note { max-width: 46rem; padding-bottom: 1rem; }
+  .footer-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 1.25rem 2rem; padding: 1.25rem 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+  .footer-heading { margin-bottom: .5rem; color: var(--color-ink); font-family: var(--font-sans); font-size: .8125rem; font-weight: 600; hyphens: none; }
+  .footer-nav ul { display: flex; flex-direction: column; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+  .footer-link { display: inline-flex; align-items: center; min-height: 1.5rem; color: var(--color-muted); text-decoration: none; }
+  .footer-note .footer-link { display: inline; color: var(--color-accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: .18em; }
+  .footer-link:hover { color: var(--color-ink); text-decoration: underline; text-underline-offset: 2px; }
+  .footer-note .footer-link:hover { color: var(--color-accent); text-decoration-color: currentColor; }
+  .footer-legal { padding-top: 1rem; }
+</style>

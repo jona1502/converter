@@ -1,60 +1,127 @@
 @import "tailwindcss";
 
 /*
-  Design-Tokens. Farben, Radien und Schrift zentral definieren; Komponenten verwenden
-  ausschließlich diese Tokens (z. B. bg-surface, text-muted, ring-focus).
-  Schrift: System-Schriftstapel, damit keine Fonts nachgeladen werden müssen.
+  Design-Tokens („MI converter“, ruhige Produktseiten-Ästhetik). Farben, Radien und Schrift
+  zentral definieren; Komponenten verwenden ausschließlich diese Tokens (z. B. bg-surface,
+  text-muted, outline-focus). Der Dark Mode überschreibt dieselben Variablen per
+  prefers-color-scheme (siehe unten), Klassen müssen dafür nicht geändert werden.
+  Schrift: reiner System-Schriftstapel, es werden keine Schriftdateien geladen.
 
-  Kontraste (WCAG 2.x, rechnerisch geprüft):
-    ink auf canvas/surface/surface-muted ........ 15.8 / 16.9 / 14.8 : 1
-    muted auf canvas/surface/surface-muted ...... 6.8 / 7.3 / 6.4 : 1
-    accent auf surface/canvas/accent-soft ....... 6.0 / 5.6 / 5.2 : 1
-    on-accent auf accent / accent-hover ......... 6.0 / 8.1 : 1
-    success auf success-soft .................... 5.7 : 1
-    warning auf warning-soft .................... 5.4 : 1
-    danger auf danger-soft / on-accent auf danger 5.8 / 6.6 : 1
-    focus auf canvas/surface (Nicht-Text, ≥ 3) .. 6.0 / 6.5 : 1
-    border-control auf surface/canvas (≥ 3) ..... 4.3 / 4.0 : 1
-  border und border-strong sind rein dekorativ (Trennlinien, Kartenränder) und
+  Kontraste (WCAG 2.x, rechnerisch geprüft) – hell | dunkel:
+    ink auf canvas/surface ............................. 15.5 / 16.8 | 19.3 / 15.6 : 1
+    muted auf canvas/surface/surface-muted ............. 5.1 / 5.5 / 5.1 | 8.2 / 6.6 / 5.4 : 1
+    muted auf accent-/danger-/warning-/success-soft .... 4.8 / 4.9 / 5.1 / 5.0 | 5.7 / 6.2 / 5.2 / 5.7 : 1
+    accent (Links) auf canvas/surface/accent-soft ...... 5.1 / 5.6 / 4.9 | 7.0 / 5.6 / 4.8 : 1
+    on-accent auf accent-fill / accent-fill-hover ...... 4.7 / 5.9 | 4.7 / 5.9 : 1
+    ink auf fill / fill-hover (Sekundär-Buttons) ....... 13.8 / 12.3 | 10.4 / 8.4 : 1
+    ink auf segment (gewählte Option) .................. 16.8 | 5.5 : 1
+    success/warning/danger auf *-soft .................. 4.6 / 4.8 / 4.7 | 7.3 / 9.5 / 5.7 : 1
+    on-accent auf danger ............................... 5.4 | – : 1
+    focus auf canvas/surface (Nicht-Text, ≥ 3) ......... 4.3 / 4.7 | 7.0 / 5.6 : 1
+    border-control auf surface/canvas (≥ 3) ............ 3.6 / 3.3 | 5.2 / 6.4 : 1
+  muted wird nie auf fill gesetzt. border ist rein dekorativ (Trennlinien, Kartenränder) und
   nicht für die Erkennbarkeit von Bedienelementen gedacht.
 */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-canvas: #f7f7f4;
+  --color-canvas: #f5f5f7;
   --color-surface: #ffffff;
-  --color-surface-muted: #f0f0ec;
-  --color-border: #d9d9d2;
-  --color-border-strong: #a8a89e;
-  --color-border-control: #7a7b72;
-  --color-ink: #1c1d1a;
-  --color-muted: #55574f;
-  --color-accent: #1f6f5c;
-  --color-accent-hover: #185a4a;
-  --color-accent-soft: #e3f1ec;
+  --color-surface-muted: #f5f5f7;
+  --color-fill: #e8e8ed;
+  --color-fill-hover: #dcdce1;
+  --color-segment: #ffffff;
+  --color-border: #d2d2d7;
+  --color-border-strong: #b0b0b6;
+  --color-border-control: #86868b;
+  --color-ink: #1d1d1f;
+  --color-muted: #68686d;
+  --color-accent: #0066cc;
+  --color-accent-hover: #0055aa;
+  --color-accent-fill: #0071e3;
+  --color-accent-fill-hover: #0062c4;
+  --color-accent-soft: #e8f0fb;
   --color-on-accent: #ffffff;
-  --color-focus: #2457c5;
-  --color-success: #1d6b3a;
-  --color-success-soft: #e4f3e8;
-  --color-warning: #8a5a00;
-  --color-warning-soft: #fdf3dc;
-  --color-danger: #b42318;
-  --color-danger-soft: #fdecea;
+  --color-focus: #0071e3;
+  --color-success: #1a7f37;
+  --color-success-soft: #e9f6ec;
+  --color-warning: #a15c00;
+  --color-warning-soft: #fdf4e3;
+  --color-danger: #d70015;
+  --color-danger-soft: #fdeceb;
+  --color-header: rgb(245 245 247 / 0.8);
+  --color-header-solid: #f5f5f7;
+  --color-panel: rgb(255 255 255 / 0.86);
 
-  --radius-control: 0.5rem;
-  --radius-card: 0.875rem;
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.05), 0 16px 40px rgb(0 0 0 / 0.1);
+  --shadow-panel: 0 12px 40px rgb(0 0 0 / 0.14);
+}
+
+/* Dunkles Erscheinungsbild: dieselben Tokens, andere Werte. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #000000;
+    --color-surface: #1c1c1e;
+    --color-surface-muted: #2c2c2e;
+    --color-fill: #3a3a3c;
+    --color-fill-hover: #48484a;
+    --color-segment: #636366;
+    --color-border: #38383a;
+    --color-border-strong: #545458;
+    --color-border-control: #8e8e93;
+    --color-ink: #f5f5f7;
+    --color-muted: #a1a1a6;
+    --color-accent: #2997ff;
+    --color-accent-hover: #5cb0ff;
+    --color-accent-fill: #0071e3;
+    --color-accent-fill-hover: #0062c4;
+    --color-accent-soft: #0b2a4a;
+    --color-on-accent: #ffffff;
+    --color-focus: #2997ff;
+    --color-success: #30d158;
+    --color-success-soft: #0f2e18;
+    --color-warning: #ffd60a;
+    --color-warning-soft: #3a2e05;
+    --color-danger: #ff6961;
+    --color-danger-soft: #3d1513;
+    --color-header: rgb(22 22 23 / 0.8);
+    --color-header-solid: #161617;
+    --color-panel: rgb(36 36 38 / 0.9);
+
+    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
+    --shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 40px rgb(0 0 0 / 0.6);
+    --shadow-panel: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 48px rgb(0 0 0 / 0.6);
+  }
 }
 
 @layer base {
   html {
     @apply bg-canvas text-ink font-sans antialiased;
-    color-scheme: light;
+    color-scheme: light dark;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Platz für die fixierte Kopfzeile beim Springen zu Ankern und Fokuszielen. */
+    scroll-padding-top: 7rem;
+    text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-canvas leading-relaxed;
+    @apply bg-canvas;
+    font-size: 1.0625rem;
+    line-height: 1.47;
+    letter-spacing: -0.022em;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-focus;
@@ -75,47 +142,45 @@
 }
 
 /*
-  Gestaltungsklassen (für Astro-Seiten und React-Komponenten in P04–P06)
-  ----------------------------------------------------------------------
+  Gestaltungsklassen (für Astro-Seiten und React-Komponenten)
+  -----------------------------------------------------------
   Layout
     .page-container        zentrierter Inhaltsbereich mit Seitenrand (max. 72rem)
     .page-container-narrow schmaler Bereich für Fließtext (max. 48rem)
     .page-section          vertikaler Abstand zwischen Seitenabschnitten
+    .page-eyebrow          kleine Zeile über einer Überschrift (z. B. Produktname)
     .page-title / .page-lead  Seitenüberschrift (h1) und Einleitungstext
+    .hero / .hero-title / .hero-lead  zentrierter Einstieg der Startseite
     .section-title         Abschnittsüberschrift (h2)
+    .section-kicker        kleine Gruppenüberschrift (h3)
     .prose-content         Fließtext mit Abständen für h2/h3/p/ul/ol/a/code
-    .link                  unterstrichener Textlink in Akzentfarbe
+    .link                  Textlink in Akzentfarbe (unterstrichen)
+    .link-standalone       zusätzlich für alleinstehende Links ohne Unterstreichung
     .skip-link             „Zum Inhalt springen“, nur bei Fokus sichtbar
 
   Buttons (auf <button> oder <a>; disabled bzw. aria-disabled="true" sichtbar gedämpft.
   Für deaktivierbare Aktionen <button disabled> verwenden; aria-disabled auf <a> verhindert
   die Aktivierung nicht – dort zusätzlich href entfernen.)
-    .btn                   Basis (immer zusätzlich zu einer Variante verwenden)
-    .btn-primary           Hauptaktion (gefüllt, Akzentfarbe)
-    .btn-secondary         Nebenaktion (Rahmen, weiße Fläche)
+    .btn                   Basis als Pill (immer zusätzlich zu einer Variante verwenden)
+    .btn-primary           Hauptaktion (gefüllt, Blau)
+    .btn-secondary         Nebenaktion (graue Fläche)
     .btn-danger            destruktive Aktion (z. B. „Alle entfernen“)
-    .btn-ghost             zurückhaltende Aktion ohne Rahmen (z. B. „Entfernen“ in Listen)
+    .btn-ghost             zurückhaltende Aktion ohne Fläche (z. B. „Entfernen“ in Listen)
     .btn-sm / .btn-lg      kleinere/größere Variante
     .btn-icon              quadratischer Button für Symbole (aria-label nötig)
 
   Karten
-    .card                  Fläche mit Rahmen und Innenabstand
-    .card-muted            zurückgenommene Fläche (z. B. Optionsbereich)
+    .card                  weiße Fläche mit weichem Schatten und Innenabstand
+    .card-muted            ruhige Fläche mit feiner Linie (z. B. Optionsbereich)
     .card-link             gesamte Karte als Link (auf <a>), Hover/Fokus-Zustand
     .card-title            Kartenüberschrift
+    .card-icon             runde Symbolfläche in einer Karte
 
   Formulare
-    .field                 Gruppe aus Label, Steuerelement und Hinweis (vertikal)
-    .field-row             Label/Steuerelement nebeneinander (Checkbox, Radio)
-    .label                 Feldbeschriftung
-    .hint                  Hilfetext unter dem Feld (aria-describedby verknüpfen)
-    .field-error           Fehlertext zum Feld (in Gefahrfarbe)
-    .input                 Text-/Zahlenfeld; aria-invalid="true" färbt den Rahmen rot
-    .select                Auswahlliste
-    .range                 Schieberegler
-    .checkbox / .radio     Kontrollkästchen und Optionsfeld
-    .color-input           Farbwähler (<input type="color">)
-    .fieldset / .legend    Gruppierung zusammengehöriger Optionen
+    .field / .field-row / .label / .hint / .field-error
+    .input / .select / .range / .checkbox / .radio / .color-input
+    .fieldset / .legend
+    .choice-group          Auswahlgruppe als Segment-/Chipleiste (Labels mit Checkbox/Radio)
 
   Hinweise (role="status"/"alert" je nach Zweck selbst setzen)
     .notice + .notice-info | .notice-warn | .notice-error | .notice-success
@@ -125,13 +190,13 @@
     .badge + .badge-neutral | .badge-accent | .badge-success | .badge-warn | .badge-danger
 
   Werkzeugoberfläche (src/components/tools)
-    .drop-zone             Ablagebereich; data-dragging="true" (Datei wird darübergezogen),
-                           data-disabled="true" (Auswahl nicht möglich)
+    .drop-zone             Ablagebereich; data-dragging="true", data-disabled="true"
     .file-list / .file-row Dateiliste und Zeile (data-status spiegelt den Verarbeitungsstand)
     .file-name             Dateiname, einzeilig abgeschnitten (vollen Namen per title anbieten)
     .file-result           Ergebnisbereich einer Zeile
     .meta-list             Beschreibungsliste (<dl>) mit Paaren in <div><dt/><dd/></div>
     .progress              <progress>-Balken in Akzentfarbe (ohne value = unbestimmt)
+    .variant-card / .variant-size  Ergebnisvariante (PDF) und deren Größenangabe
 */
 @layer components {
   /* Layout */
@@ -144,29 +209,74 @@
   .page-section {
     @apply mt-12 sm:mt-16;
   }
+  .page-eyebrow {
+    @apply text-base font-semibold text-muted;
+    letter-spacing: -0.01em;
+  }
   .page-title {
-    @apply text-3xl font-semibold tracking-tight text-balance sm:text-4xl;
+    @apply font-semibold text-balance;
+    font-size: clamp(2.125rem, 1.55rem + 2.6vw, 3.5rem);
+    line-height: 1.07;
+    letter-spacing: -0.028em;
   }
   .page-lead {
-    @apply mt-4 max-w-2xl text-lg text-muted text-pretty;
+    @apply mt-4 max-w-2xl text-muted text-pretty;
+    font-size: clamp(1.125rem, 1.02rem + 0.45vw, 1.3125rem);
+    line-height: 1.42;
+    letter-spacing: -0.016em;
+  }
+  .hero {
+    @apply mx-auto flex max-w-4xl flex-col items-center pt-4 pb-4 text-center sm:pt-10;
+  }
+  .hero-title {
+    @apply font-semibold text-balance;
+    font-size: clamp(2.5rem, 1.45rem + 4.6vw, 4.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+  .hero-lead {
+    @apply mx-auto mt-5 max-w-2xl text-muted text-pretty;
+    font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
+    line-height: 1.38;
+    letter-spacing: -0.018em;
   }
   .section-title {
-    @apply text-xl font-semibold tracking-tight sm:text-2xl;
+    @apply font-semibold;
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.024em;
   }
+  .section-kicker {
+    @apply text-sm font-semibold text-muted;
+    letter-spacing: 0;
+  }
+  /* Links im Fließtext bleiben unterstrichen (im Dark Mode reicht der Farbabstand allein nicht). */
   .link {
-    @apply font-medium text-accent underline decoration-1 underline-offset-2 hover:text-accent-hover hover:decoration-2;
+    @apply text-accent underline decoration-1 underline-offset-[0.18em] hover:text-accent-hover hover:decoration-2;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+  /* Alleinstehender Link (eigener Absatz), ohne Unterstreichung im Ruhezustand. */
+  .link-standalone {
+    @apply no-underline hover:underline;
   }
   .prose-content {
-    @apply max-w-none text-base;
+    @apply max-w-none;
   }
   .prose-content > * + * {
     @apply mt-4;
   }
   .prose-content h2 {
-    @apply mt-10 text-xl font-semibold tracking-tight sm:text-2xl;
+    @apply mt-12 font-semibold;
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.024em;
   }
   .prose-content h3 {
-    @apply mt-8 text-lg font-semibold;
+    @apply mt-8 text-xl font-semibold;
+    letter-spacing: -0.02em;
   }
   .prose-content ul {
     @apply list-disc space-y-2 pl-6;
@@ -174,46 +284,50 @@
   .prose-content ol {
     @apply list-decimal space-y-2 pl-6;
   }
+  .prose-content li::marker {
+    @apply text-muted;
+  }
   .prose-content a {
-    @apply font-medium text-accent underline decoration-1 underline-offset-2 hover:text-accent-hover hover:decoration-2;
+    @apply text-accent underline decoration-1 underline-offset-2 hover:text-accent-hover;
   }
   .prose-content code {
-    @apply rounded bg-surface-muted px-1 py-0.5 font-mono text-[0.9em];
+    @apply rounded-md bg-fill px-1.5 py-0.5 font-mono text-[0.88em];
   }
   .skip-link {
-    @apply absolute left-4 -top-40 z-50 rounded-control bg-ink px-4 py-2 font-medium text-surface no-underline;
+    @apply absolute left-4 -top-40 z-50 rounded-full bg-ink px-5 py-2.5 font-medium text-canvas no-underline;
   }
   .skip-link:focus,
   .skip-link:focus-visible {
-    @apply top-4;
+    @apply top-3;
   }
 
-  /* Buttons */
+  /* Buttons (ohne Farbübergänge: axe misst sonst Zwischenfarben, z. B. beim Aktivieren nach „disabled“) */
   .btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-transparent px-4 py-2 text-base font-medium leading-tight no-underline transition-colors select-none;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-transparent px-5 py-2 text-[1.0625rem] font-normal leading-tight no-underline select-none;
+    letter-spacing: -0.022em;
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
-    @apply cursor-not-allowed border-border bg-surface-muted text-muted shadow-none;
+    @apply cursor-not-allowed border-transparent bg-surface-muted text-muted shadow-none;
   }
   .btn-primary {
-    @apply bg-accent text-on-accent shadow-sm;
+    @apply bg-accent-fill text-on-accent;
   }
   .btn-secondary {
-    @apply border-border-control bg-surface text-ink;
+    @apply bg-fill text-ink;
   }
   .btn-danger {
-    @apply border-danger bg-surface text-danger;
+    @apply border-danger bg-transparent text-danger;
   }
   .btn-ghost {
     @apply bg-transparent text-accent;
   }
   /* Hover nur für aktive Buttons, damit deaktivierte Buttons lesbar bleiben. */
   .btn-primary:not(:disabled, [aria-disabled="true"]) {
-    @apply hover:bg-accent-hover;
+    @apply hover:bg-accent-fill-hover;
   }
   .btn-secondary:not(:disabled, [aria-disabled="true"]) {
-    @apply hover:bg-surface-muted;
+    @apply hover:bg-fill-hover;
   }
   .btn-danger:not(:disabled, [aria-disabled="true"]) {
     @apply hover:bg-danger-soft;
@@ -226,10 +340,11 @@
     @apply border-transparent bg-transparent;
   }
   .btn-sm {
-    @apply min-h-9 px-3 py-1.5 text-sm;
+    @apply min-h-9 px-4 py-1.5 text-sm;
+    letter-spacing: -0.01em;
   }
   .btn-lg {
-    @apply min-h-12 px-6 py-3 text-lg;
+    @apply min-h-12 px-7 py-3 text-lg;
   }
   .btn-icon {
     @apply aspect-square px-0 py-0;
@@ -237,40 +352,65 @@
 
   /* Karten */
   .card {
-    @apply rounded-card border border-border bg-surface p-5 sm:p-6;
+    @apply rounded-card bg-surface p-5 sm:p-7;
+    box-shadow: var(--shadow-card);
   }
   .card-muted {
-    @apply rounded-card border border-border bg-surface-muted p-5 sm:p-6;
+    @apply rounded-card border border-border bg-surface p-5 sm:p-7;
   }
   .card-link {
-    @apply block rounded-card border border-border bg-surface p-5 text-ink no-underline shadow-sm transition-colors sm:p-6 hover:border-accent hover:bg-accent-soft/40;
+    @apply relative block rounded-card bg-surface p-6 text-ink no-underline sm:p-8;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .card-link:hover {
+    box-shadow: var(--shadow-lift);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card-link:hover {
+      transform: translateY(-4px);
+    }
   }
   .card-link:focus-visible {
-    @apply border-accent outline-3 outline-offset-2 outline-focus;
+    @apply outline-3 outline-offset-3 outline-focus;
   }
   .card-title {
-    @apply text-lg font-semibold tracking-tight;
+    @apply text-xl font-semibold;
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+  }
+  .card-icon {
+    @apply flex size-12 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent;
   }
 
   /* Formulare */
   .field {
-    @apply flex flex-col gap-1.5;
+    @apply flex flex-col gap-2;
   }
   .field-row {
     @apply flex items-start gap-3;
   }
   .label {
-    @apply text-sm font-medium text-ink;
+    @apply text-[0.9375rem] font-semibold text-ink;
+    letter-spacing: -0.012em;
   }
   .hint {
     @apply text-sm text-muted;
+    letter-spacing: -0.01em;
+    line-height: 1.45;
   }
   .field-error {
     @apply text-sm font-medium text-danger;
   }
   .input,
   .select {
-    @apply min-h-11 w-full rounded-control border border-border-control bg-surface px-3 py-2 text-base text-ink;
+    @apply min-h-11 w-full rounded-control border border-border-control bg-surface px-3.5 py-2 text-[1.0625rem] text-ink;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input:focus-visible,
+  .select:focus-visible {
+    @apply border-focus outline-2 outline-offset-0 outline-focus;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-focus) 22%, transparent);
   }
   .input:disabled,
   .select:disabled {
@@ -281,17 +421,25 @@
     @apply border-danger;
   }
   .select {
-    @apply cursor-pointer pr-8;
+    @apply cursor-pointer pr-10;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2386868b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 1rem;
+  }
+  .select option {
+    @apply bg-surface text-ink;
   }
   .range {
-    @apply h-6 w-full cursor-pointer accent-accent;
+    @apply h-6 w-full cursor-pointer accent-accent-fill;
   }
   .range:disabled {
     @apply cursor-not-allowed opacity-50;
   }
   .checkbox,
   .radio {
-    @apply mt-0.5 size-5 shrink-0 cursor-pointer accent-accent;
+    @apply mt-0.5 size-5 shrink-0 cursor-pointer accent-accent-fill;
   }
   .checkbox:disabled,
   .radio:disabled {
@@ -307,32 +455,72 @@
     @apply m-0 flex min-w-0 flex-col gap-3 border-0 p-0;
   }
   .legend {
-    @apply mb-2 p-0 text-sm font-semibold text-ink;
+    @apply mb-2 p-0 text-[0.9375rem] font-semibold text-ink;
+  }
+  /* Segment-/Chipleiste: Labels mit echtem Kontrollkästchen bzw. Optionsfeld darin. */
+  .choice-group {
+    @apply flex flex-wrap gap-1 rounded-control bg-fill p-1;
+  }
+  .choice-group > label {
+    @apply flex min-h-10 cursor-pointer items-center gap-2 rounded-[0.55rem] px-3 text-[0.9375rem] text-ink;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .choice-group > label:hover {
+    @apply bg-fill-hover;
+  }
+  .choice-group > label:has(input:checked) {
+    @apply bg-segment font-semibold;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+  .choice-group > label:has(input:disabled) {
+    @apply cursor-default;
+  }
+  .choice-group input {
+    @apply size-4 shrink-0 cursor-pointer accent-accent-fill;
+  }
+  .choice-group input:disabled {
+    @apply cursor-default;
   }
 
   /* Hinweise */
   .notice {
-    @apply rounded-control border-l-4 px-4 py-3 text-base;
+    @apply rounded-control px-4 py-3.5 text-[0.9375rem] sm:px-5;
+    letter-spacing: -0.012em;
+    line-height: 1.47;
+    border-left: 0;
   }
   .notice-title {
     @apply font-semibold;
   }
   .notice-info {
-    @apply border-accent bg-accent-soft text-ink;
+    @apply bg-accent-soft text-ink;
   }
   .notice-warn {
-    @apply border-warning bg-warning-soft text-ink;
+    @apply bg-warning-soft text-ink;
   }
   .notice-error {
-    @apply border-danger bg-danger-soft text-ink;
+    @apply bg-danger-soft text-ink;
   }
   .notice-success {
-    @apply border-success bg-success-soft text-ink;
+    @apply bg-success-soft text-ink;
+  }
+  .notice-info .notice-title {
+    @apply text-accent;
+  }
+  .notice-warn .notice-title {
+    @apply text-warning;
+  }
+  .notice-error .notice-title {
+    @apply text-danger;
+  }
+  .notice-success .notice-title {
+    @apply text-success;
   }
 
   /* Badges */
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold leading-5;
+    letter-spacing: 0;
   }
   .badge-neutral {
     @apply bg-surface-muted text-muted;
@@ -352,29 +540,31 @@
 
   /* Werkzeugoberfläche */
   .drop-zone {
-    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-control bg-surface px-4 py-8 text-center transition-colors sm:px-6 sm:py-12;
+    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-strong bg-surface px-4 py-10 text-center sm:px-8 sm:py-14;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .drop-zone[data-dragging="true"] {
-    @apply border-solid border-accent bg-accent-soft;
+    @apply border-solid border-accent-fill bg-accent-soft;
   }
   .drop-zone[data-disabled="true"] {
     @apply border-border bg-surface-muted;
   }
   .file-list {
-    @apply flex flex-col divide-y divide-border rounded-card border border-border bg-surface;
+    @apply flex flex-col divide-y divide-border overflow-hidden rounded-card bg-surface;
+    box-shadow: var(--shadow-card);
   }
   .file-row {
-    @apply flex min-w-0 flex-col gap-3 p-4;
+    @apply flex min-w-0 flex-col gap-3 px-4 py-4 sm:px-5;
   }
   .file-row[data-status="invalid"],
   .file-row[data-status="error"] {
     @apply bg-danger-soft/40;
   }
   .file-name {
-    @apply truncate font-medium;
+    @apply truncate font-semibold;
   }
   .file-result {
-    @apply flex flex-col gap-3 rounded-control border border-border bg-surface-muted p-3;
+    @apply flex flex-col gap-3 rounded-control bg-surface-muted p-4;
   }
   .meta-list {
     @apply grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[max-content_minmax(0,1fr)];
@@ -383,12 +573,37 @@
     @apply flex flex-wrap gap-x-2 sm:contents;
   }
   .meta-list dt {
-    @apply font-medium text-muted;
+    @apply text-muted;
   }
   .meta-list dd {
-    @apply m-0 min-w-0;
+    @apply m-0 min-w-0 font-medium;
   }
   .progress {
-    @apply block h-2 w-full accent-accent;
+    @apply block h-1.5 w-full accent-accent-fill;
+  }
+  /* Bestimmter Fortschritt als schlanker, abgerundeter Balken; unbestimmter bleibt nativ animiert. */
+  .progress[value] {
+    @apply overflow-hidden rounded-full border-0 bg-fill;
+    appearance: none;
+  }
+  .progress[value]::-webkit-progress-bar {
+    @apply rounded-full bg-fill;
+  }
+  .progress[value]::-webkit-progress-value {
+    @apply rounded-full bg-accent-fill;
+  }
+  .progress[value]::-moz-progress-bar {
+    @apply rounded-full bg-accent-fill;
+  }
+  .variant-card {
+    @apply flex flex-col gap-3 rounded-card bg-surface p-6;
+    box-shadow: var(--shadow-card);
+  }
+  .variant-size {
+    @apply font-semibold;
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
   }
 }

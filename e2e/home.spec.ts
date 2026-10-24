@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('Startseite zeigt Einleitung und Werkzeugbereich; Ablauf nur bei verfügbaren Werkzeugen', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle(/– Dateiwerkzeuge$/);
+  await expect(page).toHaveTitle(/– MI converter$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Werkzeuge' })).toBeVisible();

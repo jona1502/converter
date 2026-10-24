@@ -1,4 +1,4 @@
-# Dateiwerkzeuge
+# MI converter
 
 Statische, deutschsprachige Astro-Website mit lokaler Dateiverarbeitung. React-Inseln bilden die interaktiven Werkzeuge, TypeScript prüft die Schnittstellen, Tailwind CSS gestaltet die Oberfläche.
 

@@ -14,34 +14,43 @@ const steps = [
   description="Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft im Browser auf Ihrem Gerät, Dateien werden nicht hochgeladen."
 >
   <div class="page-container">
-    <section aria-labelledby="titel">
-      <h1 id="titel" class="page-title">Dateien direkt im Browser bearbeiten</h1>
-      <p class="page-lead">
+    <section aria-labelledby="titel" class="hero">
+      <p class="page-eyebrow">MI converter</p>
+      <h1 id="titel" class="hero-title mt-2">Dateien direkt im Browser bearbeiten</h1>
+      <p class="hero-lead">
         Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft im Browser auf Ihrem Gerät –
         Ihre Dateien werden dabei nicht hochgeladen.
       </p>
-      <p class="mt-4">
-        <a href="/lokale-verarbeitung" class="link">Mehr zur lokalen Verarbeitung</a>
+      <p class="mt-6 text-lg">
+        <a href="/lokale-verarbeitung" class="link link-standalone">Mehr zur lokalen Verarbeitung<span aria-hidden="true"> ›</span></a>
       </p>
     </section>
 
-    <section class="page-section" aria-labelledby="werkzeuge">
-      <h2 id="werkzeuge" class="section-title">Werkzeuge</h2>
+    <section class="page-section sm:mt-24" aria-labelledby="werkzeuge">
+      <h2 id="werkzeuge" class="section-title text-center">Werkzeuge</h2>
       {
         availableToolsByCategory.length === 0 ? (
-          <p class="notice notice-info mt-6 max-w-2xl">
+          <p class="notice notice-info mx-auto mt-6 max-w-2xl">
             Derzeit ist noch kein Werkzeug freigeschaltet. Verfügbare Werkzeuge erscheinen an dieser Stelle.
           </p>
         ) : (
           availableToolsByCategory.map(({ category, tools }) => (
-            <div class="mt-6">
-              <h3 class="text-sm font-semibold uppercase tracking-wide text-muted">{category.title}</h3>
-              <ul class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-10">
+              <h3 class="section-kicker">{category.title}</h3>
+              <ul class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {tools.map((tool) => (
                   <li class="flex">
-                    <a href={tool.href} class="card-link flex w-full flex-col gap-2">
-                      <span class="card-title">{tool.title}</span>
+                    <a href={tool.href} class="card-link flex w-full flex-col gap-3">
+                      <span class="card-icon" aria-hidden="true">
+                        {category.id === 'pdf' ? (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.75" /><path d="m21 16-5-5-9 9" /></svg>
+                        )}
+                      </span>
+                      <span class="card-title mt-2">{tool.title}</span>
                       <span class="text-muted">{tool.description}</span>
+                      <span class="mt-auto pt-2 text-accent" aria-hidden="true">Öffnen ›</span>
                     </a>
                   </li>
                 ))}
@@ -53,21 +62,16 @@ const steps = [
     </section>
 
     {availableToolsByCategory.length > 0 && (
-    <section class="page-section" aria-labelledby="ablauf">
-      <h2 id="ablauf" class="section-title">So funktioniert es</h2>
-      <ol class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <section class="page-section sm:mt-24" aria-labelledby="ablauf">
+      <h2 id="ablauf" class="section-title text-center">So funktioniert es</h2>
+      <ol class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {
           steps.map((step, index) => (
-            <li class="card flex gap-4">
-              <span
-                class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent"
-                aria-hidden="true"
-              >
-                {index + 1}
-              </span>
+            <li class="card flex flex-col gap-3">
+              <span class="step-number" aria-hidden="true">{index + 1}</span>
               <div>
-                <p class="font-semibold">{step.title}</p>
-                <p class="mt-1 text-sm text-muted">{step.text}</p>
+                <p class="text-lg font-semibold">{step.title}</p>
+                <p class="mt-1 text-muted">{step.text}</p>
               </div>
             </li>
           ))
@@ -77,3 +81,7 @@ const steps = [
     )}
   </div>
 </BaseLayout>
+
+<style>
+  .step-number { font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; line-height: 1; letter-spacing: -.04em; color: var(--color-accent); }
+</style>

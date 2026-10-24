@@ -94,8 +94,8 @@ export function DropZone({
       <svg className="size-10 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
       </svg>
-      <p className="text-lg font-semibold">{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
-      <p className="text-muted">oder</p>
+      <p className="text-xl font-semibold tracking-tight">{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
+      <p className="hint">oder</p>
       <label htmlFor={inputId} className="sr-only">
         {buttonLabel} (Dateifeld)
       </label>

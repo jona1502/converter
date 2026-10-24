@@ -110,25 +110,26 @@ export default function PdfCompressor() {
     .slice(0, 100).join('').replace(/[\s.]+$/, '') || 'dokument';
   if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(stem)) stem = `_${stem}`;
   return <div className="space-y-6">
-    <div className="notice notice-warn">
+    <div className="notice notice-warn space-y-2">
       <p>Digitale Signaturen werden durch das Neuschreiben ungültig. Wählen Sie keine signierte PDF aus, deren Signatur gültig bleiben muss.</p>
       <p>Text und Vektoren bleiben erhalten. Maskierte Bilder, besondere Farbräume und einige Bildformate bleiben unverändert. Eine kleinere Datei ist nicht garantiert.</p>
     </div>
-    <div className="card p-6 space-y-4" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (ready) void select(event.dataTransfer.files); }}>
-      <p>Eine PDF hier ablegen oder auswählen. Die Verarbeitung läuft auf Ihrem Gerät, ohne Upload.</p>
-      <p className="text-sm text-muted">Maximal {formatBytes(PDF_LIMITS.maxFileBytes)}. Alle drei Varianten werden nacheinander berechnet; bei großen Dateien kann dies dauern.</p>
+    <div className="drop-zone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (ready) void select(event.dataTransfer.files); }}>
+      <svg className="size-10 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 18v-6m0 0-2.5 2.5M12 12l2.5 2.5" /></svg>
+      <p className="max-w-prose text-lg font-semibold tracking-tight">Eine PDF hier ablegen oder auswählen. Die Verarbeitung läuft auf Ihrem Gerät, ohne Upload.</p>
+      <p className="hint max-w-prose">Maximal {formatBytes(PDF_LIMITS.maxFileBytes)}. Alle drei Varianten werden nacheinander berechnet; bei großen Dateien kann dies dauern.</p>
       <input ref={input} className="sr-only" type="file" accept=".pdf,application/pdf" aria-label="PDF-Datei" tabIndex={-1} onChange={event => { if (event.target.files) void select(event.target.files); event.target.value = ''; }} />
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <button ref={choose} type="button" className="btn btn-primary" disabled={!ready} onClick={() => input.current?.click()}>PDF auswählen</button>
         {name && <button type="button" className="btn btn-secondary" onClick={reset}>Zurücksetzen</button>}
       </div>
-      {name && <p className="break-all">Ausgewählt: {name}</p>}
+      {name && <p className="break-all text-sm">Ausgewählt: {name}</p>}
     </div>
     <div role="status" aria-live="polite" aria-atomic="true">
       {busy && !analysis && <p>PDF wird analysiert …</p>}
       {notice && <p>{notice}</p>}
       {error && <p className="notice notice-error">{error}</p>}
-      {analysis && <div className="space-y-2">
+      {analysis && <div className="card-muted space-y-2">
         <p>Original: {formatBytes(analysis.fileSize)} · {analysis.pageCount} Seiten · {analysis.images.total} Bilder, davon {analysis.images.recompressible} grundsätzlich komprimierbar.</p>
         {analysis.images.recompressible === 0 && <p>Keine neu kodierbaren Bilder gefunden. Es ist nur eine verlustfreie Optimierung möglich; die Einsparung kann gering sein.</p>}
         {analysis.images.total > analysis.images.recompressible && <p>{analysis.images.total - analysis.images.recompressible} Bilder bleiben unverändert.</p>}
@@ -136,19 +137,19 @@ export default function PdfCompressor() {
         {analysis.limitations.some(l => l.code === 'signatures-invalidated') && <p className="notice notice-warn">Die PDF enthält digitale Signaturen. Die Ergebnisse besitzen keine gültigen ursprünglichen Signaturen.</p>}
       </div>}
     </div>
-    {analysis && <div className="grid gap-4 md:grid-cols-3">
+    {analysis && <div className="grid gap-5 md:grid-cols-3">
       {PDF_QUALITY_LEVELS.map(level => {
         const download = downloads[level];
         const change = download ? formatSizeChange(download.result.originalSize, download.result.size) : null;
-        return <section key={level} className="card p-5 space-y-3" aria-labelledby={`pdf-${level}`}>
-          <h2 id={`pdf-${level}`} className="text-xl font-semibold">{labels[level]}</h2>
-          <p className="text-sm text-muted">{descriptions[level]}</p>
+        return <section key={level} className="variant-card" aria-labelledby={`pdf-${level}`}>
+          <h2 id={`pdf-${level}`} className="card-title">{labels[level]}</h2>
+          <p className="hint">{descriptions[level]}</p>
           <p role="status" aria-live="polite">{phase(statuses[level])}</p>
           {download && <>
-            <p className="text-2xl font-semibold">{formatBytes(download.result.size)}</p>
+            <p className="variant-size">{formatBytes(download.result.size)}</p>
             <p>{change?.percent} · {change?.kind === 'larger' ? 'Größer als das Original' : change?.kind === 'equal' ? 'Keine Einsparung' : 'Kleiner als das Original'}</p>
             {download.result.imagesSkipped > 0 && <p className="text-sm">{download.result.imagesSkipped} Bilder unverändert übersprungen.</p>}
-            <a className="btn btn-primary" href={download.url} download={`${stem}-${level}.pdf`}>{labels[level]} herunterladen</a>
+            <a className="btn btn-primary mt-auto" href={download.url} download={`${stem}-${level}.pdf`}>{labels[level]} herunterladen</a>
           </>}
         </section>;
       })}

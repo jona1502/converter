@@ -2,6 +2,13 @@
 
 Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-plan.md), Abschnitt 7. Neueste Einträge oben. Hashes stehen nur in der Git-Historie.
 
+## D01 – vorhandenen Designstand sichern
+
+- **Änderungen:** Bereits vor Übernahme vorhandene Umbenennung in MI converter, neue Gestaltung, Dark Mode, Navigation und Footer getrennt vom Backend gesichert.
+- **Review:** Unabhängiger Agent `frontend_review`; keine bestätigten Regressionen, keine Nachbearbeitung erforderlich.
+- **Prüfung:** Astro-Check ohne Befunde; Produktionsbuild erfolgreich; 92 E2E bestanden, vier geräteabhängig übersprungen. Zusätzliche Dark-Mode-axe-/Überlaufprüfung auf sechs Seiten bei 390 px ohne Befund.
+- **Grenze:** Dies ist die bestehende lokale Oberfläche; Servermigration folgt in B10/B11.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`
