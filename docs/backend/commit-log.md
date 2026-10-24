@@ -30,6 +30,19 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Prüfung:** Echter Kindprozess mit gültigem Bilddownload, Größe, Headern, Besitzerbindung und Ablauf geprüft. Health mit fehlendem Pflichtcodec liefert 503. Gesamter Stack über HTTP-Smoke für alle vier Operationen erfolgreich, einschließlich drei PDF-Downloads.
 - **Hinweis:** Die gemeinsame Pipeline enthält bereits die Resize-/Kompressionsprimitive; deren vollständige Verhaltensmatrix und Abnahme folgen B06.
 
+## B06
+
+- **Änderungen:** Bildkomprimierung/-skalierung anhand einer vollständigen semantischen Matrix abgesichert: alle Eingaben/Ausgaben, Prozent/Zielmaße, JS-kompatible Rundung, kein unbeabsichtigtes Upscaling, EXIF, ICC→sRGB, Transparenz, ICO-Einträge und begrenzte Ausgabe.
+- **Review:** Unabhängig durch `tests_b03`; keine blockierenden Befunde. Der native JPEG-Dateideskriptor-Bypass wurde durch einen begrenzten Writer ohne freigegebenen `fileno` verhindert.
+- **Prüfung:** 52 Bildtests bestanden; JPEG/WebP-Qualität beeinflusst echte Größen, PNG bleibt bei geändertem Qualitätswert bytegleich. Gemeinsame Pipeline bereits in B05 eingeführt, dieser Commit ergänzt die vollständige Operationsabnahme.
+
+## B07
+
+- **Änderungen:** pikepdf/Pillow-Kern mit striktem Öffnen, Verschlüsselungsablehnung, rekursiver Platzierungsanalyse, konservativer Bildstream-Ersetzung, verlustfreier Streamoptimierung und begrenztem Ergebniswriter. Unbekannte Platzierungen werden ausdrücklich gemeldet.
+- **Review:** Unabhängig durch `backend_b03` und Hauptagent; Fehlercode `save-failed` in den gemeinsamen Antwortvertrag aufgenommen. Zählung neu komprimierter Streams dekodiert fremde Flate-Streams nur begrenzt.
+- **Prüfung:** Acht PDF-Kerntests bestanden: drei Stufen, gemeinsame Bilder/größte Platzierung, nichtkommutative Formtransformation, Zyklen, PNG-Predictor, Masken, Verschlüsselung, Limits, Text/Formular/Link/Outline/Seitengeometrie und unabhängiges PDFium-Rendering.
+- **Grenzen:** Keine Rasterung ganzer Seiten, keine OCR/Font-Untermenge, unsichere Bilder unverändert; reale signierte/PDF-A-Dokumente sind keine garantierte Erhaltungsklasse.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`
