@@ -51,6 +51,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Review:** Hauptagent unabhängig vom API-Autor: Besitzer-/CSRF-Prüfung, Transaktionsgrenzen, Multipart-/Deadline-/Header-/Downloadregeln gelesen und Korrekturen angefordert; `go_jobs` meldete ebenfalls Deadline-Reset. Letzter Subagent-Nachreview war wegen Nutzungslimit nicht vollständig verfügbar; keine erfundene weitere Freigabe.
 - **Prüfung:** Autor: zehn Endpoint-/Header-/Golden-/Securitytests mit Race und Vet grün. Hauptagent: echter HTTP-Smoke für alle vier Werkzeuge erfolgreich; erster Gesamtbrowserlauf gegen Go: 176 bestanden, vier geräteabhängig übersprungen. Nach letztem Header-Hardening folgt erneute Abschlussprüfung G11.
 
+## G09
+
+- **Änderungen:** Go-Cleanup für Ablauf/Deletion, alte Arbeitsversuche, Download-Leases, Uploadreservierungen, verwaiste Dateien und Sitzungen. Dateien vor Bytefreigabe entfernen, unklare Promotionen anhand Reservierungs-/Job-ID sicher zuordnen. Eigener Cleanupbefehl mit begrenzten DB-Kontexten.
+- **Review:** `go_converter` prüfte Cleanup/Jobs unabhängig und bestätigte nach Korrekturen keine hohen/mittleren Befunde; Hauptagent Integration zusätzlich gelesen.
+- **Prüfung:** DB-/Raceprüfungen für Expiry/Delete während laufender Arbeit, Budgethold, Uploadreste, Download-Leases und wiederholten Neustart bestanden. Keine Löschung von Nutzdaten im Teststack.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
