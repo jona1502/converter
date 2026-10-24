@@ -2,6 +2,17 @@
 
 Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-plan.md), Abschnitt 7. Neueste Einträge oben. Hashes stehen nur in der Git-Historie.
 
+## B02
+
+- **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`
+- **Änderungen:** uv-Projekt `backend/` (Python 3.13, `uv.lock` mit `exclude-newer` 2026-10-17 als 7-Tage-Karenz). App-Factory, Settings mit Präfix `CONVERTER_` (Production verlangt Secret ≥ 32 Zeichen, Secure-Cookie, Origins; Eingabewerte in Validierungsfehlern verborgen, `SecretStr`). Fehlerformat laut Vertrag inklusive 404/405/422/500/503, begrenzte `fields`, Middleware für Request-Id, `no-store` und `nosniff`. JSON-Logs über eine Allowlist ohne Body, Header und Ausnahmetexte. Health live/ready mit Check-Register, Timeout und höchstens einem hängenden Thread je Check, Storage-Check. Export von `openapi.json` mit Drift-Test; `.gitattributes` erzwingt LF für alle Textdateien. Ruff, mypy strict, pytest. Dockerfile mit Digest-Pins, Non-Root (10001), ohne Dev-Abhängigkeiten, Proxy-Header nur mit `CONVERTER_TRUSTED_PROXIES`. API-Titel „MI converter API“.
+- **Prüfung:** Autor war der Backend/Jobs-Agent, das Review machte ein unabhängiger Review-Agent in zwei Runden.
+  - Befund Hoch: Settings-Fehler gaben den Secret-Anfang und das DB-Passwort im Startlog aus. Behoben und mit Repro bestätigt (0 Treffer).
+  - Befunde Mittel: hängende Readiness-Checks konnten den Threadpool erschöpfen; Lieferketten-Alter der Versionen (1–6 Tage). Beides behoben.
+  - Niedrige Befunde behoben (Pfadbegrenzung, 5xx-Zuordnung, Exception-Logs, schlankeres Image, Allowlist in `.dockerignore`). Offen und bewusst: OpenAPI-Routen erscheinen im Log als `unmatched`.
+- **Checks:** `uv lock --check` (35 Pakete), `ruff check`, `ruff format --check`, `mypy` (strict, 31 Dateien) und `export_openapi.py --check`, alle mit Exit 0. `pytest` 62 bestanden, 1 übersprungen (POSIX-chmod-Test unter Windows), vom Reviewer und vom Hauptagenten wiederholt. Docker-Build und Container: live/ready 200, Status `healthy`, `/docs` in Production 404, Cookie und Query nicht im Log.
+- **Einschränkungen:** Ready prüft bisher nur Storage; Datenbank, Redis und Capabilities folgen in B03–B05. fastapi ist wegen der Karenz 0.143.3 statt der neuesten 0.162.0. Ohne Ausnahmetexte in Logs ist die Diagnose bewusst schwerer.
+
 ## B01
 
 - **Commit-Nachricht:** `docs(backend): B01 Architektur und API-Vertrag festlegen`

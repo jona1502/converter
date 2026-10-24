@@ -1,0 +1,9 @@
+# Allowlist: alles ausschließen, nur das für das Image Nötige zulassen.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!app/
+!migrations/
+**/__pycache__/
+**/*.py[cod]

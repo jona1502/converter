@@ -1,0 +1,87 @@
+[project]
+name = "converter-backend"
+version = "0.1.0"
+description = "FastAPI-Backend für die Converter-Website (Serververarbeitung von Bildern und PDFs)"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+# Obergrenzen verhindern unbeabsichtigte Major-Sprünge; maßgeblich für
+# reproduzierbare Builds ist uv.lock (`uv sync --frozen`).
+dependencies = [
+    "fastapi>=0.143.3,<0.144",
+    "pydantic>=2.14.1,<3",
+    "pydantic-settings>=2.16.0,<3",
+    # uvicorn ohne [standard]: nur die Beschleuniger, die der Server nutzt;
+    # kein watchfiles (Reload) und keine websockets im Image.
+    "uvicorn>=0.54.0,<0.55",
+    "httptools>=0.9.0,<0.10",
+    "uvloop>=0.23.0,<0.24; sys_platform == 'linux'",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.13.1,<3",  # von starlette.testclient benötigt (Nachfolger von httpx)
+    "mypy>=2.4.0,<3",
+    "pytest>=9.1.1,<10",
+    "ruff>=0.17.1,<0.18",
+]
+
+# Kein installierbares Paket: uv verwaltet nur die Umgebung, `app` wird
+# über das Arbeitsverzeichnis importiert.
+[tool.uv]
+package = false
+# Lieferkettenschutz: nur Releases, die vor diesem Zeitpunkt erschienen sind.
+# Bewusst fest (nicht relativ), damit `uv lock` reproduzierbar bleibt; beim
+# gezielten Aktualisieren der Abhängigkeiten mit vorschieben.
+exclude-newer = "2026-10-17T00:00:00Z"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # isort
+    "UP",      # pyupgrade
+    "B",       # bugbear
+    "S",       # bandit (Sicherheit)
+    "C4",      # comprehensions
+    "SIM",     # Vereinfachungen
+    "RUF",     # ruff-eigene Regeln
+    "PTH",     # pathlib statt os.path
+    "T20",     # keine print-Aufrufe in App-Code
+]
+
+# Deutsche Texte verwenden den Gedankenstrich bewusst.
+allowed-confusables = ["–"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: assert ist in pytest das Prüfmittel.
+# S105/S106: Testkonfiguration enthält bewusst Platzhalter-Secrets.
+"tests/**" = ["S101", "S105", "S106"]
+# Skripte dürfen auf stdout schreiben.
+"scripts/**" = ["T20"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["app", "tests", "scripts"]
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]

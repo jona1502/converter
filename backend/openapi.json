@@ -1,0 +1,241 @@
+{
+  "components": {
+    "schemas": {
+      "ApiErrorCode": {
+        "description": "Stabile, maschinenlesbare Fehlercodes für HTTP-Fehlerantworten.",
+        "enum": [
+          "invalid-request",
+          "invalid-options",
+          "missing-file",
+          "unsupported-type",
+          "not-pdf",
+          "file-too-large",
+          "dimensions-too-large",
+          "animated-unsupported",
+          "original-format-unsupported",
+          "invalid-idempotency-key",
+          "idempotency-conflict",
+          "session-required",
+          "csrf-failed",
+          "job-not-found",
+          "result-not-found",
+          "job-expired",
+          "rate-limited",
+          "session-job-limit",
+          "server-busy",
+          "storage-full",
+          "service-unavailable",
+          "internal-error",
+          "not-found",
+          "method-not-allowed"
+        ],
+        "title": "ApiErrorCode",
+        "type": "string"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ApiErrorCode"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FieldError"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "retryAfterSeconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retryafterseconds"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          },
+          "requestId": {
+            "title": "Requestid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "FieldError": {
+        "additionalProperties": false,
+        "description": "Ein ungültiges Feld: nur Pfad und Fehlerart, nie der Eingabewert.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "code"
+        ],
+        "title": "FieldError",
+        "type": "object"
+      },
+      "LiveResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "LiveResponse",
+        "type": "object"
+      },
+      "ReadyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "enum": [
+                "ok",
+                "fail"
+              ],
+              "type": "string"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadyResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "MI converter API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "description": "Prüft keine Abhängigkeiten – nur, ob der Prozess Anfragen beantwortet.",
+        "operationId": "live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          }
+        },
+        "summary": "Prozess antwortet",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unerwarteter Fehler"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            },
+            "description": "Mindestens eine Prüfung fehlgeschlagen"
+          }
+        },
+        "summary": "Benötigte Abhängigkeiten erreichbar",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}
