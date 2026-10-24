@@ -6,3 +6,12 @@
 !src/
 !public/
 !infra/
+!server/
+!converter/
+!api/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.data/

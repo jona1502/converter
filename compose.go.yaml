@@ -1,0 +1,122 @@
+# Parallel Go acceptance stack: private volumes, no access to legacy user data.
+name: mi-converter-go
+
+x-settings: &settings
+  CONVERTER_ENVIRONMENT: development
+  CONVERTER_SECRET_KEY: ${CONVERTER_SECRET_KEY:-local-development-only-change-before-hosting-2026}
+  CONVERTER_ALLOWED_ORIGINS: ${CONVERTER_ALLOWED_ORIGINS:-http://localhost:8081,http://127.0.0.1:8081}
+  CONVERTER_SESSION_COOKIE_SECURE: "false"
+  CONVERTER_DATABASE_URL: postgres://converter:converter@db:5432/converter?sslmode=disable
+  CONVERTER_REDIS_URL: redis://broker:6379/0
+  CONVERTER_STORAGE_DIR: /data/storage
+  CONVERTER_IP_CREATES_PER_MINUTE: ${CONVERTER_IP_CREATES_PER_MINUTE:-10}
+  CONVERTER_SESSION_CREATES_PER_MINUTE: ${CONVERTER_SESSION_CREATES_PER_MINUTE:-10}
+  CONVERTER_SESSION_NEW_PER_MINUTE: ${CONVERTER_SESSION_NEW_PER_MINUTE:-30}
+
+x-service: &service
+  init: true
+  restart: unless-stopped
+  environment: *settings
+  volumes: [files:/data/storage]
+  read_only: true
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  mem_limit: 256m
+  cpus: 1
+  pids_limit: 128
+  depends_on:
+    db: {condition: service_healthy}
+    broker: {condition: service_healthy}
+    migrate: {condition: service_completed_successfully}
+
+services:
+  migrate:
+    build: {context: ., dockerfile: server/Dockerfile, target: runtime}
+    image: mi-converter-go-api:local
+    entrypoint: [/app/migrate]
+    command: [up]
+    environment: *settings
+    restart: "no"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 1
+    depends_on:
+      db: {condition: service_healthy}
+
+  api:
+    <<: *service
+    build: {context: ., dockerfile: server/Dockerfile, target: runtime}
+    image: mi-converter-go-api:local
+    environment:
+      <<: *settings
+      CONVERTER_TRUSTED_PROXIES: 172.30.219.10/32
+    networks: {default: {}, frontend: {}}
+    healthcheck:
+      test: [CMD, /app/health]
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+      retries: 20
+
+  worker:
+    <<: *service
+    build: {context: ., dockerfile: server/Dockerfile, target: worker}
+    image: mi-converter-go-worker:local
+    mem_limit: 1536m
+    cpus: 2
+    stop_grace_period: 35s
+
+  cleanup:
+    <<: *service
+    image: mi-converter-go-api:local
+    entrypoint: [/app/cleanup]
+
+  web:
+    build: {context: ., dockerfile: infra/Dockerfile.web}
+    image: mi-converter-go-web:local
+    ports: ["127.0.0.1:8081:8080"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 1
+    depends_on:
+      api: {condition: service_healthy}
+    networks:
+      frontend: {ipv4_address: 172.30.219.10}
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:8080/]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: postgres:18-alpine@sha256:898c60cb390d1085bc97bdd6a1ae968757421df394b071848b52b1c09c89d6a5
+    environment: {POSTGRES_USER: converter, POSTGRES_PASSWORD: converter, POSTGRES_DB: converter}
+    volumes: [db-data:/var/lib/postgresql]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U converter -d converter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  broker:
+    image: valkey/valkey:9-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
+    command: [valkey-server, --save, "", --appendonly, "no"]
+    healthcheck:
+      test: [CMD, valkey-cli, ping]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  db-data:
+  files:
+networks:
+  frontend:
+    ipam:
+      config: [{subnet: 172.30.219.0/24}]

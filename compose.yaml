@@ -1,38 +1,29 @@
-# MI converter – Docker Compose (lokaler Betrieb, keine öffentliche Bereitstellung).
-#
-# Vollständiger lokaler Stack mit einmaliger Migration.
-# Veröffentlichte Ports sind ausschließlich an 127.0.0.1 gebunden.
-#
-#   docker compose up -d --build --wait
-#   CONVERTER_DATABASE_URL=postgresql+psycopg://converter:converter@127.0.0.1:55432/converter
-
+# Go backend: API, PostgreSQL queue, private Python codecs, reliable cleanup.
 name: mi-converter
 
-x-backend: &backend
-  build: ./backend
-  image: mi-converter-backend:local
+x-settings: &settings
+  CONVERTER_ENVIRONMENT: development
+  CONVERTER_SECRET_KEY: ${CONVERTER_SECRET_KEY:-local-development-only-change-before-hosting-2026}
+  CONVERTER_ALLOWED_ORIGINS: ${CONVERTER_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+  CONVERTER_SESSION_COOKIE_SECURE: "false"
+  CONVERTER_DATABASE_URL: postgres://converter:converter@db:5432/converter?sslmode=disable
+  CONVERTER_REDIS_URL: redis://broker:6379/0
+  CONVERTER_STORAGE_DIR: /data/storage
+  CONVERTER_IP_CREATES_PER_MINUTE: ${CONVERTER_IP_CREATES_PER_MINUTE:-10}
+  CONVERTER_SESSION_CREATES_PER_MINUTE: ${CONVERTER_SESSION_CREATES_PER_MINUTE:-10}
+  CONVERTER_SESSION_NEW_PER_MINUTE: ${CONVERTER_SESSION_NEW_PER_MINUTE:-30}
+
+x-service: &service
   init: true
   restart: unless-stopped
-  environment: &environment
-    CONVERTER_ENVIRONMENT: development
-    CONVERTER_SECRET_KEY: ${CONVERTER_SECRET_KEY:-local-development-only-change-before-hosting-2026}
-    CONVERTER_ALLOWED_ORIGINS: ${CONVERTER_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
-    CONVERTER_SESSION_COOKIE_SECURE: "false"
-    CONVERTER_DATABASE_URL: postgresql://converter:converter@db:5432/converter
-    CONVERTER_REDIS_URL: redis://broker:6379/0
-    CONVERTER_IP_CREATES_PER_MINUTE: ${CONVERTER_IP_CREATES_PER_MINUTE:-10}
-    CONVERTER_SESSION_CREATES_PER_MINUTE: ${CONVERTER_SESSION_CREATES_PER_MINUTE:-10}
-    CONVERTER_SESSION_NEW_PER_MINUTE: ${CONVERTER_SESSION_NEW_PER_MINUTE:-30}
-    CONVERTER_STORAGE_DIR: /data/storage
-  volumes:
-    - files:/data/storage
+  environment: *settings
+  volumes: [files:/data/storage]
   read_only: true
-  tmpfs:
-    - /tmp:rw,noexec,nosuid,size=64m
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
-  mem_limit: 1536m
-  cpus: 2
+  mem_limit: 256m
+  cpus: 1
   pids_limit: 128
   depends_on:
     db: {condition: service_healthy}
@@ -41,100 +32,91 @@ x-backend: &backend
 
 services:
   migrate:
-    build: ./backend
-    image: mi-converter-backend:local
-    environment: *environment
-    command: ["alembic", "upgrade", "head"]
+    build: {context: ., dockerfile: server/Dockerfile, target: runtime}
+    image: mi-converter-go-api:local
+    entrypoint: [/app/migrate]
+    command: [up]
+    environment: *settings
     restart: "no"
-    depends_on:
-      db: {condition: service_healthy}
-    healthcheck: {disable: true}
-    cap_drop: [ALL]
-    security_opt: [no-new-privileges:true]
-
-  api:
-    <<: *backend
-    environment:
-      <<: *environment
-      CONVERTER_TRUSTED_PROXIES: 172.30.218.10/32
-    networks:
-      default: {}
-      frontend: {}
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready',timeout=4)"]
-      interval: 10s
-      timeout: 5s
-      start_period: 15s
-      retries: 6
-
-  worker:
-    <<: *backend
-    command: ["celery", "-A", "app.worker.celery_app:celery_app", "worker", "--loglevel=WARNING", "--concurrency=1", "--pool=solo"]
-    healthcheck: {disable: true}
-
-  dispatcher:
-    <<: *backend
-    command: ["python", "-m", "app.jobs.dispatcher"]
-    healthcheck: {disable: true}
-
-  cleanup:
-    <<: *backend
-    command: ["python", "-m", "app.jobs.cleanup"]
-    healthcheck: {disable: true}
-
-  web:
-    build:
-      context: .
-      dockerfile: infra/Dockerfile.web
-    ports: ["127.0.0.1:8080:8080"]
-    restart: unless-stopped
-    depends_on:
-      api: {condition: service_healthy}
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=32m
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     mem_limit: 128m
     cpus: 1
-    networks:
-      frontend:
-        ipv4_address: 172.30.218.10
-  db:
-    image: postgres:18-alpine@sha256:898c60cb390d1085bc97bdd6a1ae968757421df394b071848b52b1c09c89d6a5
+    depends_on:
+      db: {condition: service_healthy}
+
+  api:
+    <<: *service
+    build: {context: ., dockerfile: server/Dockerfile, target: runtime}
+    image: mi-converter-go-api:local
     environment:
-      POSTGRES_USER: converter
-      POSTGRES_PASSWORD: converter # nur lokal; Produktion über Secrets (B12)
-      POSTGRES_DB: converter
-    ports:
-      - "127.0.0.1:55432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql
+      <<: *settings
+      CONVERTER_TRUSTED_PROXIES: 172.30.218.10/32
+    networks: {default: {}, frontend: {}}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U converter -d converter"]
+      test: [CMD, /app/health]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
+      start_period: 20s
       retries: 20
 
-  # Redis-kompatibler Broker. Valkey (BSD-3) statt Redis ≥ 8 (AGPL/RSAL/SSPL),
-  # siehe docs/backend/api-contract.md, Abschnitt 7.
+  worker:
+    <<: *service
+    build: {context: ., dockerfile: server/Dockerfile, target: worker}
+    image: mi-converter-go-worker:local
+    mem_limit: 1536m
+    cpus: 2
+    stop_grace_period: 35s
+
+  cleanup:
+    <<: *service
+    image: mi-converter-go-api:local
+    entrypoint: [/app/cleanup]
+
+  web:
+    build: {context: ., dockerfile: infra/Dockerfile.web}
+    image: mi-converter-go-web:local
+    ports: ["127.0.0.1:8080:8080"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 1
+    depends_on:
+      api: {condition: service_healthy}
+    networks:
+      frontend: {ipv4_address: 172.30.218.10}
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:8080/]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: postgres:18-alpine@sha256:898c60cb390d1085bc97bdd6a1ae968757421df394b071848b52b1c09c89d6a5
+    environment: {POSTGRES_USER: converter, POSTGRES_PASSWORD: converter, POSTGRES_DB: converter}
+    volumes: [db-data:/var/lib/postgresql]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U converter -d converter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
   broker:
     image: valkey/valkey:9-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
-    command: ["valkey-server", "--save", "", "--appendonly", "no"]
-    ports:
-      - "127.0.0.1:56379:6379"
+    command: [valkey-server, --save, "", --appendonly, "no"]
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
-      interval: 5s
+      test: [CMD, valkey-cli, ping]
+      interval: 2s
       timeout: 3s
-      retries: 20
+      retries: 30
 
 volumes:
   db-data:
   files:
-
 networks:
   frontend:
     ipam:
-      config:
-        - subnet: 172.30.218.0/24
+      config: [{subnet: 172.30.218.0/24}]
