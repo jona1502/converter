@@ -1,3 +1,5 @@
+> Legacy: FastAPI-Referenz und Rückweg. Standardbetrieb ist jetzt das Go-Backend in `server/`; siehe `docs/go-backend/operations.md`.
+
 # MI converter – FastAPI
 
 Installation, Architektur und Datenschutz: [Projekt-README](../README.md). Vertrag: [api-contract.md](../docs/backend/api-contract.md).

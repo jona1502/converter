@@ -85,3 +85,7 @@ Go-Dockerimages, Standard-Compose, Vergleichsstack, Legacy-Rueckweg, Healthprobe
 ## G11
 
 Finale HTTP-Kontexte begrenzt, Privacy-Allowlist und PDF-Hinweis geprueft, Smoke-/Cutover-/Messskripte integriert. Go Vet und Race vollstaendig gruen; finale Browserpruefung 176 bestanden / 4 uebersprungen. Echter isolierter Go-Python-Lauf und HTTP-Smoke fuer alle vier Werkzeuge bestanden. Cutover und Rueckweg mit bestehender Sitzung und wartendem Auftrag bestanden.
+
+## G12
+
+Standardbetrieb vollstaendig auf Go umgestellt; kein FastAPI/Celery im Zielruntime. Legacy-Quellcode als Rueckweg markiert und bewusst erhalten (Abweichung vom vollstaendigen Entfernen). Beide Betriebswechsel praktisch getestet; Datenvolumes erhalten.
