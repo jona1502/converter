@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { LIMITS, type ImageFormat, type ProcessOptions } from '../../lib/image';
+import { type ImageFormat, type ProcessOptions } from '../../lib/image';
 import { formatBytes } from '../../lib/format';
 import { ActionBar } from './ActionBar';
 import { DropZone } from './DropZone';
@@ -12,7 +12,7 @@ import { useImageBatch } from './useImageBatch';
 const OUTPUTS: readonly ImageFormat[] = ['jpeg', 'webp', 'png'];
 
 export default function ImageCompressor() {
-  const batch = useImageBatch();
+  const batch = useImageBatch('image-compress');
   const encode = batch.support.status === 'ready' ? batch.support.encode : null;
   const [format, setFormat] = useState<ImageFormat>('jpeg');
   const [quality, setQuality] = useState(75);
@@ -26,15 +26,15 @@ export default function ImageCompressor() {
     if (encode && !encode[format]) setFormat(OUTPUTS.find(item => encode[item]) ?? 'png');
   }, [encode, format]);
   const edge = Number(maxEdge);
-  const validEdge = maxEdge === '' || (Number.isInteger(edge) && edge > 0 && edge <= LIMITS.maxEdge);
+  const validEdge = maxEdge === '' || (Number.isInteger(edge) && edge > 0 && edge <= batch.limits.maxEdge);
   const options = useMemo<ProcessOptions>(() => ({
     format, quality: quality / 100, background,
     resize: maxEdge === '' ? { mode: 'none' } : { mode: 'maxEdge', maxEdge: edge },
   }), [format, quality, background, maxEdge, edge]);
   const key = JSON.stringify(options);
-  const reason = batch.support.status === 'unsupported' ? 'Ihr Browser unterstützt dieses Werkzeug nicht.'
-    : !encode ? 'Die Browserunterstützung wird geprüft.'
-    : !encode[format] ? 'Ihr Browser kann das gewählte Zielformat nicht erzeugen.'
+  const reason = batch.support.status === 'unsupported' ? 'Der Server unterstützt dieses Werkzeug nicht.'
+    : !encode ? 'Die Serverfunktionen werden geprüft.'
+    : !encode[format] ? 'Der Server kann das gewählte Zielformat nicht erzeugen.'
     : batch.isProcessing ? 'Die Verarbeitung läuft.'
     : batch.counts.checking ? 'Die Dateien werden geprüft.'
     : !validEdge ? 'Geben Sie eine gültige maximale Kantenlänge ein.'
@@ -46,9 +46,9 @@ export default function ImageCompressor() {
       <h2 id="compress-files" className="section-title">1. Bilder auswählen</h2>
       <DropZone accept={acceptAttribute(INPUT_FORMATS)} disabled={!encode} buttonRef={buttonRef} onFiles={files => {
         const outcome = batch.addFiles(files);
-        setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien wurden nicht hinzugefügt. Höchstens ${LIMITS.maxFiles} Dateien sind gleichzeitig erlaubt.` : '');
+        setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien wurden nicht hinzugefügt. Höchstens ${batch.limits.maxFiles} Dateien sind gleichzeitig erlaubt.` : '');
       }}>
-        <p>{formatList(INPUT_FORMATS)}; nur unbewegte Bilder. Höchstens {LIMITS.maxFiles} Dateien, je {formatBytes(LIMITS.maxFileBytes)} und 40 Megapixel.</p>
+        <p>{formatList(INPUT_FORMATS)}; nur unbewegte Bilder. Höchstens {batch.limits.maxFiles} Dateien, je {formatBytes(batch.limits.maxFileBytes)} und {(batch.limits.maxPixels / 1_000_000).toLocaleString('de-DE')} Megapixel.</p>
       </DropZone>
       {limitMessage && <p role="alert" className="notice notice-error">{limitMessage}</p>}
     </section>
@@ -59,8 +59,8 @@ export default function ImageCompressor() {
       {format === 'png' && <p className="notice notice-info">PNG wird nur neu kodiert; eine kleinere Datei ist nicht garantiert. Wählen Sie JPEG oder WebP für verlustbehaftete Komprimierung oder verkleinern Sie die Abmessungen.</p>}
       <BackgroundColor format={format} value={background} onChange={setBackground} />
       <div className="field"><label className="label" htmlFor={edgeId}>Maximale Kantenlänge (optional)</label>
-        <input id={edgeId} className="input" type="number" min={1} max={LIMITS.maxEdge} step={1} value={maxEdge} onChange={event => setMaxEdge(event.currentTarget.value)} aria-describedby={edgeHint} aria-invalid={!validEdge} />
-        <p id={edgeHint} className={validEdge ? 'hint' : 'field-error'}>Leer lassen für Originalabmessungen. Sonst 1 bis 16.384 Pixel; kleinere Bilder werden nicht vergrößert.</p>
+        <input id={edgeId} className="input" type="number" min={1} max={batch.limits.maxEdge} step={1} value={maxEdge} onChange={event => setMaxEdge(event.currentTarget.value)} aria-describedby={edgeHint} aria-invalid={!validEdge} />
+        <p id={edgeHint} className={validEdge ? 'hint' : 'field-error'}>Leer lassen für Originalabmessungen. Sonst 1 bis {batch.limits.maxEdge.toLocaleString('de-DE')} Pixel; kleinere Bilder werden nicht vergrößert.</p>
       </div>
     </section>
     <section className="flex flex-col gap-4" aria-labelledby="compress-start">

@@ -56,6 +56,12 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Prüfung:** 22 Lifecycle-/Runtime-/Migrationsprüfungen durch Reviewer gegen dedizierte Testdatenbank bestanden; gezielte Valkey-Limits/Fail-closed-Tests vorhanden. Ruff, Format und mypy des gesamten aktuellen Backends grün. Vollständiger Abschlusslauf folgt B13.
 - **Grenzen:** Bei Crash können Arbeitsreserven konservativ bis zum sicheren Parserende plus Cleanup gehalten werden. Kein sofortiges Löschen bei abgestelltem Stack oder gestörter Datenbank versprechen. Rateprüfung zählt Erstellversuche vor Annahme; bestehende idempotente Wiederholungen verbrauchen keine neuen Erstellraten.
 
+## B10
+
+- **Änderungen:** Gemeinsamer Same-Origin-Client mit Cookie/CSRF, Statuspolling, begrenztem Scheduling, stabilen Idempotenzschlüsseln und generierten OpenAPI-Typen; alle Bildwerkzeuge auf Serveraufträge umgestellt. Lokale Kernengine bleibt für Regressionstests erhalten. Upload erst nach Klick, Reset fordert Löschung an, Downloadlinks laufen ab.
+- **Review:** `backend_b03` unabhängig; automatischen Neuupload nach Netzwerkfehler entfernt. Nur explizite Schedulingcodes werden bis zum begrenzten Wartefenster erneut versucht; manuelle Wiederholung nach unklarer Antwort verwendet denselben Schlüssel/Optionssnapshot.
+- **Prüfung:** Astro ohne Befunde, Typdriftprüfung grün. Echter Chromium-Stacklauf: 43 bestanden, ein geräteabhängiger Fall übersprungen. Drei gezielte Clientfehlerprüfungen (429/413/Netzwerk) bestanden. Lokale Engine: 410 bestanden, zehn browserabhängig übersprungen.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`

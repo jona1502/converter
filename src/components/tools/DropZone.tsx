@@ -5,7 +5,7 @@ export interface DropZoneProps {
   readonly accept: string;
   /** Mehrfachauswahl (Standard: true). */
   readonly multiple?: boolean;
-  /** Deaktiviert Auswahl und Drop (z. B. vor der Hydrierung oder ohne Browserunterstützung). */
+  /** Deaktiviert Auswahl und Drop (z. B. vor der Hydrierung oder ohne Serververfügbarkeit). */
   readonly disabled?: boolean;
   /** Erhält die gewählten bzw. abgelegten Dateien. */
   readonly onFiles: (files: File[]) => void;

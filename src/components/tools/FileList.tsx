@@ -8,6 +8,7 @@ const STATUS: Readonly<Record<EntryStatus, { label: string; badge: string }>> = 
   checking: { label: 'Wird geprüft', badge: 'badge-neutral' },
   ready: { label: 'Bereit', badge: 'badge-accent' },
   invalid: { label: 'Nicht verwendbar', badge: 'badge-danger' },
+  uploading: { label: 'Wird hochgeladen', badge: 'badge-accent' },
   queued: { label: 'Wartet', badge: 'badge-neutral' },
   processing: { label: 'Wird verarbeitet', badge: 'badge-accent' },
   done: { label: 'Fertig', badge: 'badge-success' },
@@ -31,7 +32,7 @@ export interface FileRowProps {
 function ResultDetails({ entry }: { entry: BatchEntry }) {
   const { result, resultUrl, outputName } = entry;
   if (!result || !resultUrl || !outputName) return null;
-  const change = entry.size > 0 ? formatSizeChange(entry.size, result.blob.size) : null;
+  const change = entry.size > 0 ? formatSizeChange(entry.size, result.size) : null;
   const notes: string[] = [];
   if (result.transparencyFlattened) notes.push('Transparente Bereiche wurden mit der Hintergrundfarbe gefüllt.');
   if (result.upscaled) notes.push('Das Bild wurde vergrößert; dabei entstehen keine zusätzlichen Details.');
@@ -48,7 +49,7 @@ function ResultDetails({ entry }: { entry: BatchEntry }) {
         <div>
           <dt>Größe</dt>
           <dd>
-            {formatBytes(result.blob.size)}
+            {formatBytes(result.size)}
             {change && (
               <>
                 {' '}
@@ -119,6 +120,8 @@ export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRo
       {entry.error && (entry.status === 'invalid' || entry.status === 'error') && (
         <p className="field-error">{imageErrorMessage(entry.error)}</p>
       )}
+      {entry.serverError && <p className="field-error">{entry.serverError}</p>}
+      {entry.expiresAt && <p className="hint">Verfügbar bis {new Date(entry.expiresAt).toLocaleString('de-DE')}.</p>}
       {entry.status === 'processing' && <progress className="progress" aria-label={`${entry.name} wird verarbeitet`} />}
       {entry.status === 'done' && <ResultDetails entry={entry} />}
       {extraNotes?.(entry)}

@@ -9,7 +9,7 @@ export function ImageProcessingNotice() {
         Jedes Bild wird neu kodiert. Dabei werden Metadaten wie EXIF-Daten (einschließlich einer GPS-Position) und
         eingebettete Farbprofile entfernt oder verändert. Animierte Bilder werden nicht unterstützt und abgelehnt.{' '}
         <a href="/lokale-verarbeitung" className="link">
-          Mehr zur lokalen Verarbeitung
+          Mehr zur Dateiverarbeitung
         </a>
       </p>
     </div>
@@ -18,15 +18,15 @@ export function ImageProcessingNotice() {
 
 /** Hinweis, wenn der Browser die nötigen Funktionen nicht bietet. Gibt null zurück, wenn alles verfügbar ist. */
 export function BrowserSupportNotice({ support }: { support: SupportState }) {
-  if (support.status !== 'unsupported') return null;
+  if (support.status !== 'unsupported') return <p className="notice notice-info">Erst nach ausdrücklichem Start werden Ihre Dateien auf den Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Entfernen oder Zurücksetzen fordert die frühere Löschung an.</p>;
   return (
     <div className="notice notice-error" role="alert">
-      <p className="notice-title">Dieses Werkzeug funktioniert in Ihrem Browser nicht.</p>
+      <p className="notice-title">Der Verarbeitungsserver ist nicht verfügbar.</p>
       <p className="mt-1">
         {support.reason === 'apis'
-          ? 'Ihrem Browser fehlen Funktionen zur Bildverarbeitung (createImageBitmap bzw. Canvas).'
-          : 'Ihr Browser kann keines der Ausgabeformate erzeugen.'}{' '}
-        Bitte verwenden Sie eine aktuelle Version von Firefox, Chrome, Edge oder Safari.
+          ? 'Der Verarbeitungsserver ist derzeit nicht erreichbar.'
+          : 'Der Server kann keines der Ausgabeformate erzeugen.'}{' '}
+        Bitte prüfen Sie Ihre Verbindung und laden Sie die Seite erneut.
       </p>
     </div>
   );

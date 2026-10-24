@@ -64,10 +64,10 @@ export function FormatSelect({
       </select>
       <p id={hintId} className="hint">
         {!support
-          ? 'Es wird geprüft, welche Formate Ihr Browser erzeugen kann.'
+          ? 'Es wird geprüft, welche Formate Der Server erzeugen kann.'
           : unsupported.length > 0
-            ? `${joinGerman(unsupported.map(formatLabel))} kann Ihr Browser nicht erzeugen; ${unsupported.length > 1 ? 'diese Formate sind' : 'das Format ist'} deshalb nicht auswählbar.`
-            : 'Alle Formate werden von Ihrem Browser unterstützt.'}
+            ? `${joinGerman(unsupported.map(formatLabel))} kann Der Server nicht erzeugen; ${unsupported.length > 1 ? 'diese Formate sind' : 'das Format ist'} deshalb nicht auswählbar.`
+            : 'Alle Formate werden vom Server unterstützt.'}
       </p>
     </div>
   );

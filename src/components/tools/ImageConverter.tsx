@@ -3,7 +3,7 @@
  * (nur für Formate ohne Transparenz), keine Größenänderung.
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { LIMITS, DEFAULT_ICO_SIZES, type IcoSize, type ImageFormat, type ProcessOptions } from '../../lib/image';
+import { DEFAULT_ICO_SIZES, type IcoSize, type ImageFormat, type ProcessOptions } from '../../lib/image';
 import { formatBytes } from '../../lib/format';
 import { ActionBar } from './ActionBar';
 import { DropZone } from './DropZone';
@@ -85,7 +85,7 @@ export default function ImageConverter() {
         const names = outcome.rejected.slice(0, 5).map((file) => file.name);
         const more = outcome.rejected.length - names.length;
         setLimitMessage(
-          `Es können höchstens ${LIMITS.maxFiles} Dateien gleichzeitig in der Liste sein. ${
+          `Es können höchstens ${batch.limits.maxFiles} Dateien gleichzeitig in der Liste sein. ${
             outcome.rejected.length === 1 ? '1 Datei wurde' : `${outcome.rejected.length} Dateien wurden`
           } nicht hinzugefügt: ${names.join(', ')}${more > 0 ? ` und ${more} weitere` : ''}.`,
         );
@@ -147,12 +147,12 @@ export default function ImageConverter() {
 
   let disabledReason: string | null = null;
   if (!hydrated) disabledReason = 'Die Seite wird geladen …';
-  else if (support.status === 'unsupported') disabledReason = 'Ihr Browser unterstützt dieses Werkzeug nicht.';
-  else if (!encode || !format) disabledReason = 'Es wird geprüft, welche Formate Ihr Browser erzeugen kann.';
+  else if (support.status === 'unsupported') disabledReason = 'Der Server unterstützt dieses Werkzeug nicht.';
+  else if (!encode || !format) disabledReason = 'Es wird geprüft, welche Formate Der Server erzeugen kann.';
   else if (isProcessing) disabledReason = 'Die Konvertierung läuft.';
   else if (counts.checking > 0) disabledReason = 'Die Dateien werden noch geprüft.';
   else if (counts.processable === 0) disabledReason = 'Fügen Sie zuerst mindestens ein verwendbares Bild hinzu.';
-  else if (!encode[format]) disabledReason = 'Das gewählte Format kann Ihr Browser nicht erzeugen.';
+  else if (!encode[format]) disabledReason = 'Das gewählte Format kann Der Server nicht erzeugen.';
 
   const dropDisabled = !hydrated || support.status === 'unsupported';
 
@@ -174,9 +174,9 @@ export default function ImageConverter() {
           >
             <p>Formate: {formatList(INPUT_FORMATS)} (keine animierten Bilder).</p>
             <p>
-              Höchstens {LIMITS.maxFiles} Dateien, je bis {formatBytes(LIMITS.maxFileBytes)},{' '}
-              {numberDe.format(LIMITS.maxEdge)} Pixel Kantenlänge und{' '}
-              {numberDe.format(LIMITS.maxPixels / 1_000_000)} Megapixel.
+              Höchstens {batch.limits.maxFiles} Dateien, je bis {formatBytes(batch.limits.maxFileBytes)},{' '}
+              {numberDe.format(batch.limits.maxEdge)} Pixel Kantenlänge und{' '}
+              {numberDe.format(batch.limits.maxPixels / 1_000_000)} Megapixel.
             </p>
           </DropZone>
           {limitMessage && (
