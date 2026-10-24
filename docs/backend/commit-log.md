@@ -16,6 +16,13 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Prüfung:** B03-/Basistests gegen dedizierte PostgreSQL-Testdatenbank: 107 bestanden, ein POSIX-Rechtetest unter Windows übersprungen. Scoped Ruff/mypy wurden von Autoren ausgeführt; OpenAPI aktualisiert. Keine Produktdatenbank für Tests zurückgesetzt.
 - **Grenzen:** Dispatcher/Worker folgen B04, Konvertierung/Download B05–B08, Rate-/Aktivquoten und physisches Cleanup B09. Keine fertige Serverkonvertierung mit B03 behauptet.
 
+## B04
+
+- **Änderungen:** Wiederholbare Outbox-Veröffentlichung, atomare Claims, Lease/Heartbeat, Recovery mit begrenzten Versuchen, Abbruch, sequenzielle Kindprozessereignisse, feste Ressourcenlimits und Linux-Seccomp-Netzwerksperre. Ergebnisdateien werden vor Veröffentlichung synchronisiert und pro Lease getrennt.
+- **Review:** Unabhängig durch `backend_b03`; behoben: fremde/abgelaufene Lease beim Abschluss, SQLAlchemy-Autoflush im Recovery, Erhalt bereits fertiger PDF-Varianten, Reader-Thread-Aufräumen und Ergebnis-fsync.
+- **Prüfung:** Neun Runtime-/Prozesstests gegen PostgreSQL bestanden (doppelte Zustellung, konkurrierende Claims, Brokerfehler, Recovery, Cancel/Delete, echter Kindprozess, Timeout). Ruff scoped grün. Linux-Containerprobe: Socket-Erstellung nach Isolation scheitert mit EPERM. Typprüfung der B04-Dateien grün; parallel in Arbeit befindliche B09-Dateien separat.
+- **Grenze:** Volle PDF-Arbeitsreserve (maximal 300 MB statt 100 MB je gleichzeitig bearbeiteter Variante) wird zunächst gemeinsam reserviert. Dies reduziert die Parallelität, vereinfacht aber die harte gemeinsame Budgeteinhaltung. Konvertierungsmodule/API folgen in eigenen Arbeitspunkten.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`

@@ -166,3 +166,10 @@ class LocalStorage:
 
     def exists(self, key: str) -> bool:
         return self.path_for(key).is_file()
+
+    def sync(self, key: str) -> None:
+        """Make completed worker bytes durable before their DB publication."""
+        path = self.path_for(key)
+        with path.open("r+b") as handle:
+            os.fsync(handle.fileno())
+        _fsync_dir(path.parent)
