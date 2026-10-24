@@ -110,3 +110,9 @@ Rückweg **vor** Schritt 4: alte Dienste wieder starten. Rückweg **nach** Go-Be
 ## 7. Bewusst nicht Teil der Migration
 
 Keine Änderung der Bild-/PDF-Algorithmen, keine neuen Formate, kein S3, kein öffentlicher Betrieb, kein Frontend-Redesign. Leistungsaussagen nur mit Messung (G11).
+
+## Implementierungshinweise nach G09
+
+- Prospektive Job-ID und Uploadreservierungs-ID sind identisch. Dadurch kann Cleanup eine nach Dateipromotion, aber vor eindeutig bestätigtem DB-Commit hinterlassene Datei sicher zuordnen. Bei unklarer Commitantwort wird unter einer Transaktionssperre unabhängig nachgeprüft; ist auch das nicht eindeutig möglich, bleiben Datei und Budget konservativ erhalten.
+- MIME-Header werden vor dem Standard-Multipartparser auf 8 KiB begrenzt. Dateiproben haben begrenzte Leseoperationen und eigenen Context; AVIF-Abmessungen stammen vom Primärelement, nicht von einem beliebigen Thumbnail.
+- API-Anfragen haben begrenzte Contexts; Upload-/Download-Deadlines werden nach der Anfrage für wiederverwendete Verbindungen zurückgesetzt.

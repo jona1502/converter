@@ -76,6 +76,15 @@ func (a *API) Register(router *httpapi.Router) {
 	} {
 		handler := route.handler
 		router.HandleFunc(route.method, httpapi.Prefix+route.path, func(w http.ResponseWriter, r *http.Request) error {
+			timeout := 10 * time.Second
+			if route.method == http.MethodPost && route.path == "/jobs" {
+				timeout = a.cfg.UploadMax + 15*time.Second
+			} else if strings.Contains(route.path, "/results/") {
+				timeout = a.cfg.DownloadMax + 5*time.Second
+			}
+			ctx, cancel := context.WithTimeout(r.Context(), timeout)
+			defer cancel()
+			r = r.WithContext(ctx)
 			if route.path != "/capabilities" && a.pool == nil {
 				return httpapi.ServiceUnavailable()
 			}

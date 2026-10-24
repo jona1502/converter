@@ -92,13 +92,21 @@ for (const tool of tools) {
     await expect(page.locator('a[download]')).toHaveCount(0);
     const audit=await page.evaluate(()=>(window as unknown as {__audit:{storage:string[];csp:string[]}}).__audit);
     expect(audit.storage).toEqual([]);
-    const violations=browserName==='webkit'?audit.csp.filter(event=>!/style-src-attr: inline; :1; $/.test(event)):audit.csp;
+    const violations=browserName==='webkit'?audit.csp.filter(event=>!/^navigation: style-src-attr: inline; :1; $/.test(event)):audit.csp;
     expect(violations).toEqual([]);expect(network.sockets).toEqual([]);
     expect(network.requests.some(r=>r.method==='POST'&&new URL(r.url).pathname==='/api/v1/jobs')).toBe(true);
     for(const request of network.requests){
       const url=new URL(request.url);expect(url.origin).toBe(new URL(baseURL!).origin);
       expect(url.search).toBe('');expect(decodeURIComponent(url.href)).not.toContain(input.name);
-      if(['fetch','xhr'].includes(request.type))expect(url.pathname).toMatch(/^\/api\/v1\//);
+      if(['fetch','xhr'].includes(request.type)) {
+        const allowed = [
+          /^\/api\/v1\/(?:capabilities|session)$/,
+          /^\/api\/v1\/jobs(?:\/[0-9a-f-]{36}(?:\/cancel|\/results\/[0-9a-f-]{36})?)?$/,
+        ];
+        expect(allowed.some(pattern=>pattern.test(url.pathname)), `API-Pfad ${url.pathname}`).toBe(true);
+      } else {
+        expect(url.pathname===tool.path || url.pathname===`${tool.path}/` || url.pathname==='/favicon.svg' || /^\/_astro\/[\w.\/-]+\.(?:css|js|woff2?)$/.test(url.pathname), `Statischer Pfad ${url.pathname}`).toBe(true);
+      }
     }
   });
   test(`${tool.path}: Tastatur und mobile Ergebnisse mit langem Dateinamen`,async({page,browserName})=>{

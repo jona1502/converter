@@ -81,3 +81,7 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 ## G10
 
 Go-Dockerimages, Standard-Compose, Vergleichsstack, Legacy-Rueckweg, Healthprobe, Nginx und gepinnte CI integriert. Lokaler Build und Healthchecks bestanden. Letzter unabhaengiger Infrastrukturreview wegen Subagent-Limit nicht verfuegbar; Hauptagent pruefte Betrieb. GitHub-CI nicht ausgefuehrt.
+
+## G11
+
+Finale HTTP-Kontexte begrenzt, Privacy-Allowlist und PDF-Hinweis geprueft, Smoke-/Cutover-/Messskripte integriert. Go Vet und Race vollstaendig gruen; finale Browserpruefung 176 bestanden / 4 uebersprungen. Echter isolierter Go-Python-Lauf und HTTP-Smoke fuer alle vier Werkzeuge bestanden. Cutover und Rueckweg mit bestehender Sitzung und wartendem Auftrag bestanden.
