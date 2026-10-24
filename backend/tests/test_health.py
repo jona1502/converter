@@ -34,14 +34,17 @@ def test_ready_reports_registered_checks_only(client: TestClient, storage_dir: P
     response = client.get("/api/v1/health/ready")
     assert response.status_code == 200
     # B02 registriert nur "storage"; database/redis/capabilities folgen später.
-    assert response.json() == {"status": "ok", "checks": {"storage": "ok"}}
+    assert response.json() == {"status": "ok", "checks": {"storage": "ok", "capabilities": "ok"}}
     assert list(storage_dir.iterdir()) == [], "Prüfdatei muss wieder gelöscht sein"
 
 
 def test_ready_is_503_when_storage_dir_missing(tmp_path: Path) -> None:
     response = _client_for(tmp_path / "does-not-exist").get("/api/v1/health/ready")
     assert response.status_code == 503
-    assert response.json() == {"status": "unavailable", "checks": {"storage": "fail"}}
+    assert response.json() == {
+        "status": "unavailable",
+        "checks": {"storage": "fail", "capabilities": "ok"},
+    }
 
 
 def test_ready_is_503_when_storage_path_is_a_file(tmp_path: Path) -> None:
@@ -49,7 +52,7 @@ def test_ready_is_503_when_storage_path_is_a_file(tmp_path: Path) -> None:
     not_a_dir.write_bytes(b"x")
     response = _client_for(not_a_dir).get("/api/v1/health/ready")
     assert response.status_code == 503
-    assert response.json()["checks"] == {"storage": "fail"}
+    assert response.json()["checks"] == {"storage": "fail", "capabilities": "ok"}
 
 
 @pytest.mark.skipif(
@@ -63,7 +66,7 @@ def test_ready_is_503_when_storage_dir_read_only(storage_dir: Path) -> None:
     finally:
         storage_dir.chmod(0o700)
     assert response.status_code == 503
-    assert response.json()["checks"] == {"storage": "fail"}
+    assert response.json()["checks"] == {"storage": "fail", "capabilities": "ok"}
 
 
 def _registry(app: FastAPI) -> ReadinessRegistry:
@@ -81,7 +84,7 @@ def test_failing_check_does_not_leak_details(app: FastAPI, client: TestClient) -
     assert response.status_code == 503
     assert response.json() == {
         "status": "unavailable",
-        "checks": {"database": "fail", "storage": "ok"},
+        "checks": {"database": "fail", "storage": "ok", "capabilities": "ok"},
     }
     assert "hunter2" not in response.text
     assert "5432" not in response.text
@@ -114,7 +117,7 @@ def test_slow_check_times_out(storage_dir: Path) -> None:
     finally:
         release.set()
     assert response.status_code == 503
-    assert response.json()["checks"] == {"redis": "fail", "storage": "ok"}
+    assert response.json()["checks"] == {"redis": "fail", "storage": "ok", "capabilities": "ok"}
 
 
 def test_hanging_check_does_not_start_more_threads(storage_dir: Path) -> None:
@@ -151,7 +154,7 @@ def test_hanging_check_does_not_start_more_threads(storage_dir: Path) -> None:
         if response.status_code == 200:
             break
         time.sleep(0.05)
-    assert response.json()["checks"] == {"redis": "ok", "storage": "ok"}
+    assert response.json()["checks"] == {"redis": "ok", "storage": "ok", "capabilities": "ok"}
     assert calls >= 2
 
 
@@ -160,3 +163,18 @@ def test_duplicate_check_name_is_rejected() -> None:
     registry.register("storage", lambda: True)
     with pytest.raises(ValueError, match="bereits registriert"):
         registry.register("storage", lambda: True)
+
+
+def test_missing_required_codec_fails_readiness(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "app.api.capabilities.probes",
+        lambda: {
+            "input": {"jpeg": True, "avif": False},
+            "output": {"jpeg": True},
+        },
+    )
+    response = client.get("/api/v1/health/ready")
+    assert response.status_code == 503
+    assert response.json()["checks"] == {"storage": "ok", "capabilities": "fail"}

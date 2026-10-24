@@ -12,7 +12,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from app.api import API_PREFIX, health, jobs, session
+from app.api import API_PREFIX, capabilities, health, jobs, results, session
 from app.api.errors import INTERNAL_ERROR_RESPONSE, install_error_handlers
 from app.api.middleware import RequestContextMiddleware
 from app.core.config import Settings
@@ -29,6 +29,7 @@ def build_readiness(settings: Settings, database: Database | None) -> ReadinessR
     registry.register("storage", storage_writable_check(settings.storage_dir))
     if database is not None:
         registry.register("database", database_check(database))
+    registry.register("capabilities", capabilities.ready)
     # Ab B04/B05: "redis", "capabilities".
     return registry
 
@@ -86,7 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_error_handlers(app)
     app.add_middleware(RequestContextMiddleware)
     # Jeder Endpunkt kann 500 internal-error liefern (siehe middleware.py).
-    for router in (health.router, session.router, jobs.router):
+    for router in (health.router, session.router, jobs.router, results.router, capabilities.router):
         app.include_router(router, responses=INTERNAL_ERROR_RESPONSE)
     _install_openapi(app)
     return app

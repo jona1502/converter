@@ -65,6 +65,7 @@ class ProcessingErrorCode(StrEnum):
 
     DECODE_FAILED = "decode-failed"
     ENCODE_FAILED = "encode-failed"
+    SAVE_FAILED = "save-failed"
     ENCRYPTED = "encrypted"
     PARSE_FAILED = "parse-failed"
     RESULT_TOO_LARGE = "result-too-large"

@@ -20,8 +20,15 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 
 - **Änderungen:** Wiederholbare Outbox-Veröffentlichung, atomare Claims, Lease/Heartbeat, Recovery mit begrenzten Versuchen, Abbruch, sequenzielle Kindprozessereignisse, feste Ressourcenlimits und Linux-Seccomp-Netzwerksperre. Ergebnisdateien werden vor Veröffentlichung synchronisiert und pro Lease getrennt.
 - **Review:** Unabhängig durch `backend_b03`; behoben: fremde/abgelaufene Lease beim Abschluss, SQLAlchemy-Autoflush im Recovery, Erhalt bereits fertiger PDF-Varianten, Reader-Thread-Aufräumen und Ergebnis-fsync.
-- **Prüfung:** Neun Runtime-/Prozesstests gegen PostgreSQL bestanden (doppelte Zustellung, konkurrierende Claims, Brokerfehler, Recovery, Cancel/Delete, echter Kindprozess, Timeout). Ruff scoped grün. Linux-Containerprobe: Socket-Erstellung nach Isolation scheitert mit EPERM. Typprüfung der B04-Dateien grün; parallel in Arbeit befindliche B09-Dateien separat.
+- **Prüfung:** Acht Runtime-/Prozesstests gegen PostgreSQL bestanden (doppelte Zustellung, konkurrierende Claims, Brokerfehler, Recovery, Cancel/Delete, Timeout). Der echte Bildprozess wurde separat geprüft und sein Test B05 zugeordnet. Ruff scoped grün. Linux-Containerprobe: Socket-Erstellung nach Isolation scheitert mit EPERM. Typprüfung der B04-Dateien grün; parallel in Arbeit befindliche B09-Dateien separat.
 - **Grenze:** Volle PDF-Arbeitsreserve (maximal 300 MB statt 100 MB je gleichzeitig bearbeiteter Variante) wird zunächst gemeinsam reserviert. Dies reduziert die Parallelität, vereinfacht aber die harte gemeinsame Budgeteinhaltung. Konvertierungsmodule/API folgen in eigenen Arbeitspunkten.
+
+## B05
+
+- **Änderungen:** Pillow-Serverpipeline für JPEG/PNG/WebP/BMP/ICO mit allen vereinbarten Eingaben, EXIF-Orientierung, explizitem Alpha-Handling, ICO-Einpassen und begrenztem Writer; gemeinsame Verarbeitungsfehler. Capabilities aus echten Codec-Rundreisen, Besitzergebundene Downloads mit endlicher DB-Lease und sicherer Dateinamenkodierung, Cancel-Endpunkt, Migration für Download-Lease.
+- **Review:** Bildkern unabhängig von `tests_b03`, API/Download durch `backend_b03`; keine verbleibenden Blocker. Dateihandle erst nach Leasecommit öffnen und per Response-BackgroundTask schließen.
+- **Prüfung:** Echter Kindprozess mit gültigem Bilddownload, Größe, Headern, Besitzerbindung und Ablauf geprüft. Health mit fehlendem Pflichtcodec liefert 503. Gesamter Stack über HTTP-Smoke für alle vier Operationen erfolgreich, einschließlich drei PDF-Downloads.
+- **Hinweis:** Die gemeinsame Pipeline enthält bereits die Resize-/Kompressionsprimitive; deren vollständige Verhaltensmatrix und Abnahme folgen B06.
 
 ## B02
 

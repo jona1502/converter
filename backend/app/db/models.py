@@ -148,6 +148,7 @@ class Job(Base):
     heartbeat_at: Mapped[datetime | None] = mapped_column(TIMESTAMP)
     cancel_requested_at: Mapped[datetime | None] = mapped_column(TIMESTAMP)
     deleted_at: Mapped[datetime | None] = mapped_column(TIMESTAMP)
+    download_until: Mapped[datetime | None] = mapped_column(TIMESTAMP)
 
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
