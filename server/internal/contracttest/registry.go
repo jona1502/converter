@@ -1,0 +1,64 @@
+package contracttest
+
+import (
+	"reflect"
+
+	"miconverter/server/internal/apitypes"
+)
+
+// APITypes liefert die Zuordnung aller Vertragskomponenten zu den DTOs in
+// internal/apitypes. Eine neue Komponente im Vertrag ohne Eintrag hier
+// lässt TestEveryComponentHasGoType scheitern.
+func APITypes() *Types {
+	ts := NewTypes()
+
+	Enum(ts, "ApiErrorCode", apitypes.ApiErrorCodes())
+	Enum(ts, "ProcessingErrorCode", apitypes.ProcessingErrorCodes())
+	Enum(ts, "Tool", apitypes.Tools())
+	Enum(ts, "JobState", apitypes.JobStates())
+	Enum(ts, "JobPhase", apitypes.JobPhases())
+	Enum(ts, "ResultState", apitypes.ResultStates())
+	Enum(ts, "PdfLevel", apitypes.PdfLevels())
+	Enum(ts, "InputFormat", apitypes.InputFormats())
+	// Inline-Enums ohne eigene Komponente.
+	Enum(ts, "", apitypes.ImageFormatOptions())
+	Enum(ts, "", apitypes.CheckStatuses())
+	Enum(ts, "", apitypes.ReadyStatuses())
+	Enum(ts, "", []apitypes.ResizeMode{
+		apitypes.ResizeModeNone, apitypes.ResizeModePercent,
+		apitypes.ResizeModeDimensions, apitypes.ResizeModeMaxEdge,
+	})
+
+	// job.error.code / result.error.code: ProcessingErrorCode oder ApiErrorCode.
+	jobErrorCode := reflect.TypeFor[apitypes.JobErrorCode]()
+	ts.Alias("ProcessingErrorCode", jobErrorCode)
+	ts.Alias("ApiErrorCode", jobErrorCode)
+
+	ts.StringType(reflect.TypeFor[apitypes.Timestamp]())
+	ts.ObjectType(reflect.TypeFor[apitypes.JSONObject]())
+
+	for name, t := range map[string]reflect.Type{
+		"ErrorResponse":    reflect.TypeFor[apitypes.ErrorResponse](),
+		"ErrorDetail":      reflect.TypeFor[apitypes.ErrorDetail](),
+		"FieldError":       reflect.TypeFor[apitypes.FieldError](),
+		"LiveResponse":     reflect.TypeFor[apitypes.LiveResponse](),
+		"ReadyResponse":    reflect.TypeFor[apitypes.ReadyResponse](),
+		"SessionResponse":  reflect.TypeFor[apitypes.SessionResponse](),
+		"JobView":          reflect.TypeFor[apitypes.JobView](),
+		"JobInput":         reflect.TypeFor[apitypes.JobInput](),
+		"JobResultView":    reflect.TypeFor[apitypes.JobResultView](),
+		"JobError":         reflect.TypeFor[apitypes.JobError](),
+		"JobOptions":       reflect.TypeFor[apitypes.JobOptions](),
+		"ImageOptions":     reflect.TypeFor[apitypes.ImageOptions](),
+		"PdfOptions":       reflect.TypeFor[apitypes.PdfOptions](),
+		"ResizeNone":       reflect.TypeFor[apitypes.ResizeNone](),
+		"ResizePercent":    reflect.TypeFor[apitypes.ResizePercent](),
+		"ResizeDimensions": reflect.TypeFor[apitypes.ResizeDimensions](),
+		"ResizeMaxEdge":    reflect.TypeFor[apitypes.ResizeMaxEdge](),
+	} {
+		ts.Component(name, t)
+	}
+	// ResizeOptions ist im Vertrag keine eigene Komponente, sondern das
+	// Inline-oneOf ImageOptions.resize; geprüft über compareType.
+	return ts
+}

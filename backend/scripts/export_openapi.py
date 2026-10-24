@@ -1,4 +1,4 @@
-"""Schreibt das OpenAPI-Schema deterministisch nach ``backend/openapi.json``.
+"""Schreibt das OpenAPI-Schema deterministisch nach ``api/openapi.json`` (kanonischer Vertrag).
 
 Aufruf (im Verzeichnis ``backend``)::
 
@@ -23,7 +23,7 @@ if str(BACKEND_DIR) not in sys.path:
 from app.core.config import Settings  # noqa: E402 – erst nach sys.path-Anpassung
 from app.factory import create_app  # noqa: E402
 
-OPENAPI_PATH = BACKEND_DIR / "openapi.json"
+OPENAPI_PATH = BACKEND_DIR.parent / "api" / "openapi.json"
 
 
 def render_openapi() -> str:

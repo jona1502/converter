@@ -2,6 +2,13 @@
 
 Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), ohne eigenen Hash. Angegeben sind nur tatsächlich ausgeführte Prüfungen.
 
+## G02
+
+- **Änderungen:** Vorbereitete Go-Grundlage übernommen: Modul/Locks, Konfiguration, Standardbibliothek-HTTP-Router, Fehler-/Logging-/Healthmodell, typisierte API-DTOs, strikte Optionsvalidierung, kanonische Vertragsprüfungen und isolierter Go-Teststack. TypeScript-Generator liest den sprachunabhängigen Vertrag `api/openapi.json`.
+- **Review:** Unabhängig durch `go_converter`; keine bestätigten hohen/mittleren Befunde. HTTP-/Readinessplatzhalter sind ausdrücklich noch keine vollständige API; Integration folgt G05/G08.
+- **Prüfung:** Baseline `go test ./...`, `go vet ./...` und `go test -race ./...` im gepinnten Linux-Go-Image gegen eigenen PostgreSQL-/Valkey-Teststack bestanden. Foundation zusätzlich scoped durch Reviewer mit Race-Detector geprüft.
+- **Grenze:** Laufender Produktstack bleibt bis zur vollständigen Go-Abnahme unverändert auf FastAPI/Celery. Keine Nutzdatenbank für Tests verwendet.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`

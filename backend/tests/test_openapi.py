@@ -15,7 +15,7 @@ from tests.conftest import TEST_SECRET
 
 def test_committed_openapi_is_up_to_date() -> None:
     assert OPENAPI_PATH.read_text(encoding="utf-8") == render_openapi(), (
-        "backend/openapi.json ist veraltet: `uv run python scripts/export_openapi.py`"
+        "api/openapi.json ist veraltet: `uv run python scripts/export_openapi.py`"
     )
 
 

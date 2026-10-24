@@ -1,0 +1,58 @@
+# Isolierter Teststack für das Go-Backend. Eigenes Compose-Projekt, Daten nur
+# auf tmpfs: berührt weder die Nutzdatenbank noch das Dateivolume von
+# `mi-converter`. Aufruf im Projektverzeichnis:
+#
+#   docker compose -f server/compose.test.yaml up -d --wait db valkey
+#   docker compose -f server/compose.test.yaml run --rm go go test ./...
+#   docker compose -f server/compose.test.yaml run --rm go go test -race ./...
+#   docker compose -f server/compose.test.yaml down        # ohne -v genügt: keine Datenvolumes
+#
+# Nur der Go-Build-/Modulcache liegt in einem eigenen benannten Volume.
+
+name: mi-converter-test
+
+services:
+  go:
+    image: golang:1.27.3-trixie@sha256:fbb7ae40b62ff8afe31662df570d39b4f5052ac32b90dae8e60d7657a20a74f4
+    working_dir: /src/server
+    volumes:
+      - ..:/src
+      - gocache:/go
+    environment:
+      GOFLAGS: -mod=readonly
+      GOTOOLCHAIN: local
+      GOCACHE: /go/build-cache
+      CONVERTER_TEST_DATABASE_URL: postgres://converter:converter@db:5432/converter_go_test?sslmode=disable
+      CONVERTER_TEST_REDIS_URL: redis://valkey:6379/15
+    depends_on:
+      db: {condition: service_healthy}
+      valkey: {condition: service_healthy}
+    profiles: [tools]
+
+  db:
+    image: postgres:18-alpine@sha256:898c60cb390d1085bc97bdd6a1ae968757421df394b071848b52b1c09c89d6a5
+    environment:
+      POSTGRES_USER: converter
+      POSTGRES_PASSWORD: converter
+      POSTGRES_DB: converter_go_test
+    tmpfs:
+      - /var/lib/postgresql:rw,size=512m
+    ports: ["127.0.0.1:55433:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U converter -d converter_go_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:9-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    ports: ["127.0.0.1:56380:6379"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  gocache:

@@ -1,0 +1,512 @@
+[
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"webp\"}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":0}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":0.0,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":1}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":1.0,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-compress\",\"format\":\"jpeg\",\"quality\":0.5}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"jpeg\",\"icoSizes\":null,\"quality\":0.5,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-compress\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-compress\",\"format\":\"webp\",\"quality\":0.123456789012345678}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":0.12345678901234568,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-compress\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-compress\",\"format\":\"webp\",\"quality\":1e-7}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":1e-07,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-compress\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"background\":\"#ABCdef\"}",
+    "canonical": "{\"background\":\"#ABCdef\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[256,16]}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"ico\",\"icoSizes\":[256,16],\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"original\",\"icoSizes\":[32]}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"original\",\"icoSizes\":[32],\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":null}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"ico\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"none\"}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":50,\"allowUpscale\":false}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"mode\":\"percent\",\"percent\":50.0},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":150.5,\"allowUpscale\":true}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":true,\"mode\":\"percent\",\"percent\":150.5},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":100,\"keepAspectRatio\":true,\"allowUpscale\":false}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"height\":null,\"keepAspectRatio\":true,\"mode\":\"dimensions\",\"width\":100},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":null,\"height\":20,\"keepAspectRatio\":true,\"allowUpscale\":false}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":false,\"height\":20,\"keepAspectRatio\":true,\"mode\":\"dimensions\",\"width\":null},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":10,\"height\":20,\"keepAspectRatio\":false,\"allowUpscale\":true}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"allowUpscale\":true,\"height\":20,\"keepAspectRatio\":false,\"mode\":\"dimensions\",\"width\":10},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"bmp\",\"resize\":{\"mode\":\"maxEdge\",\"maxEdge\":2147483647}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"bmp\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"maxEdge\":2147483647,\"mode\":\"maxEdge\"},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"resize\":{\"mode\":\"none\"},\"format\":\"webp\",\"tool\":\"image-resize\"}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"webp\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\"}",
+    "canonical": "{\"levels\":[\"high\",\"balanced\",\"small\"],\"tool\":\"pdf-compress\"}"
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"levels\":[\"small\",\"high\"]}",
+    "canonical": "{\"levels\":[\"small\",\"high\"],\"tool\":\"pdf-compress\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"quality\":1.0}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":1.0,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":1.5}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "out-of-range"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":-0.1}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "out-of-range"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":\"0.5\"}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "float-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":null}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "float-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":true}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "float-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"background\":\"red\"}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.background",
+        "code": "string-pattern-mismatch"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"background\":\"#fff\"}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.background",
+        "code": "string-pattern-mismatch"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"gif\"}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.format",
+        "code": "invalid-choice"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\"}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.format",
+        "code": "missing"
+      }
+    ]
+  },
+  {
+    "input": "{\"format\":\"png\"}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "union-tag-not-found"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"video\",\"format\":\"png\"}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options",
+        "code": "union-tag-invalid"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"extra\":1}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "unknown-field"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"Quality\":0.5}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "unknown-field"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"icoSizes\":[16]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options",
+        "code": "ico-sizes-without-ico"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.icoSizes",
+        "code": "too-short"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[16,16]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options",
+        "code": "duplicate-values"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[17]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.icoSizes.0",
+        "code": "invalid-choice"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"icoSizes\":[16.0]}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"ico\",\"icoSizes\":[16],\"quality\":0.85,\"resize\":{\"mode\":\"none\"},\"tool\":\"image-convert\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"ico\",\"resize\":{\"mode\":\"maxEdge\",\"maxEdge\":10}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options",
+        "code": "ico-resize"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":150,\"allowUpscale\":false}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "upscale-not-allowed"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":0,\"allowUpscale\":false}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "out-of-range"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"percent\",\"percent\":50}}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize.allowUpscale",
+        "code": "missing"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"keepAspectRatio\":true,\"allowUpscale\":false}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "dimension-required"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":10,\"keepAspectRatio\":false,\"allowUpscale\":false}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "dimensions-required"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":0,\"height\":5,\"keepAspectRatio\":false,\"allowUpscale\":false}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize.width",
+        "code": "out-of-range"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"dimensions\",\"width\":1.5,\"height\":5,\"keepAspectRatio\":false,\"allowUpscale\":false}}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize.width",
+        "code": "int-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"maxEdge\",\"maxEdge\":2147483648}}",
+    "canonical": "{\"background\":\"#ffffff\",\"format\":\"png\",\"icoSizes\":null,\"quality\":0.85,\"resize\":{\"maxEdge\":2147483648,\"mode\":\"maxEdge\"},\"tool\":\"image-resize\"}"
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"maxEdge\"}}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "missing"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"zoom\"}}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "union-tag-invalid"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{}}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "union-tag-not-found"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":null}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "dict-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-resize\",\"format\":\"png\",\"resize\":{\"mode\":\"none\",\"width\":3}}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.resize",
+        "code": "unknown-field"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"levels\":[]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.levels",
+        "code": "too-short"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"levels\":[\"high\",\"high\"]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options",
+        "code": "duplicate-values"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"levels\":[\"huge\"]}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.levels.0",
+        "code": "invalid-choice"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"levels\":null}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options.levels",
+        "code": "list-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"pdf-compress\",\"format\":\"png\"}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "unknown-field"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\"} {}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "invalid-json"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "invalid-json"
+      }
+    ]
+  },
+  {
+    "input": "[]",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "dict-type"
+      }
+    ]
+  },
+  {
+    "input": "\"x\"",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "dict-type"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"png\",\"quality\":1e400}",
+    "code": "invalid-options",
+    "fields": [
+      {
+        "path": "options.quality",
+        "code": "finite-number"
+      }
+    ]
+  },
+  {
+    "input": "{\"tool\":\"image-convert\",\"format\":\"jpeg\",\"quality\":2,\"background\":\"x\",\"extra\":1}",
+    "code": "invalid-request",
+    "fields": [
+      {
+        "path": "options",
+        "code": "unknown-field"
+      },
+      {
+        "path": "options.quality",
+        "code": "out-of-range"
+      },
+      {
+        "path": "options.background",
+        "code": "string-pattern-mismatch"
+      }
+    ]
+  }
+]

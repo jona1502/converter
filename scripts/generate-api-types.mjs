@@ -1,5 +1,5 @@
 import {readFileSync, writeFileSync} from 'node:fs';
-const schema = JSON.parse(readFileSync(new URL('../backend/openapi.json', import.meta.url), 'utf8'));
+const schema = JSON.parse(readFileSync(new URL('../api/openapi.json', import.meta.url), 'utf8'));
 function type(value) {
   if (value.$ref) return `ApiSchemas[${JSON.stringify(value.$ref.split('/').at(-1))}]`;
   if (value.const !== undefined) return JSON.stringify(value.const);

@@ -2,7 +2,7 @@
 
 Stand: B01 (24.10.2026). Verbindlicher Vertrag zwischen Frontend (`src/lib/api/`), API (`backend/app/api`), Worker (`backend/app/worker`, `backend/app/processing`) und Betrieb. Grundlage ist [../fastapi-backend-plan.md](../fastapi-backend-plan.md); Machbarkeit und Bibliotheken: [feasibility/README.md](feasibility/README.md).
 
-Änderungen an diesem Dokument nur abgestimmt über den Hauptagenten. Maßgeblich für Felder und Typen ist ab B02 das aus FastAPI erzeugte OpenAPI-Schema (`backend/openapi.json`); die TypeScript-Typen in `src/lib/api/schema.d.ts` werden daraus generiert, CI prüft Drift. Dieses Dokument beschreibt Bedeutung, Regeln und Grenzfälle, die ein Schema nicht ausdrückt.
+Änderungen an diesem Dokument nur abgestimmt über den Hauptagenten. Maßgeblich für Felder und Typen ist das OpenAPI-Schema `api/openapi.json` (bis G12 aus FastAPI exportiert und gegen das Go-Backend geprüft, danach sprachunabhängig gepflegt); die TypeScript-Typen in `src/lib/api/schema.d.ts` werden daraus generiert, CI prüft Drift. Dieses Dokument beschreibt Bedeutung, Regeln und Grenzfälle, die ein Schema nicht ausdrückt.
 
 ## 1. Umfang
 
