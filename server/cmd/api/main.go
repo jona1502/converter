@@ -11,11 +11,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"miconverter/server/internal/config"
+	"miconverter/server/internal/converter"
 	"miconverter/server/internal/httpapi"
+	"miconverter/server/internal/httpapi/endpoints"
+	"miconverter/server/internal/ratelimit"
+	"miconverter/server/internal/storage"
+	"miconverter/server/internal/store"
 )
 
 // Servergrenzen. Bewusst kein globales Read-/WriteTimeout: Uploads bis
@@ -50,10 +56,40 @@ func run() int {
 
 	readiness := httpapi.NewReadiness(cfg.HealthCheckTimeout, logger)
 	registerChecks(cfg, readiness)
+	router := httpapi.New(logger, readiness)
+	if cfg.DatabaseURL.IsSet() {
+		pool, err := store.Open(context.Background(), cfg.DatabaseURL.Reveal(), store.PoolOptions{MaxConns: int32(cfg.DatabasePoolSize * 2)})
+		if err != nil {
+			logger.Error("Datenbankkonfiguration ungültig")
+			return 2
+		}
+		defer pool.Close()
+		files, err := storage.NewLocal(cfg.StorageDir)
+		if err != nil {
+			logger.Error("Dateispeicher nicht verfügbar")
+			return 2
+		}
+		var limiter *ratelimit.Limiter
+		if cfg.RedisURL.IsSet() {
+			client, err := ratelimit.NewClient(cfg.RedisURL.Reveal())
+			if err != nil {
+				logger.Error("Brokerkonfiguration ungültig")
+				return 2
+			}
+			defer client.Close()
+			limiter = ratelimit.New(client)
+		}
+		api, err := endpoints.New(cfg, pool, files, limiter)
+		if err != nil {
+			logger.Error("API-Konfiguration ungültig")
+			return 2
+		}
+		api.Register(router)
+	}
 
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           httpapi.New(logger, readiness),
+		Handler:           router,
 		ReadHeaderTimeout: readHeaderTimeout,
 		IdleTimeout:       idleTimeout,
 		MaxHeaderBytes:    maxHeaderBytes,
@@ -99,12 +135,33 @@ func registerChecks(cfg *config.Config, readiness *httpapi.Readiness) {
 	}
 	must(readiness.Register(httpapi.CheckStorage, httpapi.StorageCheck(cfg.StorageDir)))
 	if cfg.DatabaseURL.IsSet() {
-		must(readiness.Register(httpapi.CheckDatabase, notImplemented))
+		must(readiness.Register(httpapi.CheckDatabase, func(ctx context.Context) error {
+			pool, err := store.Open(ctx, cfg.DatabaseURL.Reveal(), store.PoolOptions{MaxConns: 1})
+			if err != nil {
+				return err
+			}
+			defer pool.Close()
+			return pool.Ping(ctx)
+		}))
 	}
 	if cfg.RedisURL.IsSet() || cfg.Environment != config.Test {
-		must(readiness.Register(httpapi.CheckRedis, notImplemented))
+		check := notImplemented
+		if cfg.RedisURL.IsSet() {
+			check = func(ctx context.Context) error {
+				client, err := ratelimit.NewClient(cfg.RedisURL.Reveal())
+				if err != nil {
+					return err
+				}
+				defer client.Close()
+				return client.Ping(ctx).Err()
+			}
+		}
+		must(readiness.Register(httpapi.CheckRedis, check))
 	}
-	must(readiness.Register(httpapi.CheckCapabilities, notImplemented))
+	must(readiness.Register(httpapi.CheckCapabilities, func(ctx context.Context) error {
+		_, err := converter.LoadReport(filepath.Join(cfg.StorageDir, converter.ReportFile), time.Now().UTC(), 15*time.Minute)
+		return err
+	}))
 }
 
 type serverErrorWriter struct{ logger *slog.Logger }

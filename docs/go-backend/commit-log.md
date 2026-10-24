@@ -45,6 +45,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Review:** `go_jobs` unabhängig gelesen; keine bestätigten hohen/mittleren Befunde. Hauptagent hat Linux-Prozessgrenze zusätzlich gelesen.
 - **Prüfung:** Prozess-/Protokolltests, Race und Vet grün; echte gehärtete Linuxintegration: drei Bildoperationen, PDF mit drei Stufen und Capabilitiesprobe bestanden. Fixturedateien bilden statische/animierte Codecs für Headerparität ab.
 
+## G08
+
+- **Änderungen:** Vollständige Go-HTTP-Endpunkte für Sitzung, Capabilities, Upload, Status, Cancel/Delete und autorisierte Downloads; echte Readiness in API-main. Begrenzter MIME-Headerguard vor Standardparser, Vorabreservierung, Header-/Animationsprobe einschließlich AVIF-Primärelement und Rücksetzen von HTTP-Keepalive-Deadlines.
+- **Review:** Hauptagent unabhängig vom API-Autor: Besitzer-/CSRF-Prüfung, Transaktionsgrenzen, Multipart-/Deadline-/Header-/Downloadregeln gelesen und Korrekturen angefordert; `go_jobs` meldete ebenfalls Deadline-Reset. Letzter Subagent-Nachreview war wegen Nutzungslimit nicht vollständig verfügbar; keine erfundene weitere Freigabe.
+- **Prüfung:** Autor: zehn Endpoint-/Header-/Golden-/Securitytests mit Race und Vet grün. Hauptagent: echter HTTP-Smoke für alle vier Werkzeuge erfolgreich; erster Gesamtbrowserlauf gegen Go: 176 bestanden, vier geräteabhängig übersprungen. Nach letztem Header-Hardening folgt erneute Abschlussprüfung G11.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
