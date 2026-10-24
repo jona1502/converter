@@ -1,0 +1,71 @@
+[project]
+name = "mi-converter-converter"
+version = "0.1.0"
+description = "Privater, isolierter Bild-/PDF-Konverter (Pillow/pikepdf) für den Go-Worker"
+requires-python = ">=3.13,<3.14"
+# Laufzeit ausschließlich Pillow und pikepdf, exakt die Versionen aus
+# backend/uv.lock (gleiche geprüften Codecs und Lizenzen). Kein FastAPI,
+# SQLAlchemy, Celery, Redis oder pydantic.
+dependencies = [
+    "pillow==13.0.0",
+    "pikepdf==10.17.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==2.4.0",
+    "pypdfium2==5.14.0",  # nur unabhängiger Testrenderer, nie im Laufzeitimage
+    "pytest==9.1.1",
+    "ruff==0.17.1",
+]
+
+# Kein installierbares Paket: uv verwaltet nur die Umgebung. Im Image liegt
+# das Paket root-eigen in site-packages (siehe Dockerfile).
+[tool.uv]
+package = false
+# Lieferkettenschutz wie im Backend: nur Releases vor diesem Zeitpunkt.
+exclude-newer = "2026-10-17T00:00:00Z"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # isort
+    "UP",      # pyupgrade
+    "B",       # bugbear
+    "S",       # bandit (Sicherheit)
+    "C4",      # comprehensions
+    "SIM",     # Vereinfachungen
+    "RUF",     # ruff-eigene Regeln
+    "PTH",     # pathlib statt os.path
+    "T20",     # keine print-Aufrufe; stdout gehört dem Protokoll
+]
+allowed-confusables = ["–"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: assert ist in pytest das Prüfmittel. S603: Tests starten den
+# Konverter bewusst als Kindprozess mit festem Interpreter.
+"tests/**" = ["S101", "S603"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+# Zielplattform ist der Linux-Container (signal/socket/resource-Stubs).
+platform = "linux"
+strict = true
+files = ["converter", "tests"]
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]

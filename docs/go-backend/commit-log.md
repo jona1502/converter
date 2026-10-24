@@ -9,6 +9,13 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Prüfung:** Baseline `go test ./...`, `go vet ./...` und `go test -race ./...` im gepinnten Linux-Go-Image gegen eigenen PostgreSQL-/Valkey-Teststack bestanden. Foundation zusätzlich scoped durch Reviewer mit Race-Detector geprüft.
 - **Grenze:** Laufender Produktstack bleibt bis zur vollständigen Go-Abnahme unverändert auf FastAPI/Celery. Keine Nutzdatenbank für Tests verwendet.
 
+## G03
+
+- **Änderungen:** Eigenständiger privater Python-Konverter mit ausschließlich Pillow/pikepdf als Produktabhängigkeiten, striktem begrenztem JSONL-Protokoll, einmaliger stdin-Anfrage und eigener Sandbox. Keine FastAPI-/SQLAlchemy-/Celery-/Redis-/Pydantic-Laufzeitimports. Vorhandene Bild-/PDF-Algorithmen und Tests übernommen; Ausgabe nur in bereits von Go angelegte private Dateien.
+- **Review:** Hauptagent unabhängig vom Konverterautor: CLI, Ereignisgrenzen, Optionsmodelle, Sandbox, Budget und Dateizugriff gelesen. Native Ausgaben werden auf stderr umgeleitet; Ereignisse enthalten keine Pfade/Inhalte/Fehlermeldungstexte.
+- **Prüfung:** Konverterautor: Ruff/Format/mypy grün; Windows 168 bestanden, 13 Linux-Sandboxfälle übersprungen. Gepinntes Linux-Testimage mit aktiver Seccomp-/RLIMIT-/Walltimer-/PDEATHSIG-Prüfung: 181 bestanden.
+- **Grenze:** Netzwerk-/Ressourcenschutz ist für Linux vorgesehen; Windows ist Entwicklungsumgebung. Prozessgruppen-/Go-Adapterabnahme folgt G07.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
