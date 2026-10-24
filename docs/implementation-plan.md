@@ -1,5 +1,14 @@
 # Umsetzungsplan – erster Release (Bildwerkzeuge)
 
+> **Hinweis (24.10.2026):** Dieser Plan beschreibt die reine Browserarchitektur des ersten Releases.
+> Mit [fastapi-backend-plan.md](fastapi-backend-plan.md) wird die integrierte Website auf
+> Serververarbeitung umgestellt. Die Netzwerkverbote und die Entscheidung „rein statisch, kein
+> Server“ unten gelten weiterhin für die lokale Browser-Engine (`src/lib/image`, `src/lib/pdf`) und
+> ihre Tests, für den Serverbetrieb aber nicht mehr; dort gelten der Backend-Plan und
+> [backend/api-contract.md](backend/api-contract.md) (u. a. `connect-src 'self'`, Uploads nur zum
+> eigenen Origin). Für beide Betriebsarten gelten unverändert: keine Dateien, Namen oder Tokens in
+> Web Storage/IndexedDB, kein `console.*` mit Dateinamen oder -inhalten, sichere Dateinamen.
+
 Stand der Bestandsaufnahme (2026-10-23): Das Repository enthielt nur `README.md` und einen
 Initial-Commit, keine Projektanweisungen und keinen Code. Paketmanager: keiner festgelegt → npm.
 
