@@ -43,6 +43,12 @@ Ein Eintrag je Arbeitspunkt aus [../fastapi-backend-plan.md](../fastapi-backend-
 - **Prüfung:** Acht PDF-Kerntests bestanden: drei Stufen, gemeinsame Bilder/größte Platzierung, nichtkommutative Formtransformation, Zyklen, PNG-Predictor, Masken, Verschlüsselung, Limits, Text/Formular/Link/Outline/Seitengeometrie und unabhängiges PDFium-Rendering.
 - **Grenzen:** Keine Rasterung ganzer Seiten, keine OCR/Font-Untermenge, unsichere Bilder unverändert; reale signierte/PDF-A-Dokumente sind keine garantierte Erhaltungsklasse.
 
+## B08
+
+- **Änderungen:** Die sequenzielle PDF-Variantenverarbeitung des Workerprotokolls mit dem Produktkern integriert und durch echten Upload→Kindprozess→drei geschützte Downloads abgesichert. Analyse und Variantenmetadaten entsprechen dem API-Vertrag; jede Variante beginnt beim Original.
+- **Review:** `backend_b03` prüfte PDF-Kern und API/Download, Hauptagent den kompletten Stack.
+- **Prüfung:** Echter PDF-Integrationstest prüft alle drei Varianten mit pikepdf, Seitenzahl, Formularfeld und Annotation. Separater HTTP-Smoke über Proxy/Dispatcher/Celery erfolgreich. Recovery-/Teilresultat-Erhalt ist zusätzlich in B04-Tests abgedeckt.
+
 ## B02
 
 - **Commit-Nachricht:** `feat(backend): B02 FastAPI-Grundlage und Prüfwerkzeuge ergänzen`
