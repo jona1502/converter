@@ -1,0 +1,196 @@
+table job_results
+table jobs
+table outbox
+table sessions
+table stale_attempts
+table storage_usage
+table upload_reservations
+column job_results.id uuid not null
+column job_results.job_id uuid not null
+column job_results.ordinal smallint not null
+column job_results.level text null
+column job_results.state text not null default 'pending'::text
+column job_results.storage_key text null
+column job_results.size bigint null
+column job_results.mime text not null
+column job_results.download_name text not null
+column job_results.details jsonb null
+column job_results.error_code text null
+column job_results.created_at timestamp with time zone not null default now()
+column job_results.updated_at timestamp with time zone not null default now()
+column jobs.id uuid not null
+column jobs.session_id uuid not null
+column jobs.tool text not null
+column jobs.state text not null default 'queued'::text
+column jobs.phase text null
+column jobs.options jsonb not null
+column jobs.input_name text not null
+column jobs.input_size bigint not null
+column jobs.input_format text not null
+column jobs.input_sha256 bytea not null
+column jobs.input_storage_key text not null
+column jobs.input_width integer null
+column jobs.input_height integer null
+column jobs.idempotency_key text null
+column jobs.fingerprint bytea null
+column jobs.version integer not null default 0
+column jobs.attempts integer not null default 0
+column jobs.max_attempts integer not null
+column jobs.lease_token uuid null
+column jobs.lease_expires_at timestamp with time zone null
+column jobs.heartbeat_at timestamp with time zone null
+column jobs.cancel_requested_at timestamp with time zone null
+column jobs.deleted_at timestamp with time zone null
+column jobs.created_at timestamp with time zone not null default now()
+column jobs.updated_at timestamp with time zone not null default now()
+column jobs.accepted_at timestamp with time zone not null default now()
+column jobs.started_at timestamp with time zone null
+column jobs.finished_at timestamp with time zone null
+column jobs.expires_at timestamp with time zone not null
+column jobs.error_code text null
+column jobs.progress jsonb null
+column jobs.analysis jsonb null
+column jobs.reserved_bytes bigint not null default '0'::bigint
+column jobs.working_bytes bigint not null default '0'::bigint
+column jobs.download_until timestamp with time zone null
+column outbox.id bigint not null identity always
+column outbox.kind text not null
+column outbox.job_id uuid not null
+column outbox.available_at timestamp with time zone not null default now()
+column outbox.attempts integer not null default 0
+column outbox.published_at timestamp with time zone null
+column outbox.last_error text null
+column outbox.created_at timestamp with time zone not null default now()
+column sessions.id uuid not null
+column sessions.token_hash bytea not null
+column sessions.created_at timestamp with time zone not null default now()
+column sessions.last_seen_at timestamp with time zone not null default now()
+column sessions.expires_at timestamp with time zone not null
+column stale_attempts.lease_token uuid not null
+column stale_attempts.job_id uuid not null
+column stale_attempts.reserved_bytes bigint not null
+column stale_attempts.reap_after timestamp with time zone not null
+column storage_usage.id smallint not null default nextval('storage_usage_id_seq'::regclass)
+column storage_usage.reserved_bytes bigint not null default '0'::bigint
+column upload_reservations.id uuid not null
+column upload_reservations.session_id uuid not null
+column upload_reservations.bytes bigint not null
+column upload_reservations.spool_key text not null
+column upload_reservations.created_at timestamp with time zone not null default now()
+column upload_reservations.expires_at timestamp with time zone not null
+constraint job_results.ck_job_results_level c CHECK (level IS NULL OR (level = ANY (ARRAY['high'::text, 'balanced'::text, 'small'::text])))
+constraint job_results.ck_job_results_ordinal c CHECK (ordinal >= 0)
+constraint job_results.ck_job_results_size c CHECK (size IS NULL OR size >= 0)
+constraint job_results.ck_job_results_state c CHECK (state = ANY (ARRAY['pending'::text, 'running'::text, 'succeeded'::text, 'failed'::text, 'cancelled'::text]))
+constraint job_results.ck_job_results_succeeded_has_file c CHECK (state <> 'succeeded'::text OR storage_key IS NOT NULL AND size IS NOT NULL)
+constraint job_results.fk_job_results_job_id_jobs f FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+constraint job_results.job_results_created_at_not_null n NOT NULL created_at
+constraint job_results.job_results_download_name_not_null n NOT NULL download_name
+constraint job_results.job_results_id_not_null n NOT NULL id
+constraint job_results.job_results_job_id_not_null n NOT NULL job_id
+constraint job_results.job_results_mime_not_null n NOT NULL mime
+constraint job_results.job_results_ordinal_not_null n NOT NULL ordinal
+constraint job_results.job_results_state_not_null n NOT NULL state
+constraint job_results.job_results_updated_at_not_null n NOT NULL updated_at
+constraint job_results.pk_job_results p PRIMARY KEY (id)
+constraint job_results.uq_job_results_job_id_ordinal u UNIQUE (job_id, ordinal)
+constraint jobs.ck_jobs_attempts c CHECK (attempts >= 0 AND max_attempts >= 1 AND attempts <= max_attempts)
+constraint jobs.ck_jobs_bytes c CHECK (reserved_bytes >= 0 AND working_bytes >= 0)
+constraint jobs.ck_jobs_failed_error c CHECK (state <> 'failed'::text OR error_code IS NOT NULL)
+constraint jobs.ck_jobs_idempotency_pair c CHECK ((idempotency_key IS NULL) = (fingerprint IS NULL))
+constraint jobs.ck_jobs_input_format c CHECK (input_format = ANY (ARRAY['jpeg'::text, 'png'::text, 'webp'::text, 'gif'::text, 'bmp'::text, 'ico'::text, 'avif'::text, 'pdf'::text]))
+constraint jobs.ck_jobs_input_sha256_length c CHECK (octet_length(input_sha256) = 32)
+constraint jobs.ck_jobs_input_size c CHECK (input_size >= 0)
+constraint jobs.ck_jobs_phase c CHECK (phase IS NULL OR (phase = ANY (ARRAY['analyze'::text, 'variant'::text, 'encode'::text, 'save'::text])))
+constraint jobs.ck_jobs_phase_only_running c CHECK (phase IS NULL OR state = 'running'::text)
+constraint jobs.ck_jobs_running_lease c CHECK (state <> 'running'::text OR lease_token IS NOT NULL)
+constraint jobs.ck_jobs_state c CHECK (state = ANY (ARRAY['queued'::text, 'running'::text, 'succeeded'::text, 'partially_succeeded'::text, 'failed'::text, 'cancelled'::text, 'expired'::text]))
+constraint jobs.ck_jobs_tool c CHECK (tool = ANY (ARRAY['image-convert'::text, 'image-compress'::text, 'image-resize'::text, 'pdf-compress'::text]))
+constraint jobs.ck_jobs_version c CHECK (version >= 0)
+constraint jobs.fk_jobs_session_id_sessions f FOREIGN KEY (session_id) REFERENCES sessions(id)
+constraint jobs.jobs_accepted_at_not_null n NOT NULL accepted_at
+constraint jobs.jobs_attempts_not_null n NOT NULL attempts
+constraint jobs.jobs_created_at_not_null n NOT NULL created_at
+constraint jobs.jobs_expires_at_not_null n NOT NULL expires_at
+constraint jobs.jobs_id_not_null n NOT NULL id
+constraint jobs.jobs_input_format_not_null n NOT NULL input_format
+constraint jobs.jobs_input_name_not_null n NOT NULL input_name
+constraint jobs.jobs_input_sha256_not_null n NOT NULL input_sha256
+constraint jobs.jobs_input_size_not_null n NOT NULL input_size
+constraint jobs.jobs_input_storage_key_not_null n NOT NULL input_storage_key
+constraint jobs.jobs_max_attempts_not_null n NOT NULL max_attempts
+constraint jobs.jobs_options_not_null n NOT NULL options
+constraint jobs.jobs_reserved_bytes_not_null n NOT NULL reserved_bytes
+constraint jobs.jobs_session_id_not_null n NOT NULL session_id
+constraint jobs.jobs_state_not_null n NOT NULL state
+constraint jobs.jobs_tool_not_null n NOT NULL tool
+constraint jobs.jobs_updated_at_not_null n NOT NULL updated_at
+constraint jobs.jobs_version_not_null n NOT NULL version
+constraint jobs.jobs_working_bytes_not_null n NOT NULL working_bytes
+constraint jobs.pk_jobs p PRIMARY KEY (id)
+constraint jobs.uq_jobs_session_id_idempotency_key u UNIQUE (session_id, idempotency_key)
+constraint outbox.ck_outbox_attempts c CHECK (attempts >= 0)
+constraint outbox.ck_outbox_kind c CHECK (kind = ANY (ARRAY['dispatch'::text, 'delete'::text]))
+constraint outbox.fk_outbox_job_id_jobs f FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+constraint outbox.outbox_attempts_not_null n NOT NULL attempts
+constraint outbox.outbox_available_at_not_null n NOT NULL available_at
+constraint outbox.outbox_created_at_not_null n NOT NULL created_at
+constraint outbox.outbox_id_not_null n NOT NULL id
+constraint outbox.outbox_job_id_not_null n NOT NULL job_id
+constraint outbox.outbox_kind_not_null n NOT NULL kind
+constraint outbox.pk_outbox p PRIMARY KEY (id)
+constraint sessions.ck_sessions_token_hash_length c CHECK (octet_length(token_hash) = 32)
+constraint sessions.pk_sessions p PRIMARY KEY (id)
+constraint sessions.sessions_created_at_not_null n NOT NULL created_at
+constraint sessions.sessions_expires_at_not_null n NOT NULL expires_at
+constraint sessions.sessions_id_not_null n NOT NULL id
+constraint sessions.sessions_last_seen_at_not_null n NOT NULL last_seen_at
+constraint sessions.sessions_token_hash_not_null n NOT NULL token_hash
+constraint sessions.uq_sessions_token_hash u UNIQUE (token_hash)
+constraint stale_attempts.ck_stale_attempts_ck_stale_attempts_reserved_bytes c CHECK (reserved_bytes >= 0)
+constraint stale_attempts.fk_stale_attempts_job_id_jobs f FOREIGN KEY (job_id) REFERENCES jobs(id)
+constraint stale_attempts.pk_stale_attempts p PRIMARY KEY (lease_token)
+constraint stale_attempts.stale_attempts_job_id_not_null n NOT NULL job_id
+constraint stale_attempts.stale_attempts_lease_token_not_null n NOT NULL lease_token
+constraint stale_attempts.stale_attempts_reap_after_not_null n NOT NULL reap_after
+constraint stale_attempts.stale_attempts_reserved_bytes_not_null n NOT NULL reserved_bytes
+constraint storage_usage.ck_storage_usage_reserved_bytes c CHECK (reserved_bytes >= 0)
+constraint storage_usage.ck_storage_usage_single_row c CHECK (id = 1)
+constraint storage_usage.pk_storage_usage p PRIMARY KEY (id)
+constraint storage_usage.storage_usage_id_not_null n NOT NULL id
+constraint storage_usage.storage_usage_reserved_bytes_not_null n NOT NULL reserved_bytes
+constraint upload_reservations.ck_upload_reservations_bytes c CHECK (bytes > 0)
+constraint upload_reservations.fk_upload_reservations_session_id_sessions f FOREIGN KEY (session_id) REFERENCES sessions(id)
+constraint upload_reservations.pk_upload_reservations p PRIMARY KEY (id)
+constraint upload_reservations.upload_reservations_bytes_not_null n NOT NULL bytes
+constraint upload_reservations.upload_reservations_created_at_not_null n NOT NULL created_at
+constraint upload_reservations.upload_reservations_expires_at_not_null n NOT NULL expires_at
+constraint upload_reservations.upload_reservations_id_not_null n NOT NULL id
+constraint upload_reservations.upload_reservations_session_id_not_null n NOT NULL session_id
+constraint upload_reservations.upload_reservations_spool_key_not_null n NOT NULL spool_key
+constraint upload_reservations.uq_upload_reservations_spool_key u UNIQUE (spool_key)
+index job_results.pk_job_results CREATE UNIQUE INDEX pk_job_results ON public.job_results USING btree (id)
+index job_results.uq_job_results_job_id_ordinal CREATE UNIQUE INDEX uq_job_results_job_id_ordinal ON public.job_results USING btree (job_id, ordinal)
+index jobs.ix_jobs_active_session CREATE INDEX ix_jobs_active_session ON public.jobs USING btree (session_id) WHERE ((state = ANY (ARRAY['queued'::text, 'running'::text])) AND (deleted_at IS NULL))
+index jobs.ix_jobs_deleted_at CREATE INDEX ix_jobs_deleted_at ON public.jobs USING btree (deleted_at) WHERE (deleted_at IS NOT NULL)
+index jobs.ix_jobs_expires_at CREATE INDEX ix_jobs_expires_at ON public.jobs USING btree (expires_at)
+index jobs.ix_jobs_lease_expires_at_running CREATE INDEX ix_jobs_lease_expires_at_running ON public.jobs USING btree (lease_expires_at) WHERE (state = 'running'::text)
+index jobs.pk_jobs CREATE UNIQUE INDEX pk_jobs ON public.jobs USING btree (id)
+index jobs.uq_jobs_session_id_idempotency_key CREATE UNIQUE INDEX uq_jobs_session_id_idempotency_key ON public.jobs USING btree (session_id, idempotency_key)
+index outbox.ix_outbox_job_id CREATE INDEX ix_outbox_job_id ON public.outbox USING btree (job_id)
+index outbox.ix_outbox_pending CREATE INDEX ix_outbox_pending ON public.outbox USING btree (available_at) WHERE (published_at IS NULL)
+index outbox.pk_outbox CREATE UNIQUE INDEX pk_outbox ON public.outbox USING btree (id)
+index sessions.ix_sessions_expires_at CREATE INDEX ix_sessions_expires_at ON public.sessions USING btree (expires_at)
+index sessions.pk_sessions CREATE UNIQUE INDEX pk_sessions ON public.sessions USING btree (id)
+index sessions.uq_sessions_token_hash CREATE UNIQUE INDEX uq_sessions_token_hash ON public.sessions USING btree (token_hash)
+index stale_attempts.ix_stale_attempts_job_id CREATE INDEX ix_stale_attempts_job_id ON public.stale_attempts USING btree (job_id)
+index stale_attempts.ix_stale_attempts_reap_after CREATE INDEX ix_stale_attempts_reap_after ON public.stale_attempts USING btree (reap_after)
+index stale_attempts.pk_stale_attempts CREATE UNIQUE INDEX pk_stale_attempts ON public.stale_attempts USING btree (lease_token)
+index storage_usage.pk_storage_usage CREATE UNIQUE INDEX pk_storage_usage ON public.storage_usage USING btree (id)
+index upload_reservations.ix_upload_reservations_expires_at CREATE INDEX ix_upload_reservations_expires_at ON public.upload_reservations USING btree (expires_at)
+index upload_reservations.ix_upload_reservations_session_id CREATE INDEX ix_upload_reservations_session_id ON public.upload_reservations USING btree (session_id)
+index upload_reservations.pk_upload_reservations CREATE UNIQUE INDEX pk_upload_reservations ON public.upload_reservations USING btree (id)
+index upload_reservations.uq_upload_reservations_spool_key CREATE UNIQUE INDEX uq_upload_reservations_spool_key ON public.upload_reservations USING btree (spool_key)
+sequence outbox_id_seq bigint start 1 increment 1 min 1 max 9223372036854775807 cache 1 cycle f owned_by outbox.id
+sequence storage_usage_id_seq smallint start 1 increment 1 min 1 max 32767 cache 1 cycle f owned_by storage_usage.id
+row storage_usage id=1 reserved_bytes=0

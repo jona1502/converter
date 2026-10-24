@@ -1,0 +1,462 @@
+{
+  "secrets": [
+    "test-secret-key-0123456789abcdefghijklmnop",
+    "local-development-only-change-before-hosting-2026",
+    "Schlüssel-mit-Ümlauten-und-€-Zeichen-0123456789"
+  ],
+  "tokens": [
+    {
+      "randomHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "hashHex": "ea866a757e4c38babfa8127cbe9a409d3e1f93a00ff1488ff735fcf917afffd0",
+      "csrf": {
+        "test-secret-key-0123456789abcdefghijklmnop": "fdTxpFdLhSD98xI7vtIuQPhFuqGGVsM8tTyXOGXv_Qg",
+        "local-development-only-change-before-hosting-2026": "NNEczn-7MRDcldC9XOSWxBteHmk0UoV86Pas8n8PCNg",
+        "Schlüssel-mit-Ümlauten-und-€-Zeichen-0123456789": "Y---Y8Ii3VhZ3h8nLPZZ22STllGM8n_Bq3I8a9wRWwM"
+      }
+    },
+    {
+      "randomHex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "token": "__________________________________________8",
+      "hashHex": "225f7e75329dd45aa354975d73987319309393af3a4c6733bc13601a4f1b8796",
+      "csrf": {
+        "test-secret-key-0123456789abcdefghijklmnop": "el2bn7zohsGIKJz_CUMfhFxlvkKbLE_LqMI0zpVnfrw",
+        "local-development-only-change-before-hosting-2026": "S7HSBkjdDPxW5Ws8_wf8SvXcbdXv7D0JqQDXwQB-kxc",
+        "Schlüssel-mit-Ümlauten-und-€-Zeichen-0123456789": "MCpE20TJjdBlPGJRACpY3GZimJTnwIl72XVZb4766GQ"
+      }
+    },
+    {
+      "randomHex": "fbfbfbfbfbfbfbfbfbfbfbfbfbfbfbfbefefefefefefefefefefefefefefefef",
+      "token": "-_v7-_v7-_v7-_v7-_v7--_v7-_v7-_v7-_v7-_v7-8",
+      "hashHex": "12e2011b13676557a9504b3b3026d9f487fe0bac084fc7bb6445bac2fb50b9dc",
+      "csrf": {
+        "test-secret-key-0123456789abcdefghijklmnop": "2o6UGGHlRGjzt7-K7lQ89Ma32IjlwZt9t6YiPaDVxy4",
+        "local-development-only-change-before-hosting-2026": "i0Wp7szPdjcEFES_GCWCSEVP0-g1UemXijs9JcCvCm8",
+        "Schlüssel-mit-Ümlauten-und-€-Zeichen-0123456789": "3xSs7fogUkQWvjOGh69QtFOala4cZCBddymfWgiM2y0"
+      }
+    }
+  ],
+  "plausible": {
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": true,
+    "a-_a-_a-_a-_a-_a-_a-_a-_a-_a-_a-_a-_a-_a-_x": true,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": false,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": false,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=": false,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+": false,
+    "": false,
+    "ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ": false
+  },
+  "csrfMatches": [
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "match": true
+    },
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z",
+      "match": false
+    },
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0x",
+      "match": false
+    },
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": "",
+      "match": false
+    },
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": "Q7BQPXXXYCIV3U5-CW33UZUPASCTWEDSLA0E3KTF0Z0",
+      "match": false
+    },
+    {
+      "expected": "Q7BQpxxXYCIV3U5-CW33uZupASCtWedsLA0E3KtF0Z0",
+      "given": null,
+      "match": false
+    }
+  ],
+  "cookies": [
+    {
+      "secure": true,
+      "ttlSeconds": 86400,
+      "name": "__Host-converter_session",
+      "setCookie": "__Host-converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; HttpOnly; Max-Age=86400; Path=/; SameSite=strict; Secure"
+    },
+    {
+      "secure": true,
+      "ttlSeconds": 7200,
+      "name": "__Host-converter_session",
+      "setCookie": "__Host-converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; HttpOnly; Max-Age=7200; Path=/; SameSite=strict; Secure"
+    },
+    {
+      "secure": false,
+      "ttlSeconds": 86400,
+      "name": "converter_session",
+      "setCookie": "converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; HttpOnly; Max-Age=86400; Path=/; SameSite=strict"
+    },
+    {
+      "secure": false,
+      "ttlSeconds": 7200,
+      "name": "converter_session",
+      "setCookie": "converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; HttpOnly; Max-Age=7200; Path=/; SameSite=strict"
+    }
+  ],
+  "cookieParsing": [
+    {
+      "cookie": "converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "converter_session",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "cookie": "a=b; converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; c=d",
+      "name": "converter_session",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "cookie": "converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA; converter_session=BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+      "name": "converter_session",
+      "value": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    },
+    {
+      "cookie": "converter_session=\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"",
+      "name": "converter_session",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "cookie": "converter_session= AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+      "name": "converter_session",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "cookie": "converter_session=",
+      "name": "converter_session",
+      "value": ""
+    },
+    {
+      "cookie": "__Host-converter_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "converter_session",
+      "value": null
+    },
+    {
+      "cookie": "",
+      "name": "converter_session",
+      "value": null
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://converter.example",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "origin": "HTTPS://Converter.Example",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "origin": "https://converter.example/",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "origin": "https://evil.example",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "origin": "null",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "origin": "",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "origin": "http://localhost:8080",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "secFetchSite": "cross-site",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "secFetchSite": "Cross-Site",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": false
+    },
+    {
+      "secFetchSite": "same-origin",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "secFetchSite": "same-site",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "secFetchSite": "none",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    },
+    {
+      "origin": "https://converter.example",
+      "secFetchSite": "cross-site",
+      "allowedOrigins": [
+        "https://converter.example",
+        "http://localhost:8080"
+      ],
+      "allowed": true
+    }
+  ],
+  "clientIps": [
+    {
+      "peer": "203.0.113.9",
+      "xff": null,
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "203.0.113.9"
+    },
+    {
+      "peer": "203.0.113.9",
+      "xff": "1.2.3.4",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "203.0.113.9"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "198.51.100.7",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.7"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "6.6.6.6, 198.51.100.7",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.7"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "198.51.100.7, 10.1.2.3",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.7"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "198.51.100.7, 10.1.2.3, 10.9.9.9",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.7"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "garbage, 198.51.100.7",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.7"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "198.51.100.7, garbage",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "172.30.218.10"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "172.30.218.10"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": null,
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "172.30.218.10"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": " 2001:DB8::1 ",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "2001:db8::1"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "10.0.0.1, 10.0.0.2",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "10.0.0.1"
+    },
+    {
+      "peer": "172.30.218.10",
+      "xff": "::ffff:1.2.3.4",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "::ffff:1.2.3.4"
+    },
+    {
+      "peer": "::1",
+      "xff": "198.51.100.8",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "198.51.100.8"
+    },
+    {
+      "peer": "2001:db8:0:0::5",
+      "xff": "1.1.1.1",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "2001:db8::5"
+    },
+    {
+      "peer": "not-an-ip",
+      "xff": "1.1.1.1",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "not-an-ip"
+    },
+    {
+      "peer": null,
+      "xff": "1.1.1.1",
+      "trustedProxies": [
+        "172.30.218.10/32",
+        "10.0.0.0/8",
+        "::1"
+      ],
+      "clientIp": "unknown"
+    }
+  ],
+  "rateKeys": [
+    {
+      "kind": "new-session",
+      "identity": "203.0.113.9",
+      "key": "converter:rate:new-session:d861b7e91033ebc1c1e8e7af3929010158b3241b54ca87ef73e79c32f26400ec"
+    },
+    {
+      "kind": "create-ip",
+      "identity": "2001:db8::1",
+      "key": "converter:rate:create-ip:5afd19e856d1c18d17d600dfd2b5f534992333985e126c2a951047102c1ed536"
+    },
+    {
+      "kind": "create-session",
+      "identity": "6f0c1d5e-8a3b-4c2d-9e1f-0a1b2c3d4e5f",
+      "key": "converter:rate:create-session:40a038430543bd33e3fa688a21477308c331e4e60e91dd685b61ecd76b7ed2d5"
+    },
+    {
+      "kind": "idempotency-lock",
+      "identity": "6f0c1d5e-8a3b-4c2d-9e1f-0a1b2c3d4e5f:Schlüssel_ä-1234567",
+      "key": "converter:rate:idempotency-lock:a42843800a450bb6aff7cbd2d8ad94bcf6ef503dee50889bc795c5eab8b45945"
+    },
+    {
+      "kind": "replay",
+      "identity": "",
+      "key": "converter:rate:replay:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

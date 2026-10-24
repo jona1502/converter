@@ -21,6 +21,12 @@ Ein Eintrag je Arbeitspunkt aus [../go-backend-plan.md](../go-backend-plan.md), 
 - **Änderungen:** Während G03-Staging entstandenes lokales Integrationstestbinary wieder aus der Versionsverwaltung entfernt; `.data/`, Go-Testbinaries und lokale Buildausgaben werden ignoriert. Die lokale Testdatei bleibt erhalten.
 - **Review:** `go_converter` bestätigte die gezielte Indexentfernung und Ignore-Regeln. Keine Produktcodeänderung und keine zusätzliche Testausführung erforderlich.
 
+## G04
+
+- **Änderungen:** pgx-Pool und schemaerhaltende SQL-Migrationen, Alembic-0003-Baseline, idempotente Requeue-Funktion, Besitzerabfragen, Sitzungs-/CSRF-Logik mit Python-Goldenfixtures und private Dateiablage mit fsync/atomaren Umbenennungen. Testdatenbankhelfer erlaubt ausschließlich eigene Testdatenbanken.
+- **Review:** Hauptagent unabhängig vom vorbereiteten Claude-Code: Sessionhash/CSRF, SQL-Parameter, Migrationsübernahme, Download-Lease, Pfad-/Rechte-/fsync-Regeln und Testdatenabgrenzung gelesen. `go_converter` zusätzlich Storage/Jobs unabhängig geprüft.
+- **Prüfung:** Go-Baseline einschließlich auth/store/storage/testdb/cmd-migrate gegen isolierten PostgreSQL-Stack grün; `go vet` und Race-Detector ohne Befund. Schema-Snapshot und vorhandene Alembic-Revision werden durch Migrationstests verglichen.
+
 ## G00
 
 - **Commit-Nachricht:** `chore(migration): G00 vorhandenen Converter-Stand sichern`
