@@ -127,9 +127,9 @@
   }
   body {
     @apply bg-canvas;
-    font-size: 1.0625rem;
-    line-height: 1.47;
-    letter-spacing: -0.022em;
+    font-size: 1rem;
+    line-height: 1.55;
+    letter-spacing: -0.008em;
   }
   h1,
   h2,
@@ -139,7 +139,7 @@
     hyphens: auto;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-focus;
+    @apply outline-3 outline-offset-3 outline-focus;
   }
   ::selection {
     @apply bg-accent-soft text-ink;
@@ -222,7 +222,7 @@
     @apply mx-auto w-full max-w-3xl px-4 sm:px-6;
   }
   .page-section {
-    @apply mt-12 sm:mt-16;
+    @apply mt-8 sm:mt-12;
   }
   .page-eyebrow {
     @apply text-base font-semibold text-muted;
@@ -230,15 +230,13 @@
   }
   .page-title {
     @apply font-semibold text-balance;
-    font-size: clamp(2.125rem, 1.55rem + 2.6vw, 3.5rem);
-    line-height: 1.07;
-    letter-spacing: -0.028em;
+    font-size: clamp(1.75rem, 1.5rem + 1.2vw, 2.25rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
   }
   .page-lead {
-    @apply mt-4 max-w-2xl text-muted text-pretty;
-    font-size: clamp(1.125rem, 1.02rem + 0.45vw, 1.3125rem);
-    line-height: 1.42;
-    letter-spacing: -0.016em;
+    @apply mt-3 max-w-2xl text-base text-muted text-pretty;
+    line-height: 1.55;
   }
   .hero {
     @apply mx-auto flex max-w-4xl flex-col items-center pt-4 pb-4 text-center sm:pt-10;
@@ -257,9 +255,9 @@
   }
   .section-title {
     @apply font-semibold;
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-    line-height: 1.15;
-    letter-spacing: -0.024em;
+    font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+    line-height: 1.35;
+    letter-spacing: -0.015em;
   }
   .section-kicker {
     @apply text-sm font-semibold text-muted;
@@ -285,9 +283,9 @@
   }
   .prose-content h2 {
     @apply mt-12 font-semibold;
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-    line-height: 1.15;
-    letter-spacing: -0.024em;
+    font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+    line-height: 1.35;
+    letter-spacing: -0.015em;
   }
   .prose-content h3 {
     @apply mt-8 text-xl font-semibold;
@@ -309,7 +307,7 @@
     @apply rounded-md bg-fill px-1.5 py-0.5 font-mono text-[0.88em];
   }
   .skip-link {
-    @apply absolute left-4 -top-40 z-50 rounded-full bg-ink px-5 py-2.5 font-medium text-canvas no-underline;
+    @apply absolute left-4 -top-40 z-50 rounded-control bg-ink px-5 py-2.5 font-medium text-canvas no-underline;
   }
   .skip-link:focus,
   .skip-link:focus-visible {
@@ -318,18 +316,18 @@
 
   /* Buttons (ohne Farbübergänge: axe misst sonst Zwischenfarben, z. B. beim Aktivieren nach „disabled“) */
   .btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-transparent px-5 py-2 text-[1.0625rem] font-normal leading-tight no-underline select-none;
-    letter-spacing: -0.022em;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-transparent px-4 py-2.5 text-base font-semibold leading-tight no-underline select-none;
+    letter-spacing: -0.005em;
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
-    @apply cursor-not-allowed border-transparent bg-surface-muted text-muted shadow-none;
+    @apply cursor-not-allowed border-border bg-surface-muted text-muted shadow-none;
   }
   .btn-primary {
     @apply bg-accent-fill text-on-accent;
   }
   .btn-secondary {
-    @apply bg-fill text-ink;
+    @apply border-border-control bg-fill text-ink;
   }
   .btn-danger {
     @apply border-danger bg-transparent text-danger;
@@ -355,36 +353,31 @@
     @apply border-transparent bg-transparent;
   }
   .btn-sm {
-    @apply min-h-9 px-4 py-1.5 text-sm;
+    @apply min-h-11 px-3 py-2 text-sm;
     letter-spacing: -0.01em;
   }
   .btn-lg {
-    @apply min-h-12 px-7 py-3 text-lg;
+    @apply min-h-12 px-6 py-3 text-base;
   }
   .btn-icon {
-    @apply aspect-square px-0 py-0;
+    @apply aspect-square min-w-11 px-0 py-0;
   }
 
   /* Karten */
   .card {
-    @apply rounded-card bg-surface p-5 sm:p-7;
+    @apply rounded-card border border-border bg-surface p-5 sm:p-6;
     box-shadow: var(--shadow-card);
   }
   .card-muted {
-    @apply rounded-card border border-border bg-surface p-5 sm:p-7;
+    @apply rounded-card border border-border bg-surface-muted p-5 sm:p-6;
   }
   .card-link {
-    @apply relative block rounded-card bg-surface p-6 text-ink no-underline sm:p-8;
+    @apply relative block rounded-card border border-border bg-surface p-5 text-ink no-underline sm:p-6;
     box-shadow: var(--shadow-card);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: border-color 0.15s ease;
   }
   .card-link:hover {
-    box-shadow: var(--shadow-lift);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .card-link:hover {
-      transform: translateY(-4px);
-    }
+    @apply border-accent;
   }
   .card-link:focus-visible {
     @apply outline-3 outline-offset-3 outline-focus;
@@ -395,7 +388,7 @@
     letter-spacing: -0.022em;
   }
   .card-icon {
-    @apply flex size-12 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent;
+    @apply flex size-11 shrink-0 items-center justify-center rounded-control bg-accent-soft text-accent;
   }
 
   /* Formulare */
@@ -406,7 +399,7 @@
     @apply flex items-start gap-3;
   }
   .label {
-    @apply text-[0.9375rem] font-semibold text-ink;
+    @apply text-base font-semibold text-ink;
     letter-spacing: -0.012em;
   }
   .hint {
@@ -419,13 +412,11 @@
   }
   .input,
   .select {
-    @apply min-h-11 w-full rounded-control border border-border-control bg-surface px-3.5 py-2 text-[1.0625rem] text-ink;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    @apply min-h-11 w-full rounded-control border border-border-control bg-surface px-3 py-2 text-base text-ink;
   }
   .input:focus-visible,
   .select:focus-visible {
-    @apply border-focus outline-2 outline-offset-0 outline-focus;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-focus) 22%, transparent);
+    @apply border-focus outline-3 outline-offset-3 outline-focus;
   }
   .input:disabled,
   .select:disabled {
@@ -438,10 +429,15 @@
   .select {
     @apply cursor-pointer pr-10;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2386868b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23647f77' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.9rem center;
     background-size: 1rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    .select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2391b8ab' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    }
   }
   .select option {
     @apply bg-surface text-ink;
@@ -470,25 +466,23 @@
     @apply m-0 flex min-w-0 flex-col gap-3 border-0 p-0;
   }
   .legend {
-    @apply mb-2 p-0 text-[0.9375rem] font-semibold text-ink;
+    @apply mb-2 p-0 text-base font-semibold text-ink;
   }
   /* Segment-/Chipleiste: Labels mit echtem Kontrollkästchen bzw. Optionsfeld darin. */
   .choice-group {
-    @apply flex flex-wrap gap-1 rounded-control bg-fill p-1;
+    @apply flex flex-wrap gap-1 rounded-control border border-border bg-surface-muted p-1;
   }
   .choice-group > label {
-    @apply flex min-h-10 cursor-pointer items-center gap-2 rounded-[0.55rem] px-3 text-[0.9375rem] text-ink;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    @apply flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-transparent px-3 text-base text-ink;
   }
-  .choice-group > label:hover {
+  .choice-group > label:not(:has(input:disabled)):hover {
     @apply bg-fill-hover;
   }
   .choice-group > label:has(input:checked) {
-    @apply bg-segment font-semibold;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+    @apply border-border-control bg-segment font-semibold;
   }
   .choice-group > label:has(input:disabled) {
-    @apply cursor-default;
+    @apply cursor-not-allowed border-border bg-surface-muted text-muted;
   }
   .choice-group input {
     @apply size-4 shrink-0 cursor-pointer accent-accent-fill;
@@ -499,25 +493,24 @@
 
   /* Hinweise */
   .notice {
-    @apply rounded-control px-4 py-3.5 text-[0.9375rem] sm:px-5;
-    letter-spacing: -0.012em;
-    line-height: 1.47;
-    border-left: 0;
+    @apply rounded-control border border-transparent px-4 py-3 text-sm sm:px-5;
+    line-height: 1.55;
+    border-left-width: 3px;
   }
   .notice-title {
     @apply font-semibold;
   }
   .notice-info {
-    @apply bg-accent-soft text-ink;
+    @apply border-l-accent bg-accent-soft text-ink;
   }
   .notice-warn {
-    @apply bg-warning-soft text-ink;
+    @apply border-l-warning bg-warning-soft text-ink;
   }
   .notice-error {
-    @apply bg-danger-soft text-ink;
+    @apply border-l-danger bg-danger-soft text-ink;
   }
   .notice-success {
-    @apply bg-success-soft text-ink;
+    @apply border-l-success bg-success-soft text-ink;
   }
   .notice-info .notice-title {
     @apply text-accent;
@@ -534,7 +527,7 @@
 
   /* Badges */
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold leading-5;
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-sm font-semibold leading-5;
     letter-spacing: 0;
   }
   .badge-neutral {
@@ -555,7 +548,7 @@
 
   /* Werkzeugoberfläche */
   .drop-zone {
-    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-strong bg-surface px-4 py-10 text-center sm:px-8 sm:py-14;
+    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-control bg-surface-muted px-4 py-8 text-center sm:px-6 sm:py-10;
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .drop-zone[data-dragging="true"] {
@@ -565,7 +558,7 @@
     @apply border-border bg-surface-muted;
   }
   .file-list {
-    @apply flex flex-col divide-y divide-border overflow-hidden rounded-card bg-surface;
+    @apply flex flex-col divide-y divide-border rounded-card border border-border bg-surface;
     box-shadow: var(--shadow-card);
   }
   .file-row {
@@ -579,7 +572,7 @@
     @apply truncate font-semibold;
   }
   .file-result {
-    @apply flex flex-col gap-3 rounded-control bg-surface-muted p-4;
+    @apply flex flex-col gap-3 rounded-control border border-border bg-surface-muted p-4;
   }
   .meta-list {
     @apply grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[max-content_minmax(0,1fr)];
@@ -591,7 +584,7 @@
     @apply text-muted;
   }
   .meta-list dd {
-    @apply m-0 min-w-0 font-medium;
+    @apply m-0 min-w-0 font-medium tabular-nums;
   }
   .progress {
     @apply block h-1.5 w-full accent-accent-fill;
@@ -611,11 +604,11 @@
     @apply rounded-full bg-accent-fill;
   }
   .variant-card {
-    @apply flex flex-col gap-3 rounded-card bg-surface p-6;
+    @apply flex flex-col gap-3 rounded-card border border-border bg-surface p-5 sm:p-6;
     box-shadow: var(--shadow-card);
   }
   .variant-size {
-    @apply font-semibold;
+    @apply font-semibold tabular-nums;
     font-family: var(--font-display);
     font-size: 2.25rem;
     line-height: 1.1;
