@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 // UI-Vertrag mit API-Doubles: kein Nachweis der tatsächlichen Serverkodierung.
 const tools = [
   { path: '/bilder/konvertieren', action: 'Konvertieren', change: 'jpeg' },
+  { path: '/bilder/komprimieren', action: 'Komprimieren', change: 'webp' },
 ] as const;
 
 for (const tool of tools) {
