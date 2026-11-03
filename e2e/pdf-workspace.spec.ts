@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { expect, test, type Page } from '@playwright/test';
 import type { Job, JobResult } from '../src/lib/api/client';
+import AxeBuilder from '@axe-core/playwright';
 
 // Diese API-Fixtures prüfen die Oberfläche, nicht die echte PDF-Verarbeitung.
 async function prepare(page: Page) {
@@ -90,4 +91,101 @@ test('laufende PDF zeigt Analyse und fertige Varianten, Teilfehler bleiben der V
   await expect(balanced.locator('dt', { hasText: 'Ergebnisgröße' })).toBeVisible();
   await expect(results.getByRole('link')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
+});
+
+test('Abbrechen bewahrt fertige Downloads und beendet wartende Varianten', async ({ page }) => {
+  await prepare(page);
+  await select(page);
+  const finishedHigh = variant('high', 'succeeded', { size: 10000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/high' });
+  let current = job('running', [finishedHigh, variant('balanced', 'running'), variant('small', 'pending')]);
+  await page.route('**/api/v1/jobs', route => route.fulfill({ status: 202, json: current }));
+  await page.route('**/api/v1/jobs/pdf-workspace', route => route.fulfill({ json: current }));
+  await page.route('**/api/v1/jobs/pdf-workspace/cancel', route => {
+    current = job('cancelled', [finishedHigh, variant('balanced', 'cancelled'), variant('small', 'cancelled')], { cancelRequested: true });
+    return route.fulfill({ status: 204 });
+  });
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  const cancellation = page.waitForRequest(request => request.method() === 'POST' && request.url().endsWith('/pdf-workspace/cancel'));
+  await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  await cancellation;
+  await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
+  await expect(page.getByRole('region', { name: 'Ausgewogen', exact: true })).toContainText('Abgebrochen');
+  await expect(page.getByRole('region', { name: 'Kleine Datei', exact: true })).toContainText('Abgebrochen');
+  await expect(page.getByRole('link', { name: 'Hohe Qualität herunterladen', exact: true })).toBeVisible();
+  await expect(page.locator('a[download]')).toHaveCount(1);
+});
+
+test('Reset löscht den Auftrag und lässt eine verspätete Pollantwort nicht wieder erscheinen', async ({ page }) => {
+  await prepare(page);
+  await select(page);
+  const running = job('running', [variant('high', 'running'), variant('balanced', 'pending'), variant('small', 'pending')]);
+  let resume!: () => void;
+  const responseGate = new Promise<void>(resolve => { resume = resolve; });
+  let polling = false, answered = false;
+  await page.route('**/api/v1/jobs', route => route.fulfill({ status: 202, json: running }));
+  await page.route('**/api/v1/jobs/pdf-workspace', async route => {
+    if (route.request().method() === 'DELETE') return route.fulfill({ status: 204 });
+    polling = true;
+    await responseGate;
+    await route.fulfill({ json: job('succeeded', [variant('high', 'succeeded', { size: 10000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/high' })]) });
+    answered = true;
+  });
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  await expect.poll(() => polling).toBe(true);
+  const deletion = page.waitForRequest(request => request.method() === 'DELETE' && request.url().endsWith('/pdf-workspace'));
+  await page.getByRole('button', { name: 'Zurücksetzen', exact: true }).click();
+  await deletion;
+  resume();
+  await expect.poll(() => answered).toBe(true);
+  await expect(page.getByRole('button', { name: 'PDF auswählen', exact: true })).toBeFocused();
+  await expect(page.locator('a[download]')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Analyse', level: 3, exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeDisabled();
+});
+
+test('Ablauf wird angekündigt, entfernt alle Downloads und erlaubt einen neuen Start', async ({ page }) => {
+  await page.clock.install();
+  await prepare(page);
+  await select(page);
+  const finished = job('succeeded', [
+    variant('high', 'succeeded', { size: 20000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/high' }),
+    variant('balanced', 'succeeded', { size: 22000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/balanced' }),
+    variant('small', 'succeeded', { size: 10000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/small' }),
+  ]);
+  await page.route('**/api/v1/jobs', route => route.fulfill({ status: 202, json: finished }));
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  await expect(page.locator('a[download]')).toHaveCount(3);
+  await expect(page.getByRole('region', { name: 'Hohe Qualität', exact: true })).toContainText('Keine Einsparung');
+  await page.clock.fastForward(61000);
+  await expect(page.getByRole('status').filter({ hasText: 'Auftrag abgelaufen' })).toBeVisible();
+  for (const label of ['Hohe Qualität', 'Ausgewogen', 'Kleine Datei']) {
+    await expect(page.getByRole('region', { name: label, exact: true })).toContainText('Abgelaufen');
+  }
+  await expect(page.locator('a[download]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
+});
+
+test('leere, fertige und verschlüsselt abgelehnte PDF-Zustände haben keine Axe-Verstöße', async ({ page }) => {
+  await prepare(page);
+  const violations = async () => (await new AxeBuilder({ page }).include('main').analyze()).violations;
+  expect(await violations()).toEqual([]);
+  await select(page);
+  let current = job('succeeded', [
+    variant('high', 'succeeded', { size: 20000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/high' }),
+    variant('balanced', 'succeeded', { size: 20000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/balanced' }),
+    variant('small', 'succeeded', { size: 20000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/small' }),
+  ], { analysis: { pageCount: 1, images: { total: 0, recompressible: 0 } } });
+  await page.route('**/api/v1/jobs', route => route.fulfill({ status: 202, json: current }));
+  await page.route('**/api/v1/jobs/pdf-workspace', route => route.fulfill({ status: 204 }));
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  await expect(page.locator('a[download]')).toHaveCount(3);
+  await expect(page.getByText('Keine neu kodierbaren Bilder gefunden.', { exact: false })).toBeVisible();
+  expect(await violations()).toEqual([]);
+  await page.getByRole('button', { name: 'Zurücksetzen', exact: true }).click();
+  await select(page);
+  current = job('failed', [], { analysis: null, error: { code: 'encrypted' } });
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  await expect(page.locator('p.notice-error')).toContainText('Verschlüsselte PDFs');
+  await expect(page.locator('a[download]')).toHaveCount(0);
+  expect(await violations()).toEqual([]);
 });

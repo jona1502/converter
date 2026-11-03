@@ -58,6 +58,9 @@ export default function PdfCompressor() {
   const imageAnalysis=job?.analysis?.images;
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
+  const statusText=job?.state==='expired'?'Auftrag abgelaufen. Sie können die PDF erneut komprimieren.':busy?
+    !job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …':
+    job?.state==='succeeded'?'Alle drei Varianten sind fertig.':job?.state==='partially_succeeded'?'Verarbeitung mit Teilfehlern abgeschlossen.':'';
   const signaturesInvalidated=Array.isArray(job?.analysis?.limitations)&&job.analysis.limitations.some(
     limitation=>limitation&&typeof limitation==='object'&&limitation.code==='signatures-invalidated',
   );
@@ -94,7 +97,7 @@ export default function PdfCompressor() {
         {busy&&job&&<button className="btn btn-secondary" onClick={()=>void cancelJob(job.id).catch(error=>setError(apiMessage(error)))}>Abbrechen</button>}
         {file&&<button className="btn btn-ghost" onClick={reset}>Zurücksetzen</button>}
       </div>}
-      <div role="status" aria-live="polite" className="space-y-3">{notice&&<p className="notice notice-info">{notice}</p>}{error&&<p className="notice notice-error">{error}</p>}{busy&&<p>{!job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …'}</p>}</div>
+      <div role="status" aria-live="polite" className="space-y-3">{notice&&<p className="notice notice-info">{notice}</p>}{error&&<p className="notice notice-error">{error}</p>}{statusText&&<p>{statusText}</p>}</div>
     </>}
     resultsHeadingId="pdf-results"
     results={<>
