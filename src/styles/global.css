@@ -22,81 +22,96 @@
   muted wird nie auf fill gesetzt. border ist rein dekorativ (Trennlinien, Kartenränder) und
   nicht für die Erkennbarkeit von Bedienelementen gedacht.
 */
+/*
+  Korrektur 03.11.2026: Die obige Kontrasttabelle und die dort beschriebenen blauen
+  Pillen/Schatten dokumentieren die frühere Palette. Für die Dateiwerkstatt gelten
+  die folgenden warmen Papier-/Petrol-Tokens und der datierte Nachweis in
+  docs/superpowers/reviews/task3-visual-system.md. Bestehende Klassennamen bleiben
+  als Schnittstelle erhalten; Systemschriften benötigen weiterhin keine Netzquelle.
+*/
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-canvas: #f5f5f7;
+  --color-canvas: #f6f4ef;
   --color-surface: #ffffff;
-  --color-surface-muted: #f5f5f7;
-  --color-fill: #e8e8ed;
-  --color-fill-hover: #dcdce1;
+  --color-surface-muted: #f6f4ef;
+  --color-fill: #e8ece6;
+  --color-fill-hover: #dae3dc;
   --color-segment: #ffffff;
-  --color-border: #d2d2d7;
-  --color-border-strong: #b0b0b6;
-  --color-border-control: #86868b;
-  --color-ink: #1d1d1f;
-  --color-muted: #68686d;
-  --color-accent: #0066cc;
-  --color-accent-hover: #0055aa;
-  --color-accent-fill: #0071e3;
-  --color-accent-fill-hover: #0062c4;
-  --color-accent-soft: #e8f0fb;
+  --color-border: #d3ddd5;
+  --color-border-strong: #839a90;
+  --color-border-control: #647f77;
+  --color-ink: #172b2a;
+  --color-muted: #526461;
+  --color-accent: #0f6b61;
+  --color-accent-hover: #0b554e;
+  --color-accent-fill: #0f6b61;
+  --color-accent-fill-hover: #0b554e;
+  --color-accent-soft: #e4f0ec;
   --color-on-accent: #ffffff;
-  --color-focus: #0071e3;
-  --color-success: #1a7f37;
-  --color-success-soft: #e9f6ec;
-  --color-warning: #a15c00;
-  --color-warning-soft: #fdf4e3;
-  --color-danger: #d70015;
-  --color-danger-soft: #fdeceb;
-  --color-header: rgb(245 245 247 / 0.8);
-  --color-header-solid: #f5f5f7;
-  --color-panel: rgb(255 255 255 / 0.86);
+  --color-focus: #0f6b61;
+  --color-success: #236341;
+  --color-success-soft: #e6f1e7;
+  --color-warning: #835313;
+  --color-warning-soft: #fbefdb;
+  --color-danger: #ac372f;
+  --color-danger-soft: #fbeae5;
+  --color-header: rgb(246 244 239 / 0.96);
+  --color-header-solid: #f6f4ef;
+  --color-panel: #ffffff;
 
-  --radius-control: 0.75rem;
-  --radius-card: 1.25rem;
+  --space-workshop-1: 0.25rem;
+  --space-workshop-2: 0.5rem;
+  --space-workshop-3: 0.75rem;
+  --space-workshop-4: 1rem;
+  --space-workshop-6: 1.5rem;
+  --space-workshop-8: 2rem;
+  --space-workshop-12: 3rem;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
-  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.05), 0 16px 40px rgb(0 0 0 / 0.1);
-  --shadow-panel: 0 12px 40px rgb(0 0 0 / 0.14);
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
+  --shadow-card: none;
+  --shadow-lift: 0 2px 5px rgb(23 43 42 / 0.07);
+  --shadow-panel: 0 12px 28px rgb(23 43 42 / 0.14);
 }
 
 /* Dunkles Erscheinungsbild: dieselben Tokens, andere Werte. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-canvas: #000000;
-    --color-surface: #1c1c1e;
-    --color-surface-muted: #2c2c2e;
-    --color-fill: #3a3a3c;
-    --color-fill-hover: #48484a;
-    --color-segment: #636366;
-    --color-border: #38383a;
-    --color-border-strong: #545458;
-    --color-border-control: #8e8e93;
-    --color-ink: #f5f5f7;
-    --color-muted: #a1a1a6;
-    --color-accent: #2997ff;
-    --color-accent-hover: #5cb0ff;
-    --color-accent-fill: #0071e3;
-    --color-accent-fill-hover: #0062c4;
-    --color-accent-soft: #0b2a4a;
-    --color-on-accent: #ffffff;
-    --color-focus: #2997ff;
-    --color-success: #30d158;
-    --color-success-soft: #0f2e18;
-    --color-warning: #ffd60a;
-    --color-warning-soft: #3a2e05;
-    --color-danger: #ff6961;
-    --color-danger-soft: #3d1513;
-    --color-header: rgb(22 22 23 / 0.8);
-    --color-header-solid: #161617;
-    --color-panel: rgb(36 36 38 / 0.9);
+    --color-canvas: #101918;
+    --color-surface: #182623;
+    --color-surface-muted: #21342e;
+    --color-fill: #294138;
+    --color-fill-hover: #355346;
+    --color-segment: #365e4e;
+    --color-border: #385047;
+    --color-border-strong: #688579;
+    --color-border-control: #91b8ab;
+    --color-ink: #ddeae5;
+    --color-muted: #a9bbb4;
+    --color-accent: #80d5bc;
+    --color-accent-hover: #a0e5cf;
+    --color-accent-fill: #80d5bc;
+    --color-accent-fill-hover: #a0e5cf;
+    --color-accent-soft: #1f3a31;
+    --color-on-accent: #10221d;
+    --color-focus: #80d5bc;
+    --color-success: #91d6ad;
+    --color-success-soft: #193d2a;
+    --color-warning: #edc47f;
+    --color-warning-soft: #3a2d18;
+    --color-danger: #ffaaa0;
+    --color-danger-soft: #442622;
+    --color-header: rgb(16 25 24 / 0.96);
+    --color-header-solid: #101918;
+    --color-panel: #182623;
 
-    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
-    --shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 40px rgb(0 0 0 / 0.6);
-    --shadow-panel: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 48px rgb(0 0 0 / 0.6);
+    --shadow-card: none;
+    --shadow-lift: 0 2px 5px rgb(0 0 0 / 0.2);
+    --shadow-panel: 0 12px 28px rgb(0 0 0 / 0.35);
   }
 }
 
