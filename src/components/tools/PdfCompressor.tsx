@@ -58,6 +58,9 @@ export default function PdfCompressor() {
   const imageAnalysis=job?.analysis?.images;
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
+  const signaturesInvalidated=Array.isArray(job?.analysis?.limitations)&&job.analysis.limitations.some(
+    limitation=>limitation&&typeof limitation==='object'&&limitation.code==='signatures-invalidated',
+  );
   return <ToolWorkspace
     selectionTitle="PDF auswählen"
     selection={<>
@@ -75,6 +78,7 @@ export default function PdfCompressor() {
     </>}
     settings={<>
       <p>Alle drei Varianten werden mit einem Start berechnet.</p>
+      <p className="hint">Verschlüsselte PDFs werden nicht unterstützt.</p>
       <dl className="flex flex-col gap-4">
         <div><dt className="font-semibold">Hohe Qualität</dt><dd className="hint">Schonende Komprimierung.</dd></div>
         <div><dt className="font-semibold">Ausgewogen</dt><dd className="hint">Kompromiss zwischen Qualität und Dateigröße.</dd></div>
@@ -95,23 +99,42 @@ export default function PdfCompressor() {
     resultsHeadingId="pdf-results"
     results={<>
       {!job&&<div className="card-muted"><p className="hint">{busy?'Die Analyse und Varianten erscheinen nach der Serverantwort.':'Nach dem Start sehen Sie hier die Analyse und die drei berechneten Varianten.'}</p></div>}
-    {job?.analysis&&<div className="card-muted space-y-2">
-      <p>Original: {formatBytes(job.input.size)}{typeof job.analysis.pageCount==='number'?` · ${job.analysis.pageCount} Seiten`:''}{typeof images?.total==='number'?` · ${images.total} Bilder`:''}.</p>
-      {typeof images?.recompressible==='number'&&<p>{images.recompressible} Bilder sind grundsätzlich komprimierbar.</p>}
-      {images?.recompressible===0&&<p>Keine neu kodierbaren Bilder gefunden. Nur verlustfreie Optimierung ist möglich; die Einsparung kann gering sein.</p>}
-      {typeof progress?.current==='number'&&typeof progress?.total==='number'&&<p role="status">Bilder verarbeitet: {progress.current} von {progress.total}</p>}
-    </div>}
-    {job&&<><p className="hint">{job.state==='expired'?'Auftrag abgelaufen. Erneut komprimieren, um neue Ergebnisse zu erzeugen.':`Verfügbar bis ${new Date(job.expiresAt).toLocaleString('de-DE')}.`}</p>
-      <div className="grid gap-5 md:grid-cols-3">{levels.map(level=>{
-        const result=job.results.find(result=>result.level===level);
-        const change=result?.size!=null?formatSizeChange(job.input.size,result.size):null;
-        return <section className="variant-card" key={level} aria-labelledby={`pdf-${level}`}><h2 className="card-title" id={`pdf-${level}`}>{labels[level]}</h2>
-          <p>{result?.state==='succeeded'?'Fertig':result?.state==='failed'?'Variante fehlgeschlagen':result?.state==='cancelled'?'Abgebrochen':result?.state==='running'?'Wird verarbeitet …':'Wartet auf Berechnung'}</p>
-          {result?.error&&<p className="field-error">{apiMessage(new ApiError(result.error.code))}</p>}
-          {result?.size!=null&&<><p className="variant-size">{formatBytes(result.size)}</p><p>{change?.percent} · {change?.kind==='larger'?'Größer als das Original':change?.kind==='equal'?'Keine Einsparung':'Kleiner als das Original'}</p></>}
-          {typeof result?.details?.imagesSkipped==='number'&&result.details.imagesSkipped>0&&<p className="hint">{result.details.imagesSkipped} Bilder unverändert übersprungen.</p>}
-          {result?.downloadUrl&&<a className="btn btn-primary mt-auto" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
-        </section>;
-      })}</div></>}
-  </>}/>;
+      {job?.analysis&&<section className="card-muted space-y-4" aria-labelledby="pdf-analysis">
+        <h3 className="card-title" id="pdf-analysis">Analyse</h3>
+        <dl className="meta-list">
+          <div><dt>Originalgröße</dt><dd>{formatBytes(job.input.size)}</dd></div>
+          {typeof job.analysis.pdfVersion==='string'&&<div><dt>PDF-Version</dt><dd>{job.analysis.pdfVersion}</dd></div>}
+          {typeof job.analysis.pageCount==='number'&&<div><dt>Seiten</dt><dd>{job.analysis.pageCount}</dd></div>}
+          {typeof images?.total==='number'&&<div><dt>Bilder</dt><dd>{images.total}</dd></div>}
+          {typeof images?.recompressible==='number'&&<div><dt>Komprimierbare Bilder</dt><dd>{images.recompressible}</dd></div>}
+        </dl>
+        {images?.recompressible===0&&<p className="notice notice-info">Keine neu kodierbaren Bilder gefunden. Nur verlustfreie Optimierung ist möglich; die Einsparung kann gering sein.</p>}
+        {signaturesInvalidated&&<p className="notice notice-warn">Digitale Signaturen werden durch das Neuschreiben der PDF ungültig.</p>}
+        {typeof progress?.current==='number'&&typeof progress?.total==='number'&&<p role="status" className="hint tabular-nums">Bilder verarbeitet: {progress.current} von {progress.total}</p>}
+      </section>}
+      {job&&<>
+        <p className={job.state==='expired'?'notice notice-warn':'hint'}>{job.state==='expired'?'Auftrag abgelaufen. Erneut komprimieren, um neue Ergebnisse zu erzeugen.':`Verfügbar bis ${new Date(job.expiresAt).toLocaleString('de-DE')}.`}</p>
+        {job.state==='partially_succeeded'&&<p className="notice notice-warn">Verarbeitung mit Teilfehlern abgeschlossen. Erfolgreiche Varianten können Sie herunterladen.</p>}
+        <div className="grid min-w-0 gap-4 2xl:grid-cols-3">{levels.map(level=>{
+          const result=job.results.find(result=>result.level===level);
+          const change=result?.size!=null?formatSizeChange(job.input.size,result.size):null;
+          const status=job.state==='expired'?'Abgelaufen':result?.state==='succeeded'?'Fertig':result?.state==='failed'?'Variante fehlgeschlagen':result?.state==='cancelled'||job.state==='cancelled'?'Abgebrochen':result?.state==='running'?'Wird verarbeitet …':job.state==='failed'?'Nicht berechnet':'Wartet auf Berechnung';
+          return <section className="variant-card min-w-0" key={level} aria-labelledby={`pdf-${level}`}>
+            <h3 className="card-title" id={`pdf-${level}`}>{labels[level]}</h3>
+            <p className={result?.state==='failed'?'badge badge-danger self-start':'badge badge-neutral self-start'}>{status}</p>
+            {result?.error&&<p className="field-error">{apiMessage(new ApiError(result.error.code))}</p>}
+            {result?.size!=null&&<>
+              <dl className="meta-list">
+                <div><dt>Originalgröße</dt><dd>{formatBytes(job.input.size)}</dd></div>
+                <div><dt>Ergebnisgröße</dt><dd>{formatBytes(result.size)}</dd></div>
+                <div><dt>Änderung</dt><dd>{change?.percent}</dd></div>
+              </dl>
+              <p className="hint">{change?.kind==='larger'?'Größer als das Original':change?.kind==='equal'?'Keine Einsparung':'Kleiner als das Original'}</p>
+            </>}
+            {typeof result?.details?.imagesSkipped==='number'&&result.details.imagesSkipped>0&&<p className="hint">{result.details.imagesSkipped} Bilder unverändert übersprungen.</p>}
+            {job.state!=='expired'&&result?.downloadUrl&&<a className="btn btn-primary mt-auto w-full" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
+          </section>;
+        })}</div>
+      </>}
+    </>}/>
 }

@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { expect, test, type Page } from '@playwright/test';
+import type { Job, JobResult } from '../src/lib/api/client';
 
 // Diese API-Fixtures prüfen die Oberfläche, nicht die echte PDF-Verarbeitung.
 async function prepare(page: Page) {
@@ -16,6 +17,22 @@ async function select(page: Page) {
   await page.getByLabel('PDF-Datei', { exact: true }).setInputFiles({
     name: `${'langer-dateiname-'.repeat(8)}.pdf`, mimeType: 'application/pdf', buffer: Buffer.alloc(20000, 'x'),
   });
+}
+
+function variant(level: 'high' | 'balanced' | 'small', state: JobResult['state'], changes: Partial<JobResult> = {}): JobResult {
+  return { id: level, level, state, mime: 'application/pdf', size: null, error: null, details: null,
+    downloadName: `beispiel-${level}.pdf`, downloadUrl: null, ...changes };
+}
+
+function job(state: Job['state'], results: JobResult[], changes: Partial<Job> = {}): Job {
+  return { id: 'pdf-workspace', tool: 'pdf-compress', state, phase: state === 'running' ? 'variant' : null,
+    cancelRequested: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 60000).toISOString(), error: null,
+    input: { name: 'beispiel.pdf', format: 'pdf', size: 20000, width: null, height: null },
+    analysis: { fileSize: 20000, pdfVersion: '1.7', pageCount: 2, encrypted: false,
+      images: { total: 3, recompressible: 2, skipped: { mask: 1 }, byFilter: { dct: 3, flate: 0, none: 0, other: 0 }, bytes: 15000, recompressibleBytes: 10000, maskCount: 0 },
+      fontBytes: 0, limitations: [{ code: 'signatures-invalidated', count: 1 }] },
+    progress: state === 'running' ? { current: 1, total: 2 } : null, results, ...changes };
 }
 
 for (const width of [320, 1440]) {
@@ -41,3 +58,36 @@ for (const width of [320, 1440]) {
     await expect(page.getByRole('button', { name: 'PDF auswählen', exact: true })).toBeFocused();
   });
 }
+
+test('laufende PDF zeigt Analyse und fertige Varianten, Teilfehler bleiben der Variante zugeordnet', async ({ page }) => {
+  await prepare(page);
+  await select(page);
+  const finishedHigh = variant('high', 'succeeded', { size: 10000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/high' });
+  let current = job('running', [finishedHigh, variant('balanced', 'running'), variant('small', 'pending')]);
+  await page.route('**/api/v1/jobs', route => route.fulfill({ status: 202, json: current }));
+  await page.route('**/api/v1/jobs/pdf-workspace', route => route.fulfill({ json: current }));
+  await page.getByRole('button', { name: 'Komprimieren', exact: true }).click();
+  const results = page.getByRole('region', { name: '4. Dateien und Ergebnisse', exact: true });
+  await expect(results.getByRole('heading', { name: 'Analyse', level: 3, exact: true })).toBeVisible();
+  await expect(results).toContainText('Digitale Signaturen');
+  await expect(results).toContainText('Bilder verarbeitet: 1 von 2');
+  const high = results.getByRole('region', { name: 'Hohe Qualität', exact: true });
+  const balanced = results.getByRole('region', { name: 'Ausgewogen', exact: true });
+  const small = results.getByRole('region', { name: 'Kleine Datei', exact: true });
+  await expect(high.getByRole('link', { name: 'Hohe Qualität herunterladen', exact: true })).toBeVisible();
+  await expect(balanced).toContainText('Wird verarbeitet');
+  await expect(small).toContainText('Wartet auf Berechnung');
+  current = job('partially_succeeded', [finishedHigh,
+    variant('balanced', 'succeeded', { size: 22000, downloadUrl: '/api/v1/jobs/pdf-workspace/results/balanced' }),
+    variant('small', 'failed', { error: { code: 'memory-limit' } }),
+  ]);
+  await expect(small).toContainText('Variante fehlgeschlagen');
+  await expect(small).toContainText('Arbeitsspeicher');
+  await expect(small.getByRole('link')).toHaveCount(0);
+  await expect(high).toContainText('Kleiner als das Original');
+  await expect(balanced).toContainText('Größer als das Original');
+  await expect(balanced.locator('dt', { hasText: 'Originalgröße' })).toBeVisible();
+  await expect(balanced.locator('dt', { hasText: 'Ergebnisgröße' })).toBeVisible();
+  await expect(results.getByRole('link')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
+});
