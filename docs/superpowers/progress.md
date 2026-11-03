@@ -96,9 +96,9 @@ Es wurde kein Planmandat gefunden, das einen inhaltslosen Test oder wortgleich d
 | Punkt | Stand | Tatsächlicher Nachweis / nächster Schritt |
 | --- | --- | --- |
 | 1 | Dokumentationssetup erledigt; laufende Auditnachweise separat | Branch, Planfreigabe, Spec, vollständiger Preflight und Runtimebericht vorhanden. Vollständige Funktionsausführung noch nicht behauptet. |
-| 2 | Offen, Runtimevoraussetzung verfügbar | Docker Linux erreichbar; Backend-/Dateibeweise ausführen. |
-| 3 | Implementiert; unabhängiger Review und Gesamtmatrix folgen | Drei fachliche Teilcommits, Check/Build, Chromium Home/Site 12/12, Startseiten-Axe hell/dunkel 0 Verstöße; [Nachweis](reviews/task3-visual-system.md). |
-| 4 | Offen | Navigation und direkte Startseite implementieren. |
+| 2 | Abgeschlossen, unabhängig geprüft | Linux-/Codec-Gates und vier echte Werkzeugaufträge bestanden; Retryfix `eeb9fe9`, neun Valkey-Race-Tests und unabhängiger Review ohne Blocker in `7308f68`. [Nachweise](reviews/2026-11-03-linux-acceptance.md). |
+| 3 | Abgeschlossen, unabhängig geprüft; Gesamtmatrix folgt | `40338c5`, `c5a456a`, `5254a2d`; Check/Build, Chromium Home/Site 12/12, Startseiten-Axe hell/dunkel 0 Verstöße; unabhängiger Review Spec compliant / Quality Approved. [Nachweis](reviews/task3-visual-system.md). |
+| 4 | Implementiert; unabhängiger Review folgt | Desktoprail, kompakte native Auswahl, sichtbare H1 Werkzeuge, vier gleichrangige Aufgabenfelder und Footer. Gezielte Chromium-/WebKit-Nachweise grün; Gesamtmatrixgrenzen im [Bericht](reviews/task4-navigation.md). |
 | 5 | Offen | Bildarbeitsbereiche mit Optionsparität angleichen. |
 | 6 | Offen | Gemeinsame Auswahl, Status und Ergebnisse umsetzen. |
 | 7 | Offen | PDF-Arbeitsbereich und Varianten angleichen. |
@@ -117,3 +117,6 @@ Es wurde kein Planmandat gefunden, das einen inhaltslosen Test oder wortgleich d
 Ein Commit kann seine eigene ID nicht enthalten. Für 1c liefert `git log -1 --format=%H -- docs/superpowers/progress.md` bis zum nächsten Fortschrittsupdate den ursprünglichen Einführungscommit; die Koordination ergänzt dessen feste ID vor einer weiteren Ledgeränderung.
 
 Punkt 1 wurde unabhängig durch `review_setup` für den Bereich `0d35657..b19dc63` geprüft: Spec compliant, Quality Approved, keine wichtigen oder kleineren Befunde. Punkt 3: Tokens `40338c5`, Controls `c5a456a`; die feste ID des Shell-/Nachweiscommits folgt im nächsten regulären Ledgerupdate.
+
+
+Punkt 4: Navigation `fcbb01f`, direkter Werkzeugkatalog `6193d79`; Footer-/Responsive-/Nachweiscommit über `git log -1 --format=%H -- docs/superpowers/reviews/task4-navigation.md` bestimmbar, feste ID beim nächsten regulären Ledgerupdate ergänzen. Check: 98 Dateien ohne Befund; Unit-Suite 410 bestanden, zehn übersprungen. Die beim parallelen Build gestörte volle Browsermatrix wird nicht als vollständig bestanden ausgewiesen.

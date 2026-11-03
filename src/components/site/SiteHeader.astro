@@ -11,7 +11,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
       <span>{siteName}</span>
     </a>
     <details class="tool-picker" open>
-      <summary role="button" aria-label="Werkzeuge auswählen" aria-expanded="true" aria-controls="werkzeugnavigation">
+      <summary role="button" aria-label="Werkzeuge auswählen" aria-controls="werkzeugnavigation">
         Werkzeuge
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </summary>
@@ -83,7 +83,8 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
       trigger.focus();
     });
     picker.addEventListener('focusout', event => {
-      if (!desktop.matches && !picker.contains(event.relatedTarget as Node | null)) setOpen(false);
+      // WebKit fokussiert angeklickte Links teils nicht. Ein Nullziel darf ihren Klick nicht vorzeitig verbergen.
+      if (!desktop.matches && event.relatedTarget && !picker.contains(event.relatedTarget as Node)) setOpen(false);
     });
     document.addEventListener('click', event => {
       if (!desktop.matches && !picker.contains(event.target as Node)) setOpen(false);

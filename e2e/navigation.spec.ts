@@ -86,8 +86,39 @@ for (const tool of tools) {
     await page.goto(tool.path);
     await trigger(page).click();
     await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', { name: tool.label, exact: true })).toHaveAttribute('aria-current', 'page');
     await noOverflow(page);
     await page.keyboard.press('Escape');
     await noOverflow(page);
   });
 }
+
+test('Ohne JavaScript bleiben alle Werkzeuge und die Informationsseite zugänglich', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 720 } });
+  const page = await context.newPage();
+  try {
+    await page.goto('/');
+    for (const tool of tools) await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toBeVisible();
+    // Playwrights Textsuche schließt noscript aus, auch wenn der Browser es ohne JavaScript rendert.
+    await expect(page.locator('noscript p')).toBeVisible();
+    await navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true }).click();
+    await expect(page).toHaveURL(/\/lokale-verarbeitung\/?$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Dateiverarbeitung' })).toBeVisible();
+    await noOverflow(page);
+  } finally {
+    await context.close();
+  }
+});
+
+test('Wechsel zur kompakten Navigation führt verborgenen Linkfokus zum Auslöser zurück', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await navigation(page).getByRole('link', { name: tools[0].label, exact: true }).focus();
+  // 720 CSS-Pixel entsprechen der verfügbaren Breite eines 1440-Pixel-Fensters bei 200 Prozent Zoom.
+  await page.setViewportSize({ width: 720, height: 450 });
+  await expect(trigger(page)).toBeFocused();
+  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
+  await trigger(page).press('Enter');
+  for (const tool of tools) await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toBeVisible();
+  await noOverflow(page);
+});
