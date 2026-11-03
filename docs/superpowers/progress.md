@@ -99,7 +99,7 @@ Es wurde kein Planmandat gefunden, das einen inhaltslosen Test oder wortgleich d
 | 2 | Abgeschlossen, unabhängig geprüft | Linux-/Codec-Gates und vier echte Werkzeugaufträge bestanden; Retryfix `eeb9fe9`, neun Valkey-Race-Tests und unabhängiger Review ohne Blocker in `7308f68`. [Nachweise](reviews/2026-11-03-linux-acceptance.md). |
 | 3 | Abgeschlossen, unabhängig geprüft; Gesamtmatrix folgt | `40338c5`, `c5a456a`, `5254a2d`; Check/Build, Chromium Home/Site 12/12, Startseiten-Axe hell/dunkel 0 Verstöße; unabhängiger Review Spec compliant / Quality Approved. [Nachweis](reviews/task3-visual-system.md). |
 | 4 | Implementiert; unabhängiger Review folgt | Desktoprail, kompakte native Auswahl, sichtbare H1 Werkzeuge, vier gleichrangige Aufgabenfelder und Footer. Gezielte Chromium-/WebKit-Nachweise grün; Gesamtmatrixgrenzen im [Bericht](reviews/task4-navigation.md). |
-| 5 | Offen | Bildarbeitsbereiche mit Optionsparität angleichen. |
+| 5 | Implementiert; unabhängiger Review und Gesamtmatrix folgen | Drei gemeinsame Bildarbeitsbereiche, erhaltene Optionen und Ergebniszuordnung nach Einstellungswechsel. Check/Build grün; 36/36 gezielte Quellbrowserfälle mit API-Doubles über vier Projekte bestanden. [Nachweis](reviews/task5-image-workspaces.md). |
 | 6 | Offen | Gemeinsame Auswahl, Status und Ergebnisse umsetzen. |
 | 7 | Offen | PDF-Arbeitsbereich und Varianten angleichen. |
 | 8 | Offen | Texte, Info/404 und Betriebsvertrag abgleichen. |
@@ -120,3 +120,5 @@ Punkt 1 wurde unabhängig durch `review_setup` für den Bereich `0d35657..b19dc6
 
 
 Punkt 4: Navigation `fcbb01f`, direkter Werkzeugkatalog `6193d79`; Footer-/Responsive-/Nachweiscommit über `git log -1 --format=%H -- docs/superpowers/reviews/task4-navigation.md` bestimmbar, feste ID beim nächsten regulären Ledgerupdate ergänzen. Check: 98 Dateien ohne Befund; Unit-Suite 410 bestanden, zehn übersprungen. Die beim parallelen Build gestörte volle Browsermatrix wird nicht als vollständig bestanden ausgewiesen.
+
+Punkt 5: Konverter und gemeinsamer rein darstellender Arbeitsbereich `d1ac14c`, Kompressor `5e37d25`; Resizer-/Nachweiscommit über `git log -1 --format=%H -- docs/superpowers/reviews/task5-image-workspaces.md` bestimmbar, feste ID beim nächsten regulären Ledgerupdate ergänzen. Check: 98 Dateien ohne Befund; Build: sieben Seiten; Quellbrowser: 36/36 gezielte UI-/Serverfehlerfälle über Chromium, Firefox, WebKit und mobiles Chromium. Echte Kodierung und vollständige visuelle Matrix werden daraus nicht abgeleitet.

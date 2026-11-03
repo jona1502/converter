@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 const tools = [
   { path: '/bilder/konvertieren', action: 'Konvertieren', change: 'jpeg' },
   { path: '/bilder/komprimieren', action: 'Komprimieren', change: 'webp' },
+  { path: '/bilder/skalieren', action: 'Skalieren', change: 'png' },
 ] as const;
 
 for (const tool of tools) {
