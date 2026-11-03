@@ -97,7 +97,7 @@ Es wurde kein Planmandat gefunden, das einen inhaltslosen Test oder wortgleich d
 | --- | --- | --- |
 | 1 | Dokumentationssetup erledigt; laufende Auditnachweise separat | Branch, Planfreigabe, Spec, vollständiger Preflight und Runtimebericht vorhanden. Vollständige Funktionsausführung noch nicht behauptet. |
 | 2 | Offen, Runtimevoraussetzung verfügbar | Docker Linux erreichbar; Backend-/Dateibeweise ausführen. |
-| 3 | Offen | Tokens, Controls und Seitengerüst implementieren. |
+| 3 | Implementiert; unabhängiger Review und Gesamtmatrix folgen | Drei fachliche Teilcommits, Check/Build, Chromium Home/Site 12/12, Startseiten-Axe hell/dunkel 0 Verstöße; [Nachweis](reviews/task3-visual-system.md). |
 | 4 | Offen | Navigation und direkte Startseite implementieren. |
 | 5 | Offen | Bildarbeitsbereiche mit Optionsparität angleichen. |
 | 6 | Offen | Gemeinsame Auswahl, Status und Ergebnisse umsetzen. |
@@ -112,6 +112,8 @@ Es wurde kein Planmandat gefunden, das einen inhaltslosen Test oder wortgleich d
 | --- | --- | --- |
 | 1a | `69916585b7367f248a3c1365ba6247adbc1333f4` | Freigabe/Branch/Teilcommit-Sequenzen. Ausgangsstatus und Isolation geprüft; `git diff --check` ohne Fehler. |
 | 1b | `492b4c3b5f28aa4176f575ab5cdea85e934538a6` | Layout-, Zustands-, Paritäts- und Abnahmespezifikation. Quellenabgleich und acht sRGB-Kontrastpaare; `git diff --check` ohne Fehler. |
-| 1c | Einführungscommit dieses Ledgers; genaue ID folgt im nächsten Fortschrittsupdate. | Preflight, Baseline und Runtimebericht. Markdownlinks, alle zehn Aufgaben und 45 Aufgabenpaare geprüft; nur eigene freigegebene Dokumentationsdateien gestagt. |
+| 1c | `b19dc635b8b8d294a409fa9f7526737b175b5395` | Preflight, Baseline und Runtimebericht. Markdownlinks, alle zehn Aufgaben und 45 Aufgabenpaare geprüft; nur eigene freigegebene Dokumentationsdateien gestagt. |
 
 Ein Commit kann seine eigene ID nicht enthalten. Für 1c liefert `git log -1 --format=%H -- docs/superpowers/progress.md` bis zum nächsten Fortschrittsupdate den ursprünglichen Einführungscommit; die Koordination ergänzt dessen feste ID vor einer weiteren Ledgeränderung.
+
+Punkt 1 wurde unabhängig durch `review_setup` für den Bereich `0d35657..b19dc63` geprüft: Spec compliant, Quality Approved, keine wichtigen oder kleineren Befunde. Punkt 3: Tokens `40338c5`, Controls `c5a456a`; die feste ID des Shell-/Nachweiscommits folgt im nächsten regulären Ledgerupdate.
