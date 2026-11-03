@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {formatBytes, formatSizeChange} from '../../lib/format';
+import {ToolWorkspace} from './ToolWorkspace';
 import {apiMessage, ApiError, capabilities, cancelJob, createJob, deleteJob, pollJob, type Job} from '../../lib/api/client';
 const levels = ['high','balanced','small'] as const;
 const labels = {high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei'};
@@ -57,18 +58,43 @@ export default function PdfCompressor() {
   const imageAnalysis=job?.analysis?.images;
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
-  return <div className="space-y-6">
-    <div className="drop-zone" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(ready)select(event.dataTransfer.files);}}>
-      <p className="text-lg font-semibold">Eine PDF hier ablegen oder auswählen.</p>
-      <p className="hint">Maximal {formatBytes(limit)}. Die Auswahl startet keinen Upload.</p>
-      <input ref={input} className="sr-only" tabIndex={-1} type="file" accept=".pdf,application/pdf" aria-label="PDF-Datei" onChange={event=>{if(event.target.files)select(event.target.files);event.target.value='';}}/>
-      <div className="flex flex-wrap justify-center gap-3"><button ref={choose} className="btn btn-secondary" disabled={!ready} onClick={()=>input.current?.click()}>PDF auswählen</button>
-      <button className="btn btn-primary" disabled={!ready||!file||busy} onClick={()=>void start()}>Komprimieren</button>
-      {busy&&job&&<button className="btn btn-secondary" onClick={()=>void cancelJob(job.id).catch(error=>setError(apiMessage(error)))}>Abbrechen</button>}
-      {file&&<button className="btn btn-secondary" onClick={reset}>Zurücksetzen</button>}</div>
-      {file&&<p className="break-all">Ausgewählt: {file.name}</p>}
-    </div>
-    <div role="status" aria-live="polite">{notice&&<p>{notice}</p>}{error&&<p className="notice notice-error">{error}</p>}{busy&&<p>{!job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …'}</p>}</div>
+  return <ToolWorkspace
+    selectionTitle="PDF auswählen"
+    selection={<>
+      <div className="drop-zone" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(ready)select(event.dataTransfer.files);}}>
+        <p className="text-lg font-semibold">Eine PDF hier ablegen oder auswählen.</p>
+        <p className="hint">{ready?`Maximal ${formatBytes(limit)}.`:'Die Dateigrenze wird vom Server geladen.'} Die Auswahl startet keinen Upload.</p>
+        <input ref={input} className="sr-only" tabIndex={-1} type="file" accept=".pdf,application/pdf" aria-label="PDF-Datei" onChange={event=>{if(event.target.files)select(event.target.files);event.target.value='';}}/>
+        <button ref={choose} className="btn btn-secondary" disabled={!ready} onClick={()=>input.current?.click()}>PDF auswählen</button>
+      </div>
+      {file&&<div className="card flex min-w-0 flex-col gap-2">
+        <p className="hint">Ausgewählte PDF</p>
+        <p className="break-all font-semibold">{file.name}</p>
+        <p className="tabular-nums">Originalgröße: {formatBytes(file.size)}</p>
+      </div>}
+    </>}
+    settings={<>
+      <p>Alle drei Varianten werden mit einem Start berechnet.</p>
+      <dl className="flex flex-col gap-4">
+        <div><dt className="font-semibold">Hohe Qualität</dt><dd className="hint">Schonende Komprimierung.</dd></div>
+        <div><dt className="font-semibold">Ausgewogen</dt><dd className="hint">Kompromiss zwischen Qualität und Dateigröße.</dd></div>
+        <div><dt className="font-semibold">Kleine Datei</dt><dd className="hint">Stärkere Komprimierung für kleinere Dateien.</dd></div>
+      </dl>
+    </>}
+    actionTitle="PDF komprimieren"
+    action={<>
+      <p className="hint">Nach dem Start wird Ihre PDF auf dem Server verarbeitet. Ergebnisse sind befristet verfügbar.</p>
+      <button className="btn btn-primary w-full" disabled={!ready||!file||busy} aria-describedby="pdf-start-hint" onClick={()=>void start()}>Komprimieren</button>
+      <p id="pdf-start-hint" className="hint">{!ready?'Der Server wird vorbereitet.':busy?'Die Verarbeitung läuft. Sie können abbrechen oder zurücksetzen.':!file?'Wählen Sie zuerst eine PDF aus.':'Bereit: Analyse und drei Varianten starten.'}</p>
+      {(file||busy)&&<div className="flex flex-wrap gap-3">
+        {busy&&job&&<button className="btn btn-secondary" onClick={()=>void cancelJob(job.id).catch(error=>setError(apiMessage(error)))}>Abbrechen</button>}
+        {file&&<button className="btn btn-ghost" onClick={reset}>Zurücksetzen</button>}
+      </div>}
+      <div role="status" aria-live="polite" className="space-y-3">{notice&&<p className="notice notice-info">{notice}</p>}{error&&<p className="notice notice-error">{error}</p>}{busy&&<p>{!job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …'}</p>}</div>
+    </>}
+    resultsHeadingId="pdf-results"
+    results={<>
+      {!job&&<div className="card-muted"><p className="hint">{busy?'Die Analyse und Varianten erscheinen nach der Serverantwort.':'Nach dem Start sehen Sie hier die Analyse und die drei berechneten Varianten.'}</p></div>}
     {job?.analysis&&<div className="card-muted space-y-2">
       <p>Original: {formatBytes(job.input.size)}{typeof job.analysis.pageCount==='number'?` · ${job.analysis.pageCount} Seiten`:''}{typeof images?.total==='number'?` · ${images.total} Bilder`:''}.</p>
       {typeof images?.recompressible==='number'&&<p>{images.recompressible} Bilder sind grundsätzlich komprimierbar.</p>}
@@ -87,5 +113,5 @@ export default function PdfCompressor() {
           {result?.downloadUrl&&<a className="btn btn-primary mt-auto" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
         </section>;
       })}</div></>}
-  </div>;
+  </>}/>;
 }
