@@ -12,6 +12,7 @@ import { acceptAttribute, formatList, INPUT_FORMATS, pickDefaultFormat } from '.
 import { BrowserSupportNotice, ImageProcessingNotice } from './notices';
 import { BackgroundColor, FormatSelect, QualitySlider, IcoSizes } from './options';
 import { useImageBatch, type BatchEntry } from './useImageBatch';
+import { ToolWorkspace } from './ToolWorkspace';
 
 /** Bevorzugte Zielformate in dieser Reihenfolge (erstes kodierbares wird Standard). */
 const PREFERRED_FORMATS: readonly ImageFormat[] = ['webp', 'png'];
@@ -160,11 +161,8 @@ export default function ImageConverter() {
     <div className="flex flex-col gap-8">
       <BrowserSupportNotice support={support} />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section aria-labelledby="schritt-dateien" className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1">
-          <h2 id="schritt-dateien" className="section-title">
-            1. Bilder auswählen
-          </h2>
+      <ToolWorkspace
+        selection={<>
           <DropZone
             accept={acceptAttribute(INPUT_FORMATS)}
             disabled={dropDisabled}
@@ -184,57 +182,39 @@ export default function ImageConverter() {
               {limitMessage}
             </p>
           )}
-        </section>
-
-        <aside
-          aria-label="Einstellungen und Konvertierung"
-          className="flex min-w-0 flex-col gap-8 lg:col-start-2 lg:row-span-2 lg:row-start-1"
-        >
-          <section aria-labelledby="schritt-optionen" className="card-muted flex flex-col gap-5">
-            <h2 id="schritt-optionen" className="section-title">
-              2. Einstellungen
-            </h2>
-            <FormatSelect value={format} onChange={setFormat} support={encode} disabled={dropDisabled} />
-            <QualitySlider format={format} value={quality} onChange={setQuality} />
-            <BackgroundColor format={format} value={background} onChange={setBackground} />
-            {format === 'ico' && <IcoSizes value={icoSizes} onChange={setIcoSizes} />}
-            <p className="hint">{format === 'ico' ? 'Jede gewählte Größe wird quadratisch mit transparentem Rand eingepasst. Kleine Quellen können vergrößert werden.' : 'Die Abmessungen der Bilder bleiben unverändert.'}</p>
-          </section>
-
-          <section aria-labelledby="schritt-start" className="flex flex-col gap-4">
-            <h2 id="schritt-start" className="section-title">
-              3. Konvertieren
-            </h2>
-            {settingsChanged && (
-              <p className="notice notice-warn text-sm">
-                Die Einstellungen wurden geändert. Konvertieren Sie erneut, damit die Ergebnisse sie übernehmen.
-              </p>
-            )}
-            <ActionBar
-              processLabel="Konvertieren"
-              onProcess={() => void handleProcess()}
-              onReset={handleReset}
-              counts={counts}
-              isProcessing={isProcessing}
-              progress={batch.progress}
-              disabledReason={disabledReason}
-            />
-          </section>
-        </aside>
-
-        <section aria-labelledby={listHeadingId} className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-2">
-          <h2 id={listHeadingId} className="section-title">
-            4. Dateien und Ergebnisse
-          </h2>
-          <p className="hint">Nach dem Konvertieren erscheint bei jeder Datei ein Link zum Herunterladen.</p>
-          <FileList
-            entries={batch.entries}
-            onRemove={handleRemove}
-            onEmptied={focusFileButton}
-            labelledBy={listHeadingId}
-          />
-        </section>
-      </div>
+        </>}
+        settings={<>
+          <FormatSelect value={format} onChange={setFormat} support={encode} disabled={dropDisabled} />
+          <QualitySlider format={format} value={quality} onChange={setQuality} />
+          <BackgroundColor format={format} value={background} onChange={setBackground} />
+          {format === 'ico' && <IcoSizes value={icoSizes} onChange={setIcoSizes} />}
+          <p className="hint">{format === 'ico' ? 'Jede gewählte Größe wird quadratisch mit transparentem Rand eingepasst. Kleine Quellen können vergrößert werden.' : 'Die Abmessungen der Bilder bleiben unverändert.'}</p>
+        </>}
+        actionTitle="Konvertieren"
+        action={<ActionBar
+          processLabel="Konvertieren"
+          onProcess={() => void handleProcess()}
+          onReset={handleReset}
+          counts={counts}
+          isProcessing={isProcessing}
+          progress={batch.progress}
+          disabledReason={disabledReason}
+        />}
+        resultsHeadingId={listHeadingId}
+        resultNotice={settingsChanged && (
+          <p className="notice notice-warn text-sm">
+            Die Einstellungen wurden geändert. Diese Ergebnisse stammen aus den vorherigen Einstellungen.
+            Konvertieren Sie erneut, damit die Ergebnisse sie übernehmen.
+          </p>
+        )}
+        resultsHint="Nach dem Konvertieren erscheint bei jeder Datei ein Link zum Herunterladen."
+        results={<FileList
+          entries={batch.entries}
+          onRemove={handleRemove}
+          onEmptied={focusFileButton}
+          labelledBy={listHeadingId}
+        />}
+      />
 
       <ImageProcessingNotice />
 
