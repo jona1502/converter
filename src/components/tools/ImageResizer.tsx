@@ -9,9 +9,10 @@ import { BrowserSupportNotice, ImageProcessingNotice } from './notices';
 import { BackgroundColor, QualitySlider } from './options';
 import { useImageBatch, type BatchEntry } from './useImageBatch';
 import { ToolWorkspace } from './ToolWorkspace';
+import { useInitialFiles, type ToolProps } from './useInitialFiles';
 
 const OUTPUTS: readonly ImageFormat[] = ['jpeg','png','webp','bmp'];
-export default function ImageResizer() {
+export default function ImageResizer({ initialFiles }: ToolProps) {
   const batch = useImageBatch('image-resize');
   const encode = batch.support.status === 'ready' ? batch.support.encode : null;
   const [format, setFormat] = useState<ImageFormat | 'original'>('original');
@@ -36,12 +37,17 @@ export default function ImageResizer() {
     : !valid ? 'Prüfen Sie die Größenangaben. Eine Vergrößerung muss ausdrücklich erlaubt sein.'
     : unsupportedOriginal ? 'Mindestens ein Originalformat kann nicht ausgegeben werden. Wählen Sie ein Zielformat oder entfernen Sie die betreffende Datei.'
     : !batch.counts.processable ? 'Fügen Sie zuerst mindestens ein verwendbares Bild hinzu.' : null;
+  const handleFiles = (files: File[]) => {
+    const outcome = batch.addFiles(files);
+    setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien nicht hinzugefügt. Höchstens ${batch.limits.maxFiles} Dateien erlaubt.` : '');
+  };
+  useInitialFiles(batch.support.status === 'ready', initialFiles, handleFiles);
   const displayFormat = format === 'original' ? null : format;
   return <div className="flex flex-col gap-8">
     <BrowserSupportNotice support={batch.support} />
     <ToolWorkspace
       selection={<>
-        <DropZone accept={acceptAttribute(INPUT_FORMATS)} disabled={!encode} buttonRef={buttonRef} onFiles={files => { const outcome = batch.addFiles(files); setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien nicht hinzugefügt. Höchstens ${batch.limits.maxFiles} Dateien erlaubt.` : ''); }}>
+        <DropZone accept={acceptAttribute(INPUT_FORMATS)} disabled={!encode} buttonRef={buttonRef} onFiles={handleFiles}>
           <p>Unbewegte Bilder, höchstens {batch.limits.maxFiles} Dateien, je {formatBytes(batch.limits.maxFileBytes)}, {(batch.limits.maxPixels / 1_000_000).toLocaleString('de-DE')} Megapixel und {batch.limits.maxEdge.toLocaleString('de-DE')} Pixel Kantenlänge.</p>
         </DropZone>{limitMessage && <p role="alert" className="notice notice-error">{limitMessage}</p>}
       </>}

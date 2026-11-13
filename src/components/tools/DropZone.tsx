@@ -17,6 +17,8 @@ export interface DropZoneProps {
   readonly children?: ReactNode;
   /** Ref auf den Auswahl-Button, z. B. um nach „Alle entfernen“ den Fokus dorthin zu setzen. */
   readonly buttonRef?: Ref<HTMLButtonElement>;
+  /** `hero`: große, zentrierte Fläche der Startseite. Standard: Auswahlschritt eines Werkzeugs. */
+  readonly variant?: 'default' | 'hero';
 }
 
 function hasFiles(event: DragEvent | ReactDragEvent): boolean {
@@ -36,12 +38,14 @@ export function DropZone({
   buttonLabel = 'Dateien auswählen',
   children,
   buttonRef,
+  variant = 'default',
 }: DropZoneProps) {
   const inputId = useId();
   const hintId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const depthRef = useRef(0);
+  const hero = variant === 'hero';
 
   // Verhindert, dass der Browser eine knapp neben dem Ablagebereich abgelegte Datei öffnet
   // und damit die Seite samt Auswahl verlässt.
@@ -65,7 +69,7 @@ export function DropZone({
 
   return (
     <div
-      className="drop-zone min-w-0 items-stretch gap-4 py-6 text-left sm:py-6"
+      className={hero ? 'drop-zone min-w-0 gap-5 py-14 sm:py-20' : 'drop-zone min-w-0 items-stretch gap-4 py-6 text-left sm:py-6'}
       data-dragging={dragging ? 'true' : undefined}
       data-disabled={disabled ? 'true' : undefined}
       onDragEnter={(event) => {
@@ -91,11 +95,11 @@ export function DropZone({
         if (!disabled) deliver(event.dataTransfer.files);
       }}
     >
-      <div className="flex min-w-0 items-center gap-3">
-        <svg className="size-8 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <div className={hero ? 'flex min-w-0 flex-col items-center gap-4' : 'flex min-w-0 items-center gap-3'}>
+        <svg className={hero ? 'size-12 shrink-0 text-accent' : 'size-8 shrink-0 text-accent'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
         </svg>
-        <p className="text-lg font-semibold">{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
+        <p className={hero ? 'text-xl font-semibold sm:text-2xl' : 'text-lg font-semibold'}>{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
       </div>
       <label htmlFor={inputId} className="sr-only">
         {buttonLabel} (Dateifeld)
@@ -119,7 +123,7 @@ export function DropZone({
       <button
         ref={buttonRef}
         type="button"
-        className="btn btn-secondary self-start"
+        className={hero ? 'btn btn-primary btn-lg' : 'btn btn-secondary self-start'}
         disabled={disabled}
         aria-describedby={children ? hintId : undefined}
         onClick={() => inputRef.current?.click()}
@@ -127,7 +131,7 @@ export function DropZone({
         {buttonLabel}
       </button>
       {children && (
-        <div id={hintId} className="hint flex max-w-prose flex-col gap-1 border-t border-border pt-3">
+        <div id={hintId} className={hero ? 'hint flex max-w-prose flex-col gap-1' : 'hint flex max-w-prose flex-col gap-1 border-t border-border pt-3'}>
           {children}
         </div>
       )}

@@ -1,108 +1,200 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const tools = [
-  { label: 'Bilder konvertieren', path: '/bilder/konvertieren' },
-  { label: 'Bilder komprimieren', path: '/bilder/komprimieren' },
-  { label: 'Bilder skalieren', path: '/bilder/skalieren' },
-  { label: 'PDF komprimieren', path: '/pdf/komprimieren' },
-  { label: 'Audio konvertieren', path: '/audio/konvertieren' },
+  { label: 'Bilder konvertieren', path: '/bilder/konvertieren', group: 'Konvertieren' },
+  { label: 'Audio konvertieren', path: '/audio/konvertieren', group: 'Konvertieren' },
+  { label: 'Bilder komprimieren', path: '/bilder/komprimieren', group: 'Komprimieren' },
+  { label: 'PDF komprimieren', path: '/pdf/komprimieren', group: 'Komprimieren' },
+  { label: 'Bilder skalieren', path: '/bilder/skalieren', group: 'Skalieren' },
 ] as const;
+const groups = ['Konvertieren', 'Komprimieren', 'Skalieren'] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
-function trigger(page: Page) { return page.getByRole('button', { name: 'Werkzeuge auswählen' }); }
+function group(page: Page, name: string) { return navigation(page).getByRole('button', { name: `${name}-Menü`, exact: true }); }
+function menuButton(page: Page) { return page.getByRole('button', { name: 'Menü', exact: true }); }
+function link(page: Page, label: string) { return navigation(page).getByRole('link', { name: label, exact: true }); }
 async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 }
 
-test('Desktop zeigt alle direkten Werkzeuge und Information in der schmalen Seitennavigation', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
-  for (const tool of tools) {
-    const link = navigation(page).getByRole('link', { name: tool.label, exact: true });
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', tool.path);
-  }
-  await expect(navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true })).toBeVisible();
-  const rail = await page.getByRole('banner').boundingBox();
-  const main = await page.getByRole('main').boundingBox();
-  expect(rail!.width).toBeGreaterThanOrEqual(208);
-  expect(rail!.width).toBeLessThanOrEqual(232);
-  expect(main!.x).toBeGreaterThanOrEqual(rail!.width);
-  await noOverflow(page);
-});
+test.describe('Desktop (1440 px)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
 
-test('Kompakte Auswahl öffnet alle Werkzeuge und navigiert per Klick', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
-  await trigger(page).click();
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
-  for (const tool of tools) await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toBeVisible();
-  await trigger(page).click();
-  await expect(navigation(page)).toBeHidden();
-  await trigger(page).click();
-  await navigation(page).getByRole('link', { name: 'PDF komprimieren', exact: true }).click();
-  await expect(page).toHaveURL(/\/pdf\/komprimieren\/?$/);
-});
-
-test('Tastatur erreicht Werkzeuglinks und Escape schließt mit Rückfokus', async ({ page, browserName }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  const control = trigger(page);
-  let reached = false;
-  for (let i = 0; i < 8 && !reached; i++) {
-    await page.keyboard.press('Tab');
-    reached = await control.evaluate(element => element === document.activeElement);
-  }
-  expect(reached, 'Werkzeugauswahl ist mit Tab erreichbar').toBe(true);
-  await page.keyboard.press('Enter');
-  const first = navigation(page).getByRole('link', { name: 'Alle Werkzeuge', exact: true });
-  // WebKit überspringt Links ohne volle Tastaturnavigation, daher dort Linkfokus explizit setzen.
-  if (browserName === 'webkit') await first.focus();
-  else { await page.keyboard.press('Tab'); await expect(first).toBeFocused(); }
-  await page.keyboard.press('Escape');
-  await expect(navigation(page)).toBeHidden();
-  await expect(control).toBeFocused();
-  await expect(control).toHaveAttribute('aria-expanded', 'false');
-  await page.keyboard.press('Enter');
-  await navigation(page).getByRole('link', { name: tools[0].label, exact: true }).focus();
-  await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/bilder\/konvertieren\/?$/);
-});
-
-test('Außenklick und Fokuswechsel schließen die kompakte Auswahl', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await trigger(page).click();
-  await page.getByRole('main').click({ position: { x: 4, y: 4 } });
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
-  await trigger(page).click();
-  await page.getByRole('main').getByRole('link').first().focus();
-  await expect(navigation(page)).toBeHidden();
-});
-
-for (const tool of tools) {
-  test(`${tool.path}: aktive Route und kompakte Auswahl bei 320 px ohne Überlauf`, async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 720 });
-    await page.goto(tool.path);
-    await trigger(page).click();
-    await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', { name: tool.label, exact: true })).toHaveAttribute('aria-current', 'page');
-    await noOverflow(page);
-    await page.keyboard.press('Escape');
+  test('Kopfzeile: Logo links, drei Menüs, Theme-Umschalter rechts, keine Seitenleiste', async ({ page }) => {
+    await page.goto('/');
+    const header = await page.getByRole('banner').boundingBox();
+    const main = await page.getByRole('main').boundingBox();
+    // Die frühere 14rem-Seitenleiste entfällt: Kopfzeile ist eine niedrige Leiste über dem Inhalt.
+    expect(header!.height).toBeLessThan(100);
+    expect(header!.width).toBeGreaterThan(1000);
+    expect(main!.y).toBeGreaterThanOrEqual(header!.y + header!.height);
+    await expect(page.getByText('Alle Werkzeuge', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.tool-picker')).toHaveCount(0);
+    const logo = await page.getByRole('banner').getByRole('link', { name: 'MI converter' }).boundingBox();
+    const first = await group(page, 'Konvertieren').boundingBox();
+    const theme = await page.getByRole('button', { name: 'Helles Design' }).boundingBox();
+    expect(logo!.x).toBeLessThan(first!.x);
+    expect(first!.x).toBeLessThan(theme!.x);
+    for (const name of groups) {
+      await expect(group(page, name)).toBeVisible();
+      await expect(group(page, name)).toHaveAttribute('aria-expanded', 'false');
+    }
+    await expect(menuButton(page)).toBeHidden();
     await noOverflow(page);
   });
-}
+
+  test('Klick öffnet ein Menü mit den Werkzeugen der Aktion; es ist immer nur eins offen', async ({ page }) => {
+    await page.goto('/');
+    for (const tool of tools) await expect(link(page, tool.label)).toBeHidden();
+    await group(page, 'Konvertieren').click();
+    await expect(group(page, 'Konvertieren')).toHaveAttribute('aria-expanded', 'true');
+    await expect(group(page, 'Konvertieren')).toHaveAttribute('aria-controls', 'menue-convert');
+    for (const tool of tools) {
+      if (tool.group === 'Konvertieren') {
+        await expect(link(page, tool.label)).toBeVisible();
+        await expect(link(page, tool.label)).toHaveAttribute('href', tool.path);
+      } else await expect(link(page, tool.label)).toBeHidden();
+    }
+    await group(page, 'Komprimieren').click();
+    await expect(group(page, 'Konvertieren')).toHaveAttribute('aria-expanded', 'false');
+    await expect(group(page, 'Komprimieren')).toHaveAttribute('aria-expanded', 'true');
+    await expect(link(page, 'PDF komprimieren')).toBeVisible();
+    await expect(link(page, 'Audio konvertieren')).toBeHidden();
+    await group(page, 'Komprimieren').click();
+    await expect(group(page, 'Komprimieren')).toHaveAttribute('aria-expanded', 'false');
+    await expect(link(page, 'PDF komprimieren')).toBeHidden();
+  });
+
+  test('Tastatur: Enter öffnet, Pfeiltasten wandern, Escape schließt und gibt den Fokus zurück', async ({ page, browserName }) => {
+    await page.goto('/');
+    const trigger = group(page, 'Konvertieren');
+    if (browserName === 'webkit') await trigger.focus();
+    else {
+      let reached = false;
+      for (let i = 0; i < 10 && !reached; i++) {
+        await page.keyboard.press('Tab');
+        reached = await trigger.evaluate(element => element === document.activeElement);
+      }
+      expect(reached, 'Menü ist mit Tab erreichbar').toBe(true);
+    }
+    await page.keyboard.press('Enter');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowDown');
+    await expect(link(page, 'Bilder konvertieren')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(link(page, 'Audio konvertieren')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(link(page, 'Audio konvertieren')).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await page.keyboard.press('Space');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await link(page, 'Audio konvertieren').focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/audio\/konvertieren\/?$/);
+  });
+
+  test('Klick außerhalb und Fokuswechsel schließen das Menü', async ({ page }) => {
+    await page.goto('/');
+    await group(page, 'Skalieren').click();
+    await expect(link(page, 'Bilder skalieren')).toBeVisible();
+    await page.getByRole('main').click({ position: { x: 4, y: 4 } });
+    await expect(group(page, 'Skalieren')).toHaveAttribute('aria-expanded', 'false');
+    await expect(link(page, 'Bilder skalieren')).toBeHidden();
+    await group(page, 'Skalieren').click();
+    await page.getByRole('main').getByRole('link').first().focus();
+    await expect(group(page, 'Skalieren')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  for (const tool of tools) {
+    test(`${tool.path}: aktiver Eintrag trägt aria-current="page"`, async ({ page }) => {
+      await page.goto(tool.path);
+      await group(page, tool.group).click();
+      await expect(link(page, tool.label)).toHaveAttribute('aria-current', 'page');
+      for (const other of tools.filter(entry => entry.group === tool.group && entry !== tool)) {
+        await expect(link(page, other.label)).not.toHaveAttribute('aria-current', /.*/);
+      }
+    });
+  }
+
+  test('Startseite markiert nur das Logo als aktuell', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('banner').getByRole('link', { name: 'MI converter' })).toHaveAttribute('aria-current', 'page');
+    await expect(navigation(page).locator('[aria-current]')).toHaveCount(0);
+  });
+
+  test('Theme-Umschalter schreibt erst nach Klick in localStorage', async ({ page }) => {
+    await page.goto('/');
+    expect(await page.evaluate(() => localStorage.getItem('mi-theme'))).toBeNull();
+    const toggle = page.getByRole('button', { name: 'Helles Design' });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.evaluate(() => localStorage.getItem('mi-theme'))).toBe('light');
+  });
+});
+
+test.describe('Mobil (390 px)', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('Menü-Button klappt eine Liste mit denselben Gruppen auf und navigiert per Klick', async ({ page }) => {
+    await page.goto('/');
+    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(menuButton(page)).toHaveAttribute('aria-controls', 'hauptnavigation');
+    await expect(navigation(page)).toBeHidden();
+    await menuButton(page).click();
+    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'true');
+    for (const name of groups) await expect(navigation(page).locator('.nav-label', { hasText: name })).toBeVisible();
+    for (const name of groups) await expect(group(page, name)).toBeHidden();
+    for (const tool of tools) await expect(link(page, tool.label)).toBeVisible();
+    await noOverflow(page);
+    await menuButton(page).click();
+    await expect(navigation(page)).toBeHidden();
+    await menuButton(page).click();
+    await link(page, 'PDF komprimieren').click();
+    await expect(page).toHaveURL(/\/pdf\/komprimieren\/?$/);
+  });
+
+  test('Escape schließt das Menü mit Fokus auf dem Menü-Button, Außenklick ebenfalls', async ({ page }) => {
+    await page.goto('/');
+    await menuButton(page).click();
+    await link(page, 'Bilder konvertieren').focus();
+    await page.keyboard.press('Escape');
+    await expect(navigation(page)).toBeHidden();
+    await expect(menuButton(page)).toBeFocused();
+    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
+    await menuButton(page).click();
+    await page.getByRole('main').click({ position: { x: 4, y: 4 } });
+    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('Theme-Umschalter bleibt in der Kopfzeile erreichbar', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: 'Helles Design' })).toBeVisible();
+  });
+
+  for (const tool of tools) {
+    test(`${tool.path}: aktive Route bei 320 px ohne Überlauf`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 720 });
+      await page.goto(tool.path);
+      await menuButton(page).click();
+      await expect(link(page, tool.label)).toHaveAttribute('aria-current', 'page');
+      await noOverflow(page);
+      await page.keyboard.press('Escape');
+      await noOverflow(page);
+    });
+  }
+});
 
 test('Ohne JavaScript bleiben alle Werkzeuge und die Informationsseite zugänglich', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 720 } });
   const page = await context.newPage();
   try {
     await page.goto('/');
-    for (const tool of tools) await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toBeVisible();
+    for (const tool of tools) await expect(link(page, tool.label)).toBeVisible();
     // Playwrights Textsuche schließt noscript aus, auch wenn der Browser es ohne JavaScript rendert.
     await expect(page.locator('noscript p')).toBeVisible();
-    await navigation(page).getByRole('link', { name: 'Dateiverarbeitung', exact: true }).click();
+    await page.getByRole('navigation', { name: 'Fußzeile' }).getByRole('link', { name: 'Dateiverarbeitung', exact: true }).click();
     await expect(page).toHaveURL(/\/lokale-verarbeitung\/?$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Dateiverarbeitung' })).toBeVisible();
     await noOverflow(page);
@@ -111,15 +203,13 @@ test('Ohne JavaScript bleiben alle Werkzeuge und die Informationsseite zugängli
   }
 });
 
-test('Wechsel zur kompakten Navigation führt verborgenen Linkfokus zum Auslöser zurück', async ({ page }) => {
+test('Breitenwechsel von Desktop auf mobil: Navigation hinter dem Menü-Button, alle Werkzeuge erreichbar', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await navigation(page).getByRole('link', { name: tools[0].label, exact: true }).focus();
-  // 720 CSS-Pixel entsprechen der verfügbaren Breite eines 1440-Pixel-Fensters bei 200 Prozent Zoom.
-  await page.setViewportSize({ width: 720, height: 450 });
-  await expect(trigger(page)).toBeFocused();
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
-  await trigger(page).press('Enter');
-  for (const tool of tools) await expect(navigation(page).getByRole('link', { name: tool.label, exact: true })).toBeVisible();
+  await group(page, 'Konvertieren').click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(navigation(page)).toBeHidden();
+  await menuButton(page).click();
+  for (const tool of tools) await expect(link(page, tool.label)).toBeVisible();
   await noOverflow(page);
 });

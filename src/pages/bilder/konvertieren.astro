@@ -1,25 +1,13 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolPage from '../../components/site/ToolPage.astro';
 import ImageConverter from '../../components/tools/ImageConverter';
 import { INPUT_FORMATS, formatList } from '../../components/tools/formats';
 
 const formats = formatList(INPUT_FORMATS);
 ---
-<BaseLayout
-  title="Bilder konvertieren"
+<ToolPage
+  toolId="bilder-konvertieren"
   description={`Bilder (${formats}) auf dem Server in JPEG, PNG, WebP, BMP oder ICO umwandeln. Verarbeitung auf dem Server nach ausdrücklichem Start.`}
 >
-  <div class="page-container">
-    <h1 class="page-title">Bilder konvertieren</h1>
-    <p class="page-lead">
-      Wandeln Sie Bilder in JPEG, PNG, WebP, BMP oder ICO um. Die verfügbaren Ausgabeformate
-      richten sich nach den Funktionen des Servers.
-    </p>
-
-    <div class="page-section">
-      {/* client:load: Das Werkzeug ist der Hauptinhalt der Seite und soll sofort bedienbar sein. */}
-      <ImageConverter client:load />
-    </div>
-
-  </div>
-</BaseLayout>
+  <ImageConverter client:load />
+</ToolPage>

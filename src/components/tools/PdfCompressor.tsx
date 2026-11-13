@@ -1,10 +1,11 @@
 import {useEffect, useRef, useState} from 'react';
 import {formatBytes, formatSizeChange} from '../../lib/format';
 import {ToolWorkspace} from './ToolWorkspace';
+import {useInitialFiles, type ToolProps} from './useInitialFiles';
 import {apiMessage, ApiError, capabilities, cancelJob, createJob, deleteJob, pollJob, type Job} from '../../lib/api/client';
 const levels = ['high','balanced','small'] as const;
 const labels = {high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei'};
-export default function PdfCompressor() {
+export default function PdfCompressor({initialFiles}: ToolProps) {
   const [file,setFile] = useState<File | null>(null), [job,setJob] = useState<Job | null>(null);
   const [ready,setReady] = useState(false), [busy,setBusy] = useState(false);
   const [error,setError] = useState(''), [notice,setNotice] = useState('');
@@ -37,6 +38,7 @@ export default function PdfCompressor() {
     if(files[0]!.size>limit){setError('Die PDF überschreitet die zulässige Dateigröße.');return;}
     setFile(files[0]!);
   }
+  useInitialFiles(ready, initialFiles, select);
   function reset(){release();retryKey.current=null;setFile(null);setJob(null);setBusy(false);setError('');setNotice('');choose.current?.focus();}
   async function start(){
     if(!file||busy)return;

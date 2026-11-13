@@ -1,0 +1,28 @@
+---
+/**
+ * Gemeinsamer Rahmen der Werkzeugseiten: Titel und ein Satz aus dem Werkzeugkatalog, darunter das
+ * Werkzeug. Die Startseite zeigt dieselben Texte, wenn sie ein Werkzeug mit vorgewählten Dateien rendert.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTool } from '../../data/tools';
+
+interface Props {
+  /** Kennung im Werkzeugkatalog. */
+  toolId: string;
+  /** Meta-Beschreibung der Seite. */
+  description: string;
+}
+
+const { toolId, description } = Astro.props;
+const tool = getTool(toolId);
+---
+<BaseLayout title={tool.title} description={description}>
+  <div class="page-container">
+    <h1 class="page-title">{tool.title}</h1>
+    <p class="page-lead">{tool.lead}</p>
+    <div class="page-section">
+      {/* Das Werkzeug ist der Hauptinhalt der Seite und soll mit client:load sofort bedienbar sein. */}
+      <slot />
+    </div>
+  </div>
+</BaseLayout>

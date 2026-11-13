@@ -1,31 +1,31 @@
 import { expect, test } from '@playwright/test';
 
-test('Startseite zeigt direkt Werkzeuge ohne Einleitung oder Anleitung', async ({ page }) => {
+// Die Startseite ist die Dropzone mit Typerkennung (QuickStart). Ablauf: quickstart.spec.ts.
+
+test('Startseite zeigt Titel und Dropzone ohne Einleitung, Anleitung oder Kacheln', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/– MI converter$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1, name: 'Werkzeuge', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Dateien umwandeln', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveClass(/sr-only/);
+  await expect(page.getByRole('button', { name: 'Dateien auswählen', exact: true })).toBeVisible();
   await expect(page.locator('.hero')).toHaveCount(0);
+  await expect(page.locator('.card-link, .tool-card')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'So funktioniert es' })).toHaveCount(0);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
 });
 
-test('Werkzeugbereich zeigt Kacheln oder einen Hinweis, aber keine toten Links', async ({ page, request }) => {
+test('Werkzeugliste unter der Dropzone besteht aus erreichbaren Textlinks, keine toten Links', async ({ page, request }) => {
   await page.goto('/');
-  const section = page.locator('section[aria-labelledby="werkzeuge"]');
-  const tiles = section.locator('a.card-link');
-  const count = await tiles.count();
-  if (count === 0) {
-    await expect(section.locator('.notice')).toBeVisible();
-    return;
-  }
+  const links = page.getByRole('navigation', { name: 'Werkzeuge im Überblick' }).getByRole('link');
+  const count = await links.count();
+  expect(count).toBeGreaterThan(0);
   for (let i = 0; i < count; i++) {
-    const href = await tiles.nth(i).getAttribute('href');
+    const href = await links.nth(i).getAttribute('href');
     expect(href).toMatch(/^\//);
     const response = await request.get(href!);
-    expect(response.status(), `Kachel-Link ${href}`).toBe(200);
+    expect(response.status(), `Link ${href}`).toBe(200);
   }
 });
 

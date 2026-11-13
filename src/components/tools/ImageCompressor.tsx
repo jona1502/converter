@@ -9,10 +9,11 @@ import { BrowserSupportNotice, ImageProcessingNotice } from './notices';
 import { BackgroundColor, FormatSelect, QualitySlider } from './options';
 import { useImageBatch } from './useImageBatch';
 import { ToolWorkspace } from './ToolWorkspace';
+import { useInitialFiles, type ToolProps } from './useInitialFiles';
 
 const OUTPUTS: readonly ImageFormat[] = ['jpeg', 'webp', 'png'];
 
-export default function ImageCompressor() {
+export default function ImageCompressor({ initialFiles }: ToolProps) {
   const batch = useImageBatch('image-compress');
   const encode = batch.support.status === 'ready' ? batch.support.encode : null;
   const [format, setFormat] = useState<ImageFormat>('jpeg');
@@ -40,15 +41,17 @@ export default function ImageCompressor() {
     : batch.counts.checking ? 'Die Dateien werden geprüft.'
     : !validEdge ? 'Geben Sie eine gültige maximale Kantenlänge ein.'
     : !batch.counts.processable ? 'Fügen Sie zuerst mindestens ein verwendbares Bild hinzu.' : null;
+  const handleFiles = (files: File[]) => {
+    const outcome = batch.addFiles(files);
+    setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien wurden nicht hinzugefügt. Höchstens ${batch.limits.maxFiles} Dateien sind gleichzeitig erlaubt.` : '');
+  };
+  useInitialFiles(batch.support.status === 'ready', initialFiles, handleFiles);
   const reset = () => { batch.reset(); setLimitMessage(''); setProcessedKey(null); buttonRef.current?.focus(); };
   return <div className="flex flex-col gap-8">
     <BrowserSupportNotice support={batch.support} />
     <ToolWorkspace
       selection={<>
-        <DropZone accept={acceptAttribute(INPUT_FORMATS)} disabled={!encode} buttonRef={buttonRef} onFiles={files => {
-          const outcome = batch.addFiles(files);
-          setLimitMessage(outcome.rejected.length ? `${outcome.rejected.length} Dateien wurden nicht hinzugefügt. Höchstens ${batch.limits.maxFiles} Dateien sind gleichzeitig erlaubt.` : '');
-        }}>
+        <DropZone accept={acceptAttribute(INPUT_FORMATS)} disabled={!encode} buttonRef={buttonRef} onFiles={handleFiles}>
           <p>{formatList(INPUT_FORMATS)}; nur unbewegte Bilder. Höchstens {batch.limits.maxFiles} Dateien, je {formatBytes(batch.limits.maxFileBytes)} und {(batch.limits.maxPixels / 1_000_000).toLocaleString('de-DE')} Megapixel.</p>
         </DropZone>
         {limitMessage && <p role="alert" className="notice notice-error">{limitMessage}</p>}
