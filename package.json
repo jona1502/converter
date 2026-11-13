@@ -7,7 +7,11 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "npm run stack:up && astro dev",
+    "dev:web": "astro dev",
+    "stack:up": "docker compose up -d --build --wait",
+    "stack:down": "docker compose down",
+    "stack:logs": "docker compose logs -f --tail 50 api worker",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
