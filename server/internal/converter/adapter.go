@@ -42,6 +42,10 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	for _, target := range task.Results {
 		req.Results = append(req.Results, ResultTarget{ID: storage.FormatUUID(target.ID), Level: target.Level, Path: target.Path})
 	}
+	if task.Tool == "audio-convert" {
+		req.Timeout = c.AudioTimeout
+		req.OutputLimit = c.AudioMaxOutputBytes
+	}
 	if task.Tool == "pdf-compress" {
 		if task.OutputBudget <= 0 {
 			return Request{}, invalid("PDF-Arbeitsbudget fehlt")

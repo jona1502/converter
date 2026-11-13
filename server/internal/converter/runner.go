@@ -92,6 +92,7 @@ func CheckResult(path string, limit int64) (int64, error) {
 type session struct {
 	req       Request
 	pdf       bool
+	audio     bool
 	onEvent   func(Event) error
 	analysis  bool
 	next      int // Index des nächsten offenen Ergebnisses
@@ -175,17 +176,23 @@ func (s *session) handle(data []byte) error {
 			return err
 		}
 		var details json.RawMessage
-		if s.pdf {
+		switch {
+		case s.pdf:
 			details, err = ValidatePdfDetails(o["details"])
-		} else {
+		case s.audio:
+			details, err = ValidateAudioDetails(o["details"], s.req.Limits)
+		default:
 			details, err = ValidateImageDetails(o["details"], s.req.Limits)
 		}
 		if err != nil {
 			return violated("details ungültig")
 		}
 		limit := s.req.Limits.ImageMaxOutputBytes
-		if s.pdf {
+		switch {
+		case s.pdf:
 			limit = s.req.Limits.PdfMaxResultsTotalBytes - s.usedBytes
+		case s.audio:
+			limit = s.req.Limits.AudioMaxOutputBytes
 		}
 		size, err := CheckResult(t.Path, limit)
 		s.finish(t)
@@ -278,7 +285,7 @@ func (r *Runner) Run(ctx context.Context, req Request, onEvent func(Event) error
 	if err != nil {
 		return Outcome{}, err
 	}
-	s := &session{req: req, pdf: req.isPDF(), onEvent: onEvent}
+	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), onEvent: onEvent}
 	res, err := r.execute(ctx, "run", payload, req.Timeout, s.handle)
 	if err != nil {
 		return Outcome{}, err
