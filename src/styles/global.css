@@ -389,7 +389,8 @@
   /* Karten */
   /* Nach .mi-card: Haarlinie, 2px-Akzentkante oben, Radius 14px, dezenter Verlauf. */
   .card,
-  .card-link {
+  .card-link,
+  .variant-card {
     @apply rounded-card border border-border bg-surface;
     border-top: 2px solid var(--mi-card-edge);
     background-image: var(--mi-card-gradient);
@@ -639,8 +640,7 @@
     @apply rounded-full bg-accent-fill;
   }
   .variant-card {
-    @apply flex flex-col gap-3 rounded-card bg-surface p-6;
-    box-shadow: var(--shadow-card);
+    @apply flex flex-col gap-3 p-6;
   }
   .variant-size {
     @apply font-semibold;
