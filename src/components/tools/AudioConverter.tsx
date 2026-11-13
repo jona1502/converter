@@ -14,6 +14,7 @@ import { EntryList, MetadataGroup, ResultSummary } from './FileList';
 import { AudioProcessingNotice, BrowserSupportNotice } from './notices';
 import { ToolWorkspace } from './ToolWorkspace';
 import { useAudioBatch, type AudioEntry } from './useAudioBatch';
+import { useInitialFiles, type ToolProps } from './useInitialFiles';
 
 /** Bevorzugtes Zielformat, falls der Server es anbietet. */
 const PREFERRED_FORMAT: AudioFormat = 'mp3';
@@ -140,7 +141,7 @@ function renderResult(entry: AudioEntry) {
   );
 }
 
-export default function AudioConverter() {
+export default function AudioConverter({ initialFiles }: ToolProps) {
   const batch = useAudioBatch();
   const { support, counts, isProcessing, limits } = batch;
   const ready = support.status === 'ready';
@@ -216,6 +217,8 @@ export default function AudioConverter() {
       );
     });
   }, [announce, batch, limits.maxFiles]);
+
+  useInitialFiles(ready, initialFiles, handleFiles);
 
   const handleProcess = useCallback(async () => {
     if (!settings || !optionsKey) return;
