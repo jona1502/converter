@@ -75,9 +75,9 @@ export function FormatSelect({
       </select>
       <p id={hintId} className="hint">
         {!support
-          ? 'Es wird geprüft, welche Formate Der Server erzeugen kann.'
+          ? 'Es wird geprüft, welche Formate der Server erzeugen kann.'
           : unsupported.length > 0
-            ? `${joinGerman(unsupported.map(formatLabel))} kann Der Server nicht erzeugen; ${unsupported.length > 1 ? 'diese Formate sind' : 'das Format ist'} deshalb nicht auswählbar.`
+            ? `${joinGerman(unsupported.map(formatLabel))} kann der Server nicht erzeugen; ${unsupported.length > 1 ? 'diese Formate sind' : 'das Format ist'} deshalb nicht auswählbar.`
             : 'Alle Formate werden vom Server unterstützt.'}
       </p>
     </div>
