@@ -24,6 +24,11 @@ class Limits:
     pdf_max_input_bytes: int = 100_000_000
     pdf_max_results_total_bytes: int = 300_000_000
     pdf_image_max_pixels: int = 40_000_000
+    audio_max_input_bytes: int = 104_857_600
+    audio_max_duration_seconds: int = 1800
+    audio_max_channels: int = 8
+    audio_max_sample_rate: int = 192_000
+    audio_max_output_bytes: int = 419_430_400
 
 
 def _camel(name: str) -> str:
