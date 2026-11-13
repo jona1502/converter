@@ -12,7 +12,9 @@
 # per CONVERTER_TEST_DB_PORT / CONVERTER_TEST_VALKEY_PORT setzen. Die Tests im
 # go-Container nutzen ohnehin das Compose-Netz.
 #
-# Nur der Go-Build-/Modulcache liegt in einem eigenen benannten Volume.
+# Nur der Go-Build-/Modulcache liegt in einem eigenen benannten Volume. CI setzt
+# CONVERTER_TEST_GOCACHE auf ein absolutes Hostverzeichnis, das actions/cache
+# zwischen Läufen sichert.
 
 name: mi-converter-test
 
@@ -22,7 +24,7 @@ services:
     working_dir: /src/server
     volumes:
       - ..:/src
-      - gocache:/go
+      - ${CONVERTER_TEST_GOCACHE:-gocache}:/go
     environment:
       GOFLAGS: -mod=readonly
       GOTOOLCHAIN: local

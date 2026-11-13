@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  workers: 2,
+  // CI setzt PW_WORKERS je Browserjob höher; lokal bleiben zwei Worker.
+  workers: Number(process.env.PW_WORKERS) || 2,
   reporter: [['list']],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:4329',
