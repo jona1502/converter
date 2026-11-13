@@ -80,5 +80,8 @@ def execute(request: Request, writer: EventWriter) -> None:
     options = request.options
     if isinstance(options, ImageOptions):
         run_image(request, options, writer)
-    else:
+    elif isinstance(options, PdfOptions):
         run_pdf(request, options, writer)
+    else:
+        # Audio folgt mit der Pipeline; bis dahin geschlossen ablehnen.
+        raise ProcessingError("invalid-options")
