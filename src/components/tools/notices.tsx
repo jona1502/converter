@@ -7,7 +7,7 @@ export function ImageProcessingNotice() {
       <p className="notice-title">Metadaten und Animation</p>
       <p className="mt-1">
         Jedes Bild wird neu kodiert. Dabei werden Metadaten wie EXIF-Daten (einschließlich einer GPS-Position) und
-        eingebettete Farbprofile entfernt oder verändert. Animierte Bilder werden nicht unterstützt und abgelehnt.{' '}
+        eingebettete Farbprofile entfernt oder verändert. Eine vollständige Entfernung von Metadaten ist nicht gewährleistet. Animierte Bilder werden nicht unterstützt und abgelehnt.{' '}
         <a href="/lokale-verarbeitung" className="link">
           Mehr zur Dateiverarbeitung
         </a>
