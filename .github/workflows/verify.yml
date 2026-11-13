@@ -71,6 +71,11 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # Browser kommen aus dem Cache; Systempakete installiert --with-deps weiterhin.
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: node scripts/generate-api-types.mjs --check
       - run: npm run check
@@ -99,6 +104,11 @@ jobs:
           enable-cache: true
           cache-dependency-glob: converter/uv.lock
       - run: npm ci
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # Browser kommen aus dem Cache; Systempakete installiert --with-deps weiterhin.
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: uv sync --frozen --project converter
       - name: Full stack
