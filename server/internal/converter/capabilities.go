@@ -14,8 +14,9 @@ import (
 	"miconverter/server/internal/storage"
 )
 
-// ReportSchemaVersion ist die Version von capabilities.json.
-const ReportSchemaVersion = 1
+// ReportSchemaVersion ist die Version von capabilities.json (2: mit audio).
+// Ein älterer Bericht gilt als ungültig, bis die Probe ihn neu schreibt.
+const ReportSchemaVersion = 2
 
 // ReportFile ist der Dateiname des Berichts im privaten Volume.
 const ReportFile = "capabilities.json"
@@ -26,6 +27,8 @@ const maxReportBytes = 64 * 1024
 var (
 	RequiredInputFormats  = []string{"jpeg", "png", "webp", "gif", "bmp", "ico", "avif"}
 	RequiredOutputFormats = []string{"jpeg", "png", "webp", "bmp", "ico"}
+	// RequiredAudioFormats gilt für Ein- und Ausgabe von audio-convert.
+	RequiredAudioFormats = []string{"mp3", "wav", "flac", "ogg"}
 )
 
 var (
@@ -40,21 +43,38 @@ var versionRe = regexp.MustCompile(`^[0-9A-Za-z.+-]{1,32}$`)
 
 // Versions: Bibliotheksversionen aus der Probe (nur Betrieb/Diagnose).
 type Versions struct {
-	Python  string `json:"python"`
-	Pillow  string `json:"pillow"`
-	Pikepdf string `json:"pikepdf"`
-	Qpdf    string `json:"qpdf"`
+	Python     string `json:"python"`
+	Pillow     string `json:"pillow"`
+	Pikepdf    string `json:"pikepdf"`
+	Qpdf       string `json:"qpdf"`
+	Soundfile  string `json:"soundfile"`
+	Libsndfile string `json:"libsndfile"`
+	Numpy      string `json:"numpy"`
+}
+
+// versionKeys in Protokollreihenfolge.
+var versionKeys = []string{"python", "pillow", "pikepdf", "qpdf", "soundfile", "libsndfile", "numpy"}
+
+func (v *Versions) fields() []*string {
+	return []*string{&v.Python, &v.Pillow, &v.Pikepdf, &v.Qpdf, &v.Soundfile, &v.Libsndfile, &v.Numpy}
+}
+
+// AudioReport: per Rundreise (soundfile) bestätigte Audioformate.
+type AudioReport struct {
+	InputFormats  []string `json:"inputFormats"`
+	OutputFormats []string `json:"outputFormats"`
 }
 
 // Report ist der versionierte Capabilities-Bericht (capabilities.json).
 type Report struct {
-	SchemaVersion   int       `json:"schemaVersion"`
-	ProtocolVersion int       `json:"protocolVersion"`
-	GeneratedAt     time.Time `json:"generatedAt"`
-	InputFormats    []string  `json:"inputFormats"`
-	OutputFormats   []string  `json:"outputFormats"`
-	PDF             bool      `json:"pdf"`
-	Versions        Versions  `json:"versions"`
+	SchemaVersion   int         `json:"schemaVersion"`
+	ProtocolVersion int         `json:"protocolVersion"`
+	GeneratedAt     time.Time   `json:"generatedAt"`
+	InputFormats    []string    `json:"inputFormats"`
+	OutputFormats   []string    `json:"outputFormats"`
+	PDF             bool        `json:"pdf"`
+	Audio           AudioReport `json:"audio"`
+	Versions        Versions    `json:"versions"`
 }
 
 // ImageFormats liefert die Formatlisten für GET /capabilities
@@ -69,6 +89,20 @@ func (r Report) ImageFormats() (input, output []string) {
 	}
 	for _, f := range RequiredOutputFormats {
 		if slices.Contains(r.OutputFormats, f) {
+			output = append(output, f)
+		}
+	}
+	return input, output
+}
+
+// AudioFormats liefert die Audioformate für capabilities.audio in
+// Vertragsreihenfolge.
+func (r Report) AudioFormats() (input, output []string) {
+	for _, f := range RequiredAudioFormats {
+		if slices.Contains(r.Audio.InputFormats, f) {
+			input = append(input, f)
+		}
+		if slices.Contains(r.Audio.OutputFormats, f) {
 			output = append(output, f)
 		}
 	}
@@ -91,11 +125,13 @@ func (r Report) Validate() error {
 	if r.SchemaVersion != ReportSchemaVersion || r.ProtocolVersion != ProtocolVersion || r.GeneratedAt.IsZero() {
 		return fmt.Errorf("%w: Version", ErrReportInvalid)
 	}
-	if !knownList(r.InputFormats, RequiredInputFormats) || !knownList(r.OutputFormats, RequiredOutputFormats) {
+	if !knownList(r.InputFormats, RequiredInputFormats) || !knownList(r.OutputFormats, RequiredOutputFormats) ||
+		!knownList(r.Audio.InputFormats, RequiredAudioFormats) || !knownList(r.Audio.OutputFormats, RequiredAudioFormats) {
 		return fmt.Errorf("%w: Formatliste", ErrReportInvalid)
 	}
-	for _, v := range []string{r.Versions.Python, r.Versions.Pillow, r.Versions.Pikepdf, r.Versions.Qpdf} {
-		if !versionRe.MatchString(v) {
+	versions := r.Versions
+	for _, v := range versions.fields() {
+		if !versionRe.MatchString(*v) {
 			return fmt.Errorf("%w: Versionsangabe", ErrReportInvalid)
 		}
 	}
@@ -112,20 +148,43 @@ func (r Report) Validate() error {
 	if !r.PDF {
 		return fmt.Errorf("%w: pdf", ErrMissingFormats)
 	}
+	for _, f := range RequiredAudioFormats {
+		if !slices.Contains(r.Audio.InputFormats, f) {
+			return fmt.Errorf("%w: Audioeingabe %s", ErrMissingFormats, f)
+		}
+		if !slices.Contains(r.Audio.OutputFormats, f) {
+			return fmt.Errorf("%w: Audioausgabe %s", ErrMissingFormats, f)
+		}
+	}
 	return nil
 }
 
 func decodeVersions(o object) (Versions, error) {
-	v, err := o.nested("versions", []string{"python", "pillow", "pikepdf", "qpdf"}, nil)
+	v, err := o.nested("versions", versionKeys, nil)
 	if err != nil {
 		return Versions{}, err
 	}
 	var out Versions
-	fields := []*string{&out.Python, &out.Pillow, &out.Pikepdf, &out.Qpdf}
-	for i, k := range []string{"python", "pillow", "pikepdf", "qpdf"} {
+	fields := out.fields()
+	for i, k := range versionKeys {
 		if *fields[i], err = v.str(k, 32); err != nil {
 			return Versions{}, err
 		}
+	}
+	return out, nil
+}
+
+func decodeAudio(o object) (AudioReport, error) {
+	a, err := o.nested("audio", []string{"inputFormats", "outputFormats"}, nil)
+	if err != nil {
+		return AudioReport{}, err
+	}
+	var out AudioReport
+	if out.InputFormats, err = decodeFormats(a, "inputFormats"); err != nil {
+		return AudioReport{}, err
+	}
+	if out.OutputFormats, err = decodeFormats(a, "outputFormats"); err != nil {
+		return AudioReport{}, err
 	}
 	return out, nil
 }
@@ -140,7 +199,7 @@ func decodeFormats(o object, key string) ([]string, error) {
 
 // parseProbe dekodiert die Probezeile des Konverters streng.
 func parseProbe(data []byte, now time.Time) (Report, error) {
-	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "versions"}, nil)
+	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "audio", "versions"}, nil)
 	if err != nil {
 		return Report{}, err
 	}
@@ -156,6 +215,9 @@ func parseProbe(data []byte, now time.Time) (Report, error) {
 		return Report{}, err
 	}
 	if rep.PDF, err = o.boolean("pdf"); err != nil {
+		return Report{}, err
+	}
+	if rep.Audio, err = decodeAudio(o); err != nil {
 		return Report{}, err
 	}
 	if rep.Versions, err = decodeVersions(o); err != nil {
@@ -238,7 +300,7 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, fmt.Errorf("%w: lesen", ErrReportInvalid)
 	}
 	o, err := parseObject(data, []string{"schemaVersion", "protocolVersion", "generatedAt",
-		"inputFormats", "outputFormats", "pdf", "versions"}, nil)
+		"inputFormats", "outputFormats", "pdf", "audio", "versions"}, nil)
 	if err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
@@ -260,6 +322,9 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
 	if rep.PDF, err = o.boolean("pdf"); err != nil {
+		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
+	}
+	if rep.Audio, err = decodeAudio(o); err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
 	if rep.Versions, err = decodeVersions(o); err != nil {

@@ -165,7 +165,8 @@ func TestReportRoundtripRejectsStaleFutureAndSymlink(t *testing.T) {
 	now := time.Now().UTC()
 	report := Report{SchemaVersion: ReportSchemaVersion, ProtocolVersion: ProtocolVersion, GeneratedAt: now,
 		InputFormats: RequiredInputFormats, OutputFormats: RequiredOutputFormats, PDF: true,
-		Versions: Versions{Python: "3.13.17", Pillow: "13.0.0", Pikepdf: "10.17.0", Qpdf: "12.3"}}
+		Audio:    AudioReport{InputFormats: RequiredAudioFormats, OutputFormats: RequiredAudioFormats},
+		Versions: Versions{Python: "3.13.17", Pillow: "13.0.0", Pikepdf: "10.17.0", Qpdf: "12.3", Soundfile: "0.14.0", Libsndfile: "1.2.2", Numpy: "2.5.4"}}
 	path := filepath.Join(t.TempDir(), ReportFile)
 	if err := WriteReport(path, report); err != nil {
 		t.Fatal(err)

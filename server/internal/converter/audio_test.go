@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -155,5 +159,44 @@ func TestAdapterUsesAudioTimeoutAndOutputLimit(t *testing.T) {
 	}
 	if req.Timeout != 299*time.Second || req.OutputLimit != 419430400 || !req.isAudio() || req.isPDF() {
 		t.Fatalf("request=%+v", req)
+	}
+}
+
+func TestProbeReportRequiresAudioFormatsAndVersions(t *testing.T) {
+	now := time.Now().UTC()
+	rep, err := parseProbe([]byte(probeOK), now)
+	if err != nil || rep.Validate() != nil {
+		t.Fatalf("Probe: %+v %v %v", rep, err, rep.Validate())
+	}
+	in, out := rep.AudioFormats()
+	if !slices.Equal(in, RequiredAudioFormats) || !slices.Equal(out, RequiredAudioFormats) || rep.Versions.Libsndfile != "1.2.2" {
+		t.Fatalf("Audio = %v %v %+v", in, out, rep.Versions)
+	}
+	missing, err := parseProbe([]byte(strings.Replace(probeOK, `"outputFormats":["mp3","wav","flac","ogg"]`, `"outputFormats":["wav","flac","ogg"]`, 1)), now)
+	if err != nil || !errors.Is(missing.Validate(), ErrMissingFormats) {
+		t.Fatalf("fehlendes MP3: %v %v", err, missing.Validate())
+	}
+	for name, raw := range map[string]string{
+		"ohne audio":         strings.Replace(probeOK, `"audio":{"inputFormats":["mp3","wav","flac","ogg"],"outputFormats":["mp3","wav","flac","ogg"]},`, "", 1),
+		"ohne numpy":         strings.Replace(probeOK, `,"numpy":"2.5.4"`, "", 1),
+		"unbekanntes Format": strings.Replace(probeOK, `"inputFormats":["mp3",`, `"inputFormats":["m4a","mp3",`, 1),
+	} {
+		rep, err := parseProbe([]byte(raw), now)
+		if err == nil && rep.Validate() == nil {
+			t.Errorf("%s akzeptiert", name)
+		}
+	}
+}
+
+func TestOldReportWithoutAudioIsInvalid(t *testing.T) {
+	path := filepath.Join(t.TempDir(), ReportFile)
+	old := `{"schemaVersion":1,"protocolVersion":1,"generatedAt":"` + time.Now().UTC().Format(time.RFC3339Nano) + `",` +
+		`"inputFormats":["jpeg","png","webp","gif","bmp","ico","avif"],"outputFormats":["jpeg","png","webp","bmp","ico"],` +
+		`"pdf":true,"versions":{"python":"3.13.17","pillow":"13.0.0","pikepdf":"10.17.0","qpdf":"12.4.2"}}`
+	if err := os.WriteFile(path, []byte(old), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadReport(path, time.Now().UTC(), time.Minute); !errors.Is(err, ErrReportInvalid) {
+		t.Fatalf("alter Bericht: %v", err)
 	}
 }
