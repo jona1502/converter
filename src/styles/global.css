@@ -224,9 +224,12 @@
   .page-section {
     @apply mt-12 sm:mt-16;
   }
-  .page-eyebrow {
-    @apply text-base font-semibold text-muted;
-    letter-spacing: -0.01em;
+  /* Überzeile (Eyebrow) wie .mi-caption der Referenz: klein, gedämpft. */
+  .page-eyebrow,
+  .section-kicker {
+    @apply text-sm font-medium text-muted;
+    line-height: 1.43;
+    letter-spacing: -0.016em;
   }
   /* Titel nach .mi-hero, Einleitung nach .mi-lead-airy. */
   .page-title,
@@ -236,20 +239,19 @@
     line-height: 1.07;
     letter-spacing: -0.01em;
   }
-  .page-lead {
+  .page-lead,
+  .hero-lead {
     @apply mt-4 max-w-2xl text-muted text-pretty;
-    font-size: clamp(1.125rem, 1.02rem + 0.45vw, 1.3125rem);
-    line-height: 1.42;
+    font-size: clamp(1.125rem, 1.8vw, 1.5rem);
+    font-weight: 300;
+    line-height: 1.5;
     letter-spacing: -0.016em;
   }
   .hero {
     @apply mx-auto flex max-w-4xl flex-col items-center pt-4 pb-4 text-center sm:pt-10;
   }
   .hero-lead {
-    @apply mx-auto mt-5 max-w-2xl text-muted text-pretty;
-    font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
-    line-height: 1.38;
-    letter-spacing: -0.018em;
+    @apply mx-auto mt-5;
   }
   /* Abschnittsüberschrift nach .mi-display-md. */
   .section-title {
@@ -257,10 +259,6 @@
     font-size: clamp(1.625rem, 3vw, 2.125rem);
     line-height: 1.2;
     letter-spacing: -0.012em;
-  }
-  .section-kicker {
-    @apply text-sm font-semibold text-muted;
-    letter-spacing: 0;
   }
   /* Links im Fließtext bleiben unterstrichen (im Dark Mode reicht der Farbabstand allein nicht). */
   .link {
