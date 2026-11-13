@@ -107,6 +107,7 @@
 
   --mi-card-edge: rgb(15 118 110 / 0.55);
   --mi-card-gradient: linear-gradient(145deg, #ffffff, #f7fbfa);
+  --mi-nav-active: rgb(7 11 13 / 0.07);
 }
 
 @layer base {
@@ -115,6 +116,7 @@
   :root {
     --mi-card-edge: rgb(94 234 212 / 0.5);
     --mi-card-gradient: linear-gradient(145deg, rgb(255 255 255 / 0.043), rgb(255 255 255 / 0.02));
+    --mi-nav-active: rgb(255 255 255 / 0.08);
   }
   html {
     @apply bg-canvas text-ink font-sans antialiased;

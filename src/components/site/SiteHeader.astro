@@ -56,19 +56,22 @@ const operations: { id: ToolOperation; label: string }[] = [
   .brand img { flex: none; border-radius: .45rem; }
   .brand:hover { color: var(--color-ink); }
   .tool-navigation { position: relative; }
-  .nav-groups { display: flex; align-items: center; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+  .nav-groups { display: flex; align-items: center; gap: .25rem; margin: 0; padding: 0; list-style: none; }
   .nav-dropdown { position: relative; }
-  summary { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: 980px; color: var(--color-ink); opacity: 1; font-size: .875rem; font-weight: 400; letter-spacing: -.01em; text-decoration: none; cursor: pointer; list-style: none; transition: background-color .2s ease, color .2s ease; }
+  /* Navigationseinträge nach der Referenz: kleine Schrift, Pill mit Radius 8px. */
+  summary { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: 8px; color: var(--color-muted); opacity: 1; font-size: .875rem; font-weight: 500; letter-spacing: -.01em; text-decoration: none; cursor: pointer; list-style: none; }
   summary::-webkit-details-marker { display: none; }
   summary svg { color: var(--color-muted); transition: transform .25s ease; }
-  summary:hover, details[open] summary { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
-  details[data-active] summary { color: var(--color-accent); font-weight: 600; }
+  summary:hover, details[open] summary { background: var(--mi-nav-active); color: var(--color-ink); }
+  /* Aktiver Bereich als Pill: Fläche, halbfett. */
+  details[data-active] summary { background: var(--mi-nav-active); color: var(--color-ink); font-weight: 600; }
+  details[data-active] summary svg { color: var(--color-ink); }
   details[open] summary svg { transform: rotate(180deg); }
-  .nav-panel { position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0; width: 20rem; padding: .45rem; margin: 0; border: 1px solid var(--color-border); border-radius: 1.125rem; background: var(--color-surface); box-shadow: var(--shadow-panel); list-style: none; }
+  .nav-panel { position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0; width: 20rem; padding: .45rem; margin: 0; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-panel); list-style: none; }
   .nav-groups > li:nth-last-child(2) .nav-panel { left: auto; right: 0; }
   /* Unsichtbare Brücke über den Abstand, damit das Menü beim Überfahren mit der Maus offen bleibt. */
   .nav-panel::before { content: ""; position: absolute; left: 0; right: 0; top: -.6rem; height: .6rem; }
-  .nav-panel a { display: flex; flex-direction: column; gap: .2rem; padding: .75rem .9rem; border-radius: .75rem; text-decoration: none; color: var(--color-ink); transition: background-color .2s ease; }
+  .nav-panel a { display: flex; flex-direction: column; gap: .2rem; padding: .75rem .9rem; border-radius: 10px; text-decoration: none; color: var(--color-ink); transition: background-color .2s ease; }
   .nav-panel a:hover, .nav-panel a:focus-visible { background: var(--color-surface-muted); }
   .nav-panel a[aria-current] { background: var(--color-accent-soft); }
   .nav-panel a[aria-current] .nav-tool-title { color: var(--color-accent); }
