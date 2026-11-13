@@ -58,6 +58,12 @@ func TestDefaultsMatchContractLimits(t *testing.T) {
 		{"PdfMaxInputBytes", c.PdfMaxInputBytes, int64(100_000_000)},
 		{"PdfMaxResultsTotalBytes", c.PdfMaxResultsTotalBytes, int64(300_000_000)},
 		{"PdfImageMaxPixels", c.PdfImageMaxPixels, int64(40_000_000)},
+		{"AudioMaxInputBytes", c.AudioMaxInputBytes, int64(104_857_600)},
+		{"AudioMaxDurationSeconds", c.AudioMaxDurationSeconds, int64(1800)},
+		{"AudioMaxChannels", c.AudioMaxChannels, int64(8)},
+		{"AudioMaxSampleRate", c.AudioMaxSampleRate, int64(192_000)},
+		{"AudioMaxOutputBytes", c.AudioMaxOutputBytes, int64(419_430_400)},
+		{"AudioTimeout", c.AudioTimeout, 300 * time.Second},
 		{"JobTTL", c.JobTTL, time.Hour},
 		{"SessionMaxActiveJobs", c.SessionMaxActiveJobs, 3},
 		{"GlobalMaxActiveJobs", c.GlobalMaxActiveJobs, 50},
@@ -80,7 +86,8 @@ func TestDefaultsMatchContractLimits(t *testing.T) {
 		{"DatabasePoolSize", c.DatabasePoolSize, 5},
 		{"HealthCheckTimeout", c.HealthCheckTimeout, 2 * time.Second},
 		{"LogLevel", c.LogLevel, "INFO"},
-		{"MaxUploadInputBytes", c.MaxUploadInputBytes(), int64(100_000_000)},
+		// Audio (100 MiB) ist die größte Eingabe und bestimmt die Reservierung.
+		{"MaxUploadInputBytes", c.MaxUploadInputBytes(), int64(104_857_600)},
 	}
 	for _, tc := range checks {
 		if tc.got != tc.want {
@@ -228,6 +235,9 @@ func TestInvalidScalarsAreRejected(t *testing.T) {
 		"CONVERTER_LOG_LEVEL":                    "TRACE",
 		"CONVERTER_STORAGE_DIR":                  "",
 		"CONVERTER_UPLOAD_MAX_SECONDS":           "",
+		"CONVERTER_AUDIO_MAX_CHANNELS":           "0",
+		"CONVERTER_AUDIO_MAX_DURATION_SECONDS":   "-5",
+		"CONVERTER_AUDIO_TIMEOUT_SECONDS":        "x",
 	}
 	for name, value := range cases {
 		m := map[string]string{"CONVERTER_ENVIRONMENT": "test", name: value}
@@ -258,6 +268,12 @@ func TestCrossFieldRules(t *testing.T) {
 		t.Errorf("zu kurze Löschfrist muss scheitern: %v", err)
 	}
 	mustLoad(t, map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_PHYSICAL_DELETE_MAX_SECONDS": "430"})
+	// Längeres Audio-Zeitlimit verlängert die nötige Löschfrist: 400 + 60 + 60 + 10.
+	_, err = Load(env(map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "400"}))
+	if err == nil || !strings.Contains(err.Error(), "PHYSICAL_DELETE_MAX_SECONDS") {
+		t.Errorf("Audio-Zeitlimit muss in die Löschfrist eingehen: %v", err)
+	}
+	mustLoad(t, map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "400", "CONVERTER_PHYSICAL_DELETE_MAX_SECONDS": "530"})
 	// Mindestlänge gilt auch außerhalb von production.
 	_, err = Load(env(map[string]string{"CONVERTER_ENVIRONMENT": "development", "CONVERTER_SECRET_KEY": "kurz"}))
 	if err == nil {
