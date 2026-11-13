@@ -1,46 +1,21 @@
 ---
-import { availableToolsByCategory } from '../../data/tools';
 interface Props { siteName: string }
 const { siteName } = Astro.props;
 const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
 <footer class="site-footer">
-  <div class="page-container">
-    <p class="footer-note">
-      Dateien werden nach ausdrücklichem Start hochgeladen, temporär gespeichert und nach Ablauf gelöscht.{" "}
-      <a href="/lokale-verarbeitung" class="footer-link">Wie die Dateiverarbeitung funktioniert</a>
-    </p>
-    <nav aria-label="Fußzeile" class="footer-nav">
-      {availableToolsByCategory.map(({ category, tools }) => (
-        <div>
-          <h2 class="footer-heading">{category.title}</h2>
-          <ul>
-            {tools.map((tool) => <li><a href={tool.href} class="footer-link" aria-current={current === tool.href ? 'page' : undefined}>{tool.title}</a></li>)}
-          </ul>
-        </div>
-      ))}
-      <div>
-        <h2 class="footer-heading">Information</h2>
-        <ul>
-          <li><a href="/lokale-verarbeitung" class="footer-link" aria-current={current === '/lokale-verarbeitung' ? 'page' : undefined}>Dateiverarbeitung</a></li>
-        </ul>
-      </div>
+  <div class="page-container footer-inner">
+    <nav aria-label="Fußzeile">
+      <a href="/lokale-verarbeitung" class="footer-link" aria-current={current === '/lokale-verarbeitung' ? 'page' : undefined}>Dateiverarbeitung</a>
     </nav>
-    <p class="footer-legal">{siteName}</p>
+    <p>{siteName}</p>
   </div>
 </footer>
 
 <style>
   .site-footer { margin-top: auto; border-top: 1px solid var(--color-border); background: var(--color-canvas); color: var(--color-muted); font-size: .875rem; line-height: 1.55; }
-  .site-footer .page-container { padding-top: 1.75rem; padding-bottom: 1.75rem; }
-  .footer-note { max-width: 46rem; padding-bottom: 1.5rem; }
-  .footer-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1.5rem; padding: 1.5rem 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
-  .footer-heading { margin-bottom: .5rem; color: var(--color-ink); font-family: var(--font-sans); font-size: .875rem; font-weight: 650; hyphens: none; }
-  .footer-nav ul { margin: 0; padding: 0; list-style: none; }
+  .footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1.5rem; padding-top: .5rem; padding-bottom: .5rem; }
   .footer-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-muted); text-decoration: none; }
   .footer-link[aria-current] { color: var(--color-accent); font-weight: 650; }
-  .footer-note .footer-link { display: inline; color: var(--color-accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: .18em; }
   .footer-link:hover { color: var(--color-ink); text-decoration: underline; text-underline-offset: 2px; }
-  .footer-note .footer-link:hover { color: var(--color-accent); text-decoration-color: currentColor; }
-  .footer-legal { padding-top: 1rem; }
 </style>
