@@ -5,7 +5,8 @@ test('Startseite zeigt direkt Werkzeuge ohne Einleitung oder Anleitung', async (
   await expect(page).toHaveTitle(/– MI converter$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Werkzeuge', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1, name: 'Werkzeuge', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveClass(/sr-only/);
   await expect(page.locator('.hero')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'So funktioniert es' })).toHaveCount(0);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);

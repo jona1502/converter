@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from 'react';
 import { formatBytes, formatSizeChange } from '../../lib/format';
+import type { InputFormat } from '../../lib/image';
 import { imageErrorMessage } from './errorMessages';
 import { formatLabel } from './formats';
 import type { BatchEntry, EntryStatus } from './useImageBatch';
@@ -9,7 +10,7 @@ const STATUS: Readonly<Record<EntryStatus, { label: string; badge: string }>> = 
   ready: { label: 'Bereit', badge: 'badge-accent' },
   invalid: { label: 'Nicht verwendbar', badge: 'badge-danger' },
   uploading: { label: 'Wird hochgeladen', badge: 'badge-accent' },
-  queued: { label: 'Wartet', badge: 'badge-neutral' },
+  queued: { label: 'Wartet auf Verarbeitung', badge: 'badge-neutral' },
   processing: { label: 'Wird verarbeitet', badge: 'badge-accent' },
   done: { label: 'Fertig', badge: 'badge-success' },
   error: { label: 'Fehler', badge: 'badge-danger' },
@@ -29,6 +30,25 @@ export interface FileRowProps {
   readonly extraNotes?: (entry: BatchEntry) => ReactNode;
 }
 
+function ImageMetadata({ label, format, width, height, size }: {
+  label: string;
+  format?: InputFormat;
+  width?: number;
+  height?: number;
+  size: number;
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex min-w-0 flex-col gap-3 rounded-control border border-border bg-surface p-3">
+      <h4 className="text-base font-semibold">{label}</h4>
+      <dl className="meta-list">
+        {format && <div><dt>Format</dt><dd>{formatLabel(format)}</dd></div>}
+        {width !== undefined && height !== undefined && <div><dt>Maße</dt><dd>{formatDimensions(width, height)}</dd></div>}
+        <div><dt>Größe</dt><dd>{formatBytes(size)}</dd></div>
+      </dl>
+    </div>
+  );
+}
+
 function ResultDetails({ entry }: { entry: BatchEntry }) {
   const { result, resultUrl, outputName } = entry;
   if (!result || !resultUrl || !outputName) return null;
@@ -39,41 +59,31 @@ function ResultDetails({ entry }: { entry: BatchEntry }) {
 
   return (
     <div className="file-result">
+      <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+        <ImageMetadata label="Original" format={entry.probe?.format} width={entry.probe?.width} height={entry.probe?.height} size={entry.size} />
+        <ImageMetadata label="Ergebnis" format={result.format} width={result.width} height={result.height} size={result.size} />
+      </div>
       <dl className="meta-list">
-        <div>
-          <dt>Ergebnis</dt>
-          <dd>
-            {formatLabel(result.format)} · {formatDimensions(result.width, result.height)}
+        {change && <div>
+          <dt>Änderung</dt>
+          <dd data-size-change={change.kind} className={change.kind === 'larger' ? 'text-warning' : undefined}>
+            {change.percent} · {change.kind === 'smaller' ? 'kleiner' : change.kind === 'larger' ? 'größer' : 'Keine Einsparung'}
           </dd>
-        </div>
-        <div>
-          <dt>Größe</dt>
-          <dd>
-            {formatBytes(result.size)}
-            {change && (
-              <>
-                {' '}
-                <span className={change.kind === 'larger' ? 'font-semibold text-warning' : undefined}>
-                  ({change.percent})
-                </span>
-              </>
-            )}
-          </dd>
-        </div>
+        </div>}
         <div>
           <dt>Dateiname</dt>
           <dd className="break-all">{outputName}</dd>
         </div>
       </dl>
       {change?.kind === 'larger' && (
-        <p className="notice notice-warn text-sm" data-size-change="larger">
+        <p className="notice notice-warn text-sm">
           <span className="notice-title">Größer als das Original.</span> Das Ergebnis ist {change.percent.replace('+', '')}{' '}
           größer als die Ausgangsdatei.
         </p>
       )}
       {change?.kind === 'equal' && (
-        <p className="text-sm text-muted" data-size-change="equal">
-          <span className="badge badge-neutral">Keine Einsparung</span> Das Ergebnis ist genau so groß wie das Original.
+        <p className="hint">
+          Das Ergebnis ist genau so groß wie das Original.
         </p>
       )}
       {notes.map((note) => (
@@ -81,36 +91,41 @@ function ResultDetails({ entry }: { entry: BatchEntry }) {
           {note}
         </p>
       ))}
-      <a className="btn btn-secondary btn-sm self-start" href={resultUrl} download={outputName}>
-        Herunterladen<span className="sr-only">: {outputName}</span>
-      </a>
+      <div className="flex min-w-0 flex-wrap items-center gap-3 border-t border-border pt-3">
+        <a className="btn btn-secondary max-w-full whitespace-normal break-all" href={resultUrl} download={outputName}>
+          Herunterladen<span className="sr-only">: {outputName}</span>
+        </a>
+        {entry.expiresAt && <p className="hint">Verfügbar bis <time dateTime={entry.expiresAt}>{new Date(entry.expiresAt).toLocaleString('de-DE')}</time>.</p>}
+      </div>
     </div>
   );
 }
 
 export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRowProps) {
-  const status = STATUS[entry.status];
+  const expired = Boolean(entry.result && entry.expiresAt && Date.parse(entry.expiresAt) <= Date.now());
+  const status = expired ? { label: 'Abgelaufen', badge: 'badge-warn' } : STATUS[entry.status];
   const { probe } = entry;
   return (
     <li className="file-row" data-status={entry.status}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="file-name" title={entry.name}>
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
+          <h3 className="file-name whitespace-normal break-all" title={entry.name}>
             {entry.name}
-          </p>
-          <p className="hint">
+          </h3>
+          {entry.status !== 'done' && <p className="hint tabular-nums">
+            <span className="font-medium">Original: </span>
             {probe ? `${formatLabel(probe.format)} · ${formatDimensions(probe.width, probe.height)} · ` : ''}
             {formatBytes(entry.size)}
-          </p>
+          </p>}
         </div>
-        <span className={`badge shrink-0 ${status.badge}`}>
+        <span className={`badge max-w-full whitespace-normal ${status.badge}`}>
           <span className="sr-only">Status: </span>
           {status.label}
         </span>
         <button
           ref={removeButtonRef}
           type="button"
-          className="btn btn-ghost btn-sm shrink-0"
+          className="btn btn-ghost shrink-0"
           aria-label={`Datei ${entry.name} entfernen`}
           onClick={() => onRemove(entry.id)}
         >
@@ -121,9 +136,9 @@ export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRo
         <p className="field-error">{imageErrorMessage(entry.error)}</p>
       )}
       {entry.serverError && <p className="field-error">{entry.serverError}</p>}
-      {entry.expiresAt && <p className="hint">Verfügbar bis {new Date(entry.expiresAt).toLocaleString('de-DE')}.</p>}
+      {expired && entry.expiresAt && <p className="hint">Abgelaufen am <time dateTime={entry.expiresAt}>{new Date(entry.expiresAt).toLocaleString('de-DE')}</time>.</p>}
       {entry.status === 'processing' && <progress className="progress" aria-label={`${entry.name} wird verarbeitet`} />}
-      {entry.status === 'done' && <ResultDetails entry={entry} />}
+      {entry.status === 'done' && !expired && <ResultDetails entry={entry} />}
       {extraNotes?.(entry)}
     </li>
   );

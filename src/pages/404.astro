@@ -1,21 +1,42 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { availableToolsByCategory } from '../data/tools';
 ---
 <BaseLayout
   title="Seite nicht gefunden"
-  description="Die angeforderte Seite gibt es nicht."
+  description="Die angeforderte Seite gibt es nicht. Wählen Sie ein Werkzeug oder kehren Sie zur Startseite zurück."
   noindex
 >
-  <div class="page-container-narrow flex flex-col items-center py-6 text-center sm:py-16">
-    <p class="badge badge-neutral">Fehler 404</p>
-    <h1 class="page-title mt-3">Seite nicht gefunden</h1>
-    <p class="page-lead mx-auto">
-      Unter dieser Adresse gibt es keine Seite. Vielleicht hat sich die Adresse geändert oder sie
-      enthält einen Tippfehler.
-    </p>
-    <p class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href="/" class="btn btn-primary">Zur Startseite</a>
-      <a href="/lokale-verarbeitung" class="btn btn-secondary">Dateiverarbeitung</a>
-    </p>
+  <div class="page-container-narrow">
+    <div class="card">
+      <p class="badge badge-neutral">Fehler 404</p>
+      <h1 class="page-title mt-4">Seite nicht gefunden</h1>
+      <p class="page-lead">Unter dieser Adresse gibt es keine Seite. Prüfen Sie die Schreibweise oder wählen Sie eines der verfügbaren Werkzeuge.</p>
+      <p class="mt-6"><a href="/" class="btn btn-primary">Zur Startseite</a></p>
+    </div>
+
+    <section class="mt-8" aria-labelledby="werkzeuge">
+      <h2 id="werkzeuge" class="section-title">Direkt zu einem Werkzeug</h2>
+      <div class="recovery-categories mt-4">
+        {availableToolsByCategory.map(({ category, tools }) => (
+          <div>
+            <h3 class="section-kicker">{category.title}</h3>
+            <ul class="mt-2">
+              {tools.map(tool => <li><a href={tool.href} class="recovery-link link">{tool.title}<span aria-hidden="true">↗</span></a></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+    <p class="mt-8 text-muted">Fragen zu Upload und Speicherung? <a href="/lokale-verarbeitung" class="link">Dateiverarbeitung</a></p>
   </div>
 </BaseLayout>
+
+<style>
+  .recovery-categories { display: grid; gap: 1.5rem; }
+  .recovery-link { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem 0; }
+  .recovery-link > span { flex-shrink: 0; }
+  @media (min-width: 640px) {
+    .recovery-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
