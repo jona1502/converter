@@ -45,3 +45,13 @@ func TestDetectAudioFormatFLAC(t *testing.T) {
 		{"kleingeschrieben", []byte("flac\x00\x00\x00\x22"), ""},
 	})
 }
+
+func TestDetectAudioFormatOGG(t *testing.T) {
+	checkSniff(t, []sniffCase{
+		{"ogg erste Seite", cat([]byte("OggS\x00\x02"), make([]byte, 22)), "ogg"},
+		{"nur Magie und Version", []byte("OggS\x00"), "ogg"},
+		{"Version 1", cat([]byte("OggS\x01\x02"), make([]byte, 22)), ""},
+		{"keine Anfangsseite", cat([]byte("OggS\x00\x00"), make([]byte, 22)), ""},
+		{"nur Magie", []byte("OggS"), ""},
+	})
+}

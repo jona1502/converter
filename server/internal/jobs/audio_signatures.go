@@ -13,6 +13,8 @@ func DetectAudioFormat(head []byte) string {
 		return "wav"
 	case isFLAC(head):
 		return "flac"
+	case isOGG(head):
+		return "ogg"
 	}
 	return ""
 }
@@ -33,4 +35,13 @@ func isFLAC(b []byte) bool {
 	}
 	length := int(b[5])<<16 | int(b[6])<<8 | int(b[7])
 	return b[4]&0x7f == 0 && length == 34
+}
+
+// isOGG: Seitenkopf "OggS", Strukturversion 0 und (falls enthalten) das
+// Flag "beginning of stream" der ersten Seite.
+func isOGG(b []byte) bool {
+	if len(b) < 5 || !bytes.Equal(b[:4], []byte("OggS")) || b[4] != 0 {
+		return false
+	}
+	return len(b) < 6 || b[5]&0x02 != 0
 }
