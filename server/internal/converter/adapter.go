@@ -32,7 +32,10 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
-		PdfImageMaxPixels: c.PdfImageMaxPixels,
+		PdfImageMaxPixels:  c.PdfImageMaxPixels,
+		AudioMaxInputBytes: c.AudioMaxInputBytes, AudioMaxDurationSeconds: c.AudioMaxDurationSeconds,
+		AudioMaxChannels: c.AudioMaxChannels, AudioMaxSampleRate: c.AudioMaxSampleRate,
+		AudioMaxOutputBytes: c.AudioMaxOutputBytes,
 	}
 	req := Request{Source: task.InputPath, Options: task.Options, Limits: limits,
 		MemoryBytes: 1 << 30, Timeout: c.ImageTimeout, OutputLimit: c.ImageMaxOutputBytes}

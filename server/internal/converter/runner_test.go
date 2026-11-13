@@ -177,7 +177,9 @@ func TestReportRoundtripRejectsStaleFutureAndSymlink(t *testing.T) {
 func TestAdapterRetryRestrictsLevelsAndRemainingPDFBudget(t *testing.T) {
 	cfg := &config.Config{ImageMaxInputBytes: 52428800, ImageMaxPixels: 40000000, ImageMaxEdge: 16384,
 		ImageMaxOutputBytes: 104857600, PdfMaxInputBytes: 100000000, PdfMaxResultsTotalBytes: 300000000,
-		PdfImageMaxPixels: 40000000, ImageTimeout: 120 * time.Second, PdfTimeout: 300 * time.Second}
+		PdfImageMaxPixels: 40000000, ImageTimeout: 120 * time.Second, PdfTimeout: 300 * time.Second,
+		AudioMaxInputBytes: 104857600, AudioMaxDurationSeconds: 1800, AudioMaxChannels: 8,
+		AudioMaxSampleRate: 192000, AudioMaxOutputBytes: 419430400, AudioTimeout: 300 * time.Second}
 	processor := NewProcessor(nil, cfg)
 	req, err := processor.request(jobs.Task{Tool: "pdf-compress", InputPath: "/data/input", OutputBudget: 250000000,
 		Options: json.RawMessage(`{"tool":"pdf-compress","levels":["high","balanced","small"]}`),
