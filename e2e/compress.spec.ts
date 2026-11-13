@@ -1,5 +1,11 @@
 import { Buffer } from 'node:buffer';
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+// Ergebnisgruppe mit Format und Maßen (FileList: Gruppen „Original“ und „Ergebnis“).
+const resultGroup = (page: Page, format: string, dimensions: string) =>
+  page.getByRole('group', { name: 'Ergebnis', exact: true })
+    .filter({ has: page.getByText(format, { exact: true }) })
+    .filter({ has: page.getByText(dimensions, { exact: true }) });
 
 test('Komprimieren zeigt echte Ergebnisse, PNG-Hinweis und optionale Verkleinerung', async ({ page }) => {
   await page.goto('/bilder/komprimieren');
@@ -17,7 +23,7 @@ test('Komprimieren zeigt echte Ergebnisse, PNG-Hinweis und optionale Verkleineru
   const button = page.getByRole('button', { name: 'Komprimieren', exact: true });
   await expect(button).toBeEnabled(); await button.click();
   await expect(page.locator('a[download="foto-komprimiert.png"]')).toBeVisible();
-  await expect(page.getByText('PNG · 80 × 40 px', { exact: true })).toBeVisible();
+  await expect(resultGroup(page, 'PNG', '80 × 40 px')).toBeVisible();
   await page.getByLabel('Zielformat', { exact: true }).selectOption('jpeg');
   await expect(page.getByRole('slider', { name: 'Qualität', exact: true })).toBeVisible();
   await expect(page.getByText(/Einstellungen geändert/)).toBeVisible();

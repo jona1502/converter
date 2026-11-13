@@ -11,8 +11,8 @@ export function BatchSummary({ progress, isProcessing }: BatchSummaryProps) {
   if (!progress) return null;
   const { total, done, failed, finished } = progress;
   return (
-    <div className="flex flex-col gap-2" data-testid="batch-summary">
-      <p className="text-sm font-medium">
+    <div className="flex flex-col gap-3 border-t border-border pt-4" data-testid="batch-summary">
+      <p className="text-sm font-medium tabular-nums">
         {isProcessing ? 'Verarbeitung läuft: ' : ''}
         {done} von {total} fertig
         {failed > 0 && <span className="text-danger">, {failed} mit Fehler</span>}
@@ -50,19 +50,26 @@ export function ActionBar({
   const reasonId = useId();
   const disabled = disabledReason !== null;
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-3">
+    <div className="flex min-w-0 flex-col gap-4">
+      <p className="hint tabular-nums">
+        {counts.total === 0
+          ? 'Keine Dateien in der Liste.'
+          : `${counts.total} ${counts.total === 1 ? 'Datei' : 'Dateien'} in der Liste, davon ${counts.processable} verarbeitbar${
+              counts.invalid > 0 ? `, ${counts.invalid} nicht verwendbar` : ''
+            }${counts.checking > 0 ? `, ${counts.checking} in Prüfung` : ''}.`}
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button
           ref={processButtonRef}
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary sm:flex-1"
           disabled={disabled}
           aria-describedby={disabled ? reasonId : undefined}
           onClick={onProcess}
         >
           {processLabel}
         </button>
-        <button type="button" className="btn btn-danger" disabled={counts.total === 0} onClick={onReset}>
+        <button type="button" className="btn btn-secondary" disabled={counts.total === 0} onClick={onReset}>
           Alle entfernen
         </button>
       </div>
@@ -71,13 +78,6 @@ export function ActionBar({
           {disabledReason}
         </p>
       )}
-      <p className="hint">
-        {counts.total === 0
-          ? 'Keine Dateien in der Liste.'
-          : `${counts.total} ${counts.total === 1 ? 'Datei' : 'Dateien'} in der Liste, davon ${counts.processable} verarbeitbar${
-              counts.invalid > 0 ? `, ${counts.invalid} nicht verwendbar` : ''
-            }${counts.checking > 0 ? `, ${counts.checking} in Prüfung` : ''}.`}
-      </p>
       <BatchSummary progress={progress} isProcessing={isProcessing} />
     </div>
   );
