@@ -68,6 +68,8 @@ const (
 	ProcDimensionsTooLarge  ProcessingErrorCode = "dimensions-too-large"
 	ProcAnimatedUnsupported ProcessingErrorCode = "animated-unsupported"
 	ProcUnsupportedType     ProcessingErrorCode = "unsupported-type"
+	ProcDurationTooLong     ProcessingErrorCode = "duration-too-long"
+	ProcUnsupportedAudio    ProcessingErrorCode = "unsupported-audio"
 )
 
 func ProcessingErrorCodes() []ProcessingErrorCode {
@@ -75,6 +77,7 @@ func ProcessingErrorCodes() []ProcessingErrorCode {
 		ProcDecodeFailed, ProcEncodeFailed, ProcSaveFailed, ProcEncrypted, ProcParseFailed,
 		ProcResultTooLarge, ProcTimeout, ProcMemoryLimit, ProcWorkerFailed, ProcStorageFull,
 		ProcDimensionsTooLarge, ProcAnimatedUnsupported, ProcUnsupportedType,
+		ProcDurationTooLong, ProcUnsupportedAudio,
 	}
 }
 

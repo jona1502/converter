@@ -635,7 +635,9 @@
           "storage-full",
           "dimensions-too-large",
           "animated-unsupported",
-          "unsupported-type"
+          "unsupported-type",
+          "duration-too-long",
+          "unsupported-audio"
         ],
         "title": "ProcessingErrorCode",
         "type": "string"

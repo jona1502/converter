@@ -17,7 +17,7 @@ export interface ApiSchemas {
   "LiveResponse": { "status"?: "ok" };
   "PdfLevel": "high" | "balanced" | "small";
   "PdfOptions": { "levels"?: Array<ApiSchemas["PdfLevel"]>; "tool": "pdf-compress" };
-  "ProcessingErrorCode": "decode-failed" | "encode-failed" | "save-failed" | "encrypted" | "parse-failed" | "result-too-large" | "timeout" | "memory-limit" | "worker-failed" | "storage-full" | "dimensions-too-large" | "animated-unsupported" | "unsupported-type";
+  "ProcessingErrorCode": "decode-failed" | "encode-failed" | "save-failed" | "encrypted" | "parse-failed" | "result-too-large" | "timeout" | "memory-limit" | "worker-failed" | "storage-full" | "dimensions-too-large" | "animated-unsupported" | "unsupported-type" | "duration-too-long" | "unsupported-audio";
   "ReadyResponse": { "checks": Record<string, "ok" | "fail">; "status": "ok" | "unavailable" };
   "ResizeDimensions": { "allowUpscale": boolean; "height"?: number | null; "keepAspectRatio": boolean; "mode": "dimensions"; "width"?: number | null };
   "ResizeMaxEdge": { "maxEdge": number; "mode": "maxEdge" };
