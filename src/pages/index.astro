@@ -2,47 +2,56 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { availableToolsByCategory } from '../data/tools';
 
+const catalog = availableToolsByCategory.flatMap(({ category, tools }) => tools.map(tool => ({ tool, category })));
 ---
 <BaseLayout
-  title="Dateien online bearbeiten"
+  title="Werkzeuge"
   description="Werkzeuge für alltägliche Dateiaufgaben. Die Verarbeitung läuft auf dem Server, Dateien werden nach ausdrücklichem Start hochgeladen."
 >
   <div class="page-container">
     <section aria-labelledby="werkzeuge">
-      <h1 id="werkzeuge" class="sr-only">Dateien bearbeiten</h1>
-      {
-        availableToolsByCategory.length === 0 ? (
-          <p class="notice notice-info mx-auto mt-6 max-w-2xl">
-            Derzeit ist noch kein Werkzeug freigeschaltet. Verfügbare Werkzeuge erscheinen an dieser Stelle.
-          </p>
-        ) : (
-          availableToolsByCategory.map(({ category, tools }) => (
-            <div class="mt-10">
-              <h2 class="section-kicker">{category.title}</h2>
-              <ul class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {tools.map((tool) => (
-                  <li class="flex">
-                    <a href={tool.href} class="card-link flex w-full flex-col gap-3">
-                      <span class="card-icon" aria-hidden="true">
-                        {category.id === 'pdf' ? (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.75" /><path d="m21 16-5-5-9 9" /></svg>
-                        )}
-                      </span>
-                      <span class="card-title mt-2">{tool.title}</span>
-                      <span class="text-muted">{tool.description}</span>
-                      <span class="mt-auto pt-2 text-accent" aria-hidden="true">Öffnen ›</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
-        )
-      }
+      <h1 id="werkzeuge" class="page-title">Werkzeuge</h1>
+      {catalog.length === 0 ? (
+        <p class="notice notice-info mt-6">
+          Derzeit ist noch kein Werkzeug freigeschaltet. Verfügbare Werkzeuge erscheinen an dieser Stelle.
+        </p>
+      ) : (
+        <ul class="tool-catalog">
+          {catalog.map(({ tool, category }) => (
+            <li>
+              <a href={tool.href} class="card-link tool-card">
+                <span class="tool-card-top">
+                  <span class="card-icon" aria-hidden="true">
+                    {category.id === 'pdf' ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.75" /><path d="m21 16-5-5-9 9" /></svg>
+                    )}
+                  </span>
+                  <span class="tool-category">{category.title}</span>
+                </span>
+                <h2 class="card-title">{tool.title}</h2>
+                <p class="tool-description">{tool.description}</p>
+                <span class="tool-open" aria-hidden="true">Werkzeug öffnen <span>↗</span></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
-
   </div>
 </BaseLayout>
 
+<style>
+  .tool-catalog { display: grid; gap: 1rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+  .tool-catalog li { display: flex; min-width: 0; }
+  .tool-card { display: flex; flex: 1; flex-direction: column; gap: .75rem; min-width: 0; padding: 1.5rem; }
+  .tool-card-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .25rem; }
+  .tool-category { color: var(--color-muted); font-size: .875rem; }
+  .tool-description { color: var(--color-muted); font-size: 1rem; line-height: 1.55; }
+  .tool-open { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: 1rem; color: var(--color-accent); font-size: .875rem; font-weight: 600; }
+  .tool-open > span { font-size: 1.25rem; }
+  @media (min-width: 640px) {
+    .tool-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+  }
+</style>

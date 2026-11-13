@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const PAGES = [
-  { path: '/', heading: 'Dateien bearbeiten', status: 200 },
+  { path: '/', heading: 'Werkzeuge', status: 200 },
   { path: '/lokale-verarbeitung', heading: 'Dateiverarbeitung', status: 200 },
   { path: '/gibt-es-nicht', heading: 'Seite nicht gefunden', status: 404 },
 ] as const;

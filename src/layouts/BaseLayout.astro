@@ -45,7 +45,7 @@ const fullTitle = `${title} – ${SITE_NAME}`;
     <script is:inline set:html={THEME_SCRIPT} />
     <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
     <SiteHeader siteName={SITE_NAME} />
-    <main id="inhalt" tabindex="-1" class="flex-1 pb-20 pt-10 outline-none sm:pb-28 sm:pt-16">
+    <main id="inhalt" tabindex="-1" class="flex-1 pb-12 pt-6 outline-none sm:pb-16 sm:pt-8">
       <noscript>
         <div class="page-container mb-8">
           <p class="notice notice-warn">
@@ -58,3 +58,10 @@ const fullTitle = `${title} – ${SITE_NAME}`;
     <SiteFooter siteName={SITE_NAME} />
   </body>
 </html>
+
+<style>
+  @media (min-width: 1024px) {
+    body { padding-left: 14rem; }
+    :global(html) { scroll-padding-top: 1.5rem; }
+  }
+</style>

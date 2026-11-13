@@ -65,6 +65,14 @@
   --color-header-solid: #070b0d;
   --color-panel: rgb(11 18 20 / 0.9);
 
+  --space-workshop-1: 0.25rem;
+  --space-workshop-2: 0.5rem;
+  --space-workshop-3: 0.75rem;
+  --space-workshop-4: 1rem;
+  --space-workshop-6: 1.5rem;
+  --space-workshop-8: 2rem;
+  --space-workshop-12: 3rem;
+
   --radius-control: 12px;
   --radius-card: 14px;
 
@@ -145,7 +153,7 @@
     hyphens: auto;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-focus;
+    @apply outline-3 outline-offset-3 outline-focus;
   }
   ::selection {
     @apply bg-accent-soft text-ink;
@@ -373,7 +381,7 @@
   }
   /* Nach .mi-btn-sm. */
   .btn-sm {
-    @apply min-h-9 text-sm;
+    @apply min-h-11 text-sm;
     padding: 7px 15px;
     line-height: 1.29;
     letter-spacing: -0.016em;
@@ -383,7 +391,7 @@
     padding: 13px 28px;
   }
   .btn-icon {
-    @apply aspect-square;
+    @apply aspect-square min-w-11;
     padding: 0;
   }
 
@@ -513,10 +521,10 @@
     @apply flex flex-wrap gap-1 rounded-control border border-border bg-fill p-1;
   }
   .choice-group > label {
-    @apply flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-3 text-[0.9375rem] text-ink;
+    @apply flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-3 text-[0.9375rem] text-ink;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .choice-group > label:hover {
+  .choice-group > label:not(:has(input:disabled)):hover {
     @apply bg-fill-hover;
   }
   .choice-group > label:has(input:checked) {
@@ -524,7 +532,8 @@
     box-shadow: inset 0 0 0 1px var(--color-border-strong), 0 1px 3px rgb(0 0 0 / 0.12);
   }
   .choice-group > label:has(input:disabled) {
-    @apply cursor-default;
+    @apply cursor-not-allowed bg-surface-muted text-muted;
+    box-shadow: none;
   }
   .choice-group input {
     @apply size-4 shrink-0 cursor-pointer accent-accent;
@@ -570,7 +579,7 @@
 
   /* Badges */
   .badge {
-    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-5;
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-sm font-semibold leading-5;
     letter-spacing: 0;
   }
   .badge-neutral {
@@ -604,7 +613,7 @@
     @apply border-border bg-surface-muted;
   }
   .file-list {
-    @apply flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-surface;
+    @apply flex flex-col divide-y divide-border rounded-card border border-border bg-surface;
     background-image: var(--mi-card-gradient);
   }
   .file-row {
@@ -630,7 +639,7 @@
     @apply text-muted;
   }
   .meta-list dd {
-    @apply m-0 min-w-0 font-medium;
+    @apply m-0 min-w-0 font-medium tabular-nums;
   }
   .progress {
     @apply block h-1.5 w-full accent-accent;
@@ -653,7 +662,7 @@
     @apply flex flex-col gap-3 p-6;
   }
   .variant-size {
-    @apply font-semibold;
+    @apply font-semibold tabular-nums;
     font-family: var(--font-display);
     font-size: 2.25rem;
     line-height: 1.1;

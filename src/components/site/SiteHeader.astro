@@ -1,85 +1,60 @@
 ---
-import { availableTools, TOOL_CATEGORIES, type ToolOperation } from '../../data/tools';
+import { availableToolsByCategory } from '../../data/tools';
 interface Props { siteName: string }
 const { siteName } = Astro.props;
-const normalize = (path: string) => path.length > 1 ? path.replace(/\/+$/, '') : path;
-const current = normalize(Astro.url.pathname);
-const operations: { id: ToolOperation; label: string }[] = [
-  { id: 'konvertieren', label: 'Konvertieren' },
-  { id: 'komprimieren', label: 'Komprimieren' },
-  { id: 'skalieren', label: 'Skalieren' },
-];
+const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
 <header class="site-header">
-  <div class="page-container header-inner">
+  <div class="header-inner">
     <a href="/" class="brand" aria-current={current === '/' ? 'page' : undefined}>
       <img src="/favicon.svg" alt="" width="28" height="28" />
       <span>{siteName}</span>
     </a>
-    <nav aria-label="Hauptnavigation" class="tool-navigation">
-      <ul class="nav-groups">
-        {operations.map(operation => {
-          const tools = availableTools.filter(tool => tool.operation === operation.id)
-            .sort((a, b) => TOOL_CATEGORIES.findIndex(category => category.id === a.category) - TOOL_CATEGORIES.findIndex(category => category.id === b.category));
-          if (!tools.length) return null;
-          const active = tools.some(tool => tool.href === current);
-          return <li>
-            <details class="nav-dropdown" data-active={active || undefined}>
-              <summary>{operation.label}<svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></summary>
-              <ul class="nav-panel">
-                {tools.map(tool => <li><a href={tool.href} aria-current={current === tool.href ? 'page' : undefined}>
-                  <span class="nav-tool-title">{tool.title}</span>
-                  <span class="nav-tool-description">{tool.description}</span>
-                </a></li>)}
-              </ul>
-            </details>
-          </li>;
-        })}
-      </ul>
-    </nav>
     {/* Ohne JavaScript verborgen (hidden); das Skript unten blendet den Umschalter ein. */}
     <button type="button" class="theme-toggle" aria-pressed="false" aria-label="Helles Design" title="Helles Design" hidden>
       <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
       <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" /></svg>
     </button>
+    <details class="tool-picker" open>
+      <summary role="button" aria-label="Werkzeuge auswählen" aria-controls="werkzeugnavigation">
+        Werkzeuge
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </summary>
+      <nav id="werkzeugnavigation" aria-label="Hauptnavigation" class="tool-navigation">
+        <a class="catalog-link" href="/" aria-current={current === '/' ? 'page' : undefined}>Alle Werkzeuge</a>
+        {availableToolsByCategory.map(({ category, tools }) => (
+          <div class="nav-category">
+            <h2>{category.title}</h2>
+            <ul>
+              {tools.map(tool => <li><a href={tool.href} aria-current={current === tool.href ? 'page' : undefined}>{tool.title}</a></li>)}
+            </ul>
+          </div>
+        ))}
+        <a class="information-link" href="/lokale-verarbeitung" aria-current={current === '/lokale-verarbeitung' ? 'page' : undefined}>Dateiverarbeitung</a>
+      </nav>
+    </details>
   </div>
 </header>
 
 <style>
-  /* Schlanke, halbtransparente Leiste mit Haarlinie unten; ohne backdrop-filter-Unterstützung deckend. */
-  .site-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--color-border); background: var(--color-header-solid); }
-  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .site-header { background: var(--color-header); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
-  }
-  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4rem; }
-  .brand { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; color: var(--color-ink); text-decoration: none; font-family: var(--font-display); font-size: 1.1875rem; font-weight: 600; letter-spacing: -.03em; white-space: nowrap; }
-  .brand img { flex: none; border-radius: .45rem; }
-  .brand:hover { color: var(--color-ink); }
-  .tool-navigation { position: relative; }
-  .nav-groups { display: flex; align-items: center; gap: .25rem; margin: 0; padding: 0; list-style: none; }
-  .nav-dropdown { position: relative; }
-  /* Navigationseinträge nach der Referenz: kleine Schrift, Pill mit Radius 8px. */
-  summary { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: 8px; color: var(--color-muted); opacity: 1; font-size: .875rem; font-weight: 500; letter-spacing: -.01em; text-decoration: none; cursor: pointer; list-style: none; }
+  .site-header { z-index: 40; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .75rem 1rem; }
+  .brand { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; color: var(--color-ink); text-decoration: none; font-size: 1.0625rem; font-weight: 650; letter-spacing: -.035em; white-space: nowrap; }
+  .brand img { flex: none; border-radius: .5rem; }
+  .tool-picker { position: relative; min-width: 0; }
+  summary { display: flex; align-items: center; justify-content: space-between; gap: .25rem; min-height: 2.75rem; padding: .5rem .65rem; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); font-size: .875rem; font-weight: 600; cursor: pointer; list-style: none; }
   summary::-webkit-details-marker { display: none; }
-  summary svg { color: var(--color-muted); transition: transform .25s ease; }
-  summary:hover, details[open] summary { background: var(--mi-nav-active); color: var(--color-ink); }
-  /* Aktiver Bereich als Pill: Fläche, halbfett. */
-  details[data-active] summary { background: var(--mi-nav-active); color: var(--color-ink); font-weight: 600; }
-  details[data-active] summary svg { color: var(--color-ink); }
+  summary:hover { background: var(--color-surface-muted); }
   details[open] summary svg { transform: rotate(180deg); }
-  .nav-panel { position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0; width: 20rem; padding: .45rem; margin: 0; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-panel); list-style: none; }
-  .nav-groups > li:nth-last-child(2) .nav-panel { left: auto; right: 0; }
-  /* Unsichtbare Brücke über den Abstand, damit das Menü beim Überfahren mit der Maus offen bleibt. */
-  .nav-panel::before { content: ""; position: absolute; left: 0; right: 0; top: -.6rem; height: .6rem; }
-  .nav-panel a { display: flex; flex-direction: column; gap: .2rem; padding: .75rem .9rem; border-radius: 10px; text-decoration: none; color: var(--color-ink); transition: background-color .2s ease; }
-  .nav-panel a:hover, .nav-panel a:focus-visible { background: var(--color-surface-muted); }
-  .nav-panel a[aria-current] { background: var(--color-accent-soft); }
-  .nav-panel a[aria-current] .nav-tool-title { color: var(--color-accent); }
-  .nav-tool-title { font-size: .9375rem; font-weight: 600; letter-spacing: -.015em; }
-  .nav-tool-description { font-size: .8125rem; line-height: 1.4; letter-spacing: -.005em; color: var(--color-muted); }
-  @media (prefers-reduced-motion: no-preference) {
-    details[open] .nav-panel { animation: nav-panel-in .18s ease-out; }
-  }
+  .tool-navigation { position: absolute; right: 0; top: calc(100% + .5rem); width: min(22rem, calc(100vw - 2rem)); padding: .75rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-panel); }
+  .tool-navigation a { display: flex; align-items: center; min-height: 2.75rem; padding: .625rem .75rem; border-radius: var(--radius-control); color: var(--color-ink); font-size: .875rem; line-height: 1.4; font-weight: 550; text-decoration: none; overflow-wrap: anywhere; }
+  .tool-navigation a:hover { background: var(--color-surface-muted); }
+  .tool-navigation a[aria-current] { color: var(--color-accent); background: var(--color-accent-soft); font-weight: 650; }
+  .nav-category { margin-top: 1.25rem; }
+  .nav-category h2 { padding: 0 .75rem; margin: 0 0 .25rem; color: var(--color-muted); font-size: .875rem; font-weight: 500; }
+  .nav-category ul { margin: 0; padding: 0; list-style: none; }
+  .tool-navigation .information-link { margin-top: 1.25rem; border-top: 1px solid var(--color-border); border-radius: 0; color: var(--color-muted); }
+  .brand { margin-right: auto; }
   .theme-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: transparent; color: var(--color-ink); cursor: pointer; }
   .theme-toggle[hidden] { display: none; }
   .theme-toggle:hover { border-color: var(--color-border-strong); background: var(--mi-nav-active); }
@@ -87,16 +62,16 @@ const operations: { id: ToolOperation; label: string }[] = [
   .theme-icon-moon { display: none; }
   :global(:root[data-theme="light"]) .theme-icon-sun { display: none; }
   :global(:root[data-theme="light"]) .theme-icon-moon { display: block; }
-  @keyframes nav-panel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-  @media (max-width: 767px) {
-    .header-inner { flex-wrap: wrap; gap: 0; padding-top: .25rem; padding-bottom: .25rem; }
-    .tool-navigation { width: 100%; order: 2; }
-    .theme-toggle { order: 1; }
-    .nav-groups { flex-wrap: wrap; justify-content: space-between; gap: 0; }
-    .nav-dropdown { position: static; }
-    summary { gap: .1rem; padding: .4rem .2rem; font-size: .75rem; letter-spacing: -.01em; }
-    summary svg { width: 10px; height: 10px; }
-    .nav-panel, .nav-groups > li:nth-last-child(2) .nav-panel { left: 0; right: 0; width: 100%; top: calc(100% + .25rem); }
+  @media (min-width: 1024px) {
+    .site-header { position: fixed; inset: 0 auto 0 0; width: 14rem; height: 100dvh; overflow-y: auto; border-bottom: 0; border-right: 1px solid var(--color-border); }
+    /* Marke und Theme-Umschalter in einer Zeile, darunter die Navigation über die volle Breite. */
+    .header-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: .25rem; padding: 1.5rem .75rem; }
+    .brand { margin: 0 0 2rem .75rem; }
+    .tool-picker { grid-column: 1 / -1; }
+    summary { display: none; }
+    .tool-navigation { position: static; width: auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+    .nav-category { margin-top: 1.5rem; }
+    .tool-navigation .information-link { margin-top: 2rem; }
   }
 </style>
 
@@ -119,39 +94,33 @@ const operations: { id: ToolOperation; label: string }[] = [
     });
   });
 
-  document.querySelectorAll<HTMLElement>('.tool-navigation').forEach(nav => {
-    const menus = [...nav.querySelectorAll<HTMLDetailsElement>('.nav-dropdown')];
-    const closeOthers = (except?: HTMLDetailsElement) => menus.forEach(menu => { if (menu !== except) menu.open = false; });
-    menus.forEach(menu => {
-      const trigger = menu.querySelector('summary')!;
-      let openedByHover = false;
-      menu.addEventListener('pointerenter', event => {
-        if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover)').matches) return;
-        closeOthers(menu);
-        openedByHover = !menu.open;
-        menu.open = true;
-      });
-      menu.addEventListener('pointerleave', event => {
-        if (event.pointerType === 'mouse' && !menu.contains(document.activeElement)) menu.open = false;
-      });
-      trigger.addEventListener('click', event => {
-        // A click following hover should keep the revealed links available.
-        if (event.detail > 0 && openedByHover && menu.open) event.preventDefault();
-        openedByHover = false;
-        closeOthers(menu);
-      });
-      menu.addEventListener('focusout', event => {
-        if (!menu.contains(event.relatedTarget as Node | null)) menu.open = false;
-      });
-      menu.addEventListener('keydown', event => {
-        if (event.key !== 'Escape') return;
-        event.preventDefault();
-        menu.open = false;
-        trigger.focus();
-      });
+  document.querySelectorAll<HTMLDetailsElement>('.tool-picker').forEach(picker => {
+    const trigger = picker.querySelector('summary')!;
+    const desktop = matchMedia('(min-width: 1024px)');
+    const setOpen = (open: boolean) => {
+      picker.open = open;
+      trigger.setAttribute('aria-expanded', String(open));
+    };
+    // Native Details bleiben ohne JavaScript geöffnet und damit überall auffindbar.
+    setOpen(desktop.matches);
+    desktop.addEventListener('change', () => {
+      const focusInside = picker.contains(document.activeElement);
+      setOpen(desktop.matches);
+      if (!desktop.matches && focusInside) trigger.focus();
+    });
+    picker.addEventListener('toggle', () => trigger.setAttribute('aria-expanded', String(picker.open)));
+    picker.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || desktop.matches || !picker.open) return;
+      event.preventDefault();
+      setOpen(false);
+      trigger.focus();
+    });
+    picker.addEventListener('focusout', event => {
+      // WebKit fokussiert angeklickte Links teils nicht. Ein Nullziel darf ihren Klick nicht vorzeitig verbergen.
+      if (!desktop.matches && event.relatedTarget && !picker.contains(event.relatedTarget as Node)) setOpen(false);
     });
     document.addEventListener('click', event => {
-      if (!nav.contains(event.target as Node)) closeOthers();
+      if (!desktop.matches && !picker.contains(event.target as Node)) setOpen(false);
     });
   });
 </script>

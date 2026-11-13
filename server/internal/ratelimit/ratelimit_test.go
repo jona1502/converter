@@ -66,6 +66,19 @@ func TestKeyMatchesPython(t *testing.T) {
 	}
 }
 
+func TestNewClientDisablesCommandRetries(t *testing.T) {
+	// Die Konstruktion verbindet nicht. Entscheidend ist die bereits von
+	// go-redis normalisierte Option: Eingabe 0 würde drei Retries aktivieren.
+	client, err := ratelimit.NewClient("redis://127.0.0.1:1/15")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = client.Close() })
+	if got := client.Options().MaxRetries; got != 0 {
+		t.Fatalf("effektive Command-Retries = %d, erwartet 0", got)
+	}
+}
+
 func TestWindowLimit(t *testing.T) {
 	l, client, prefix := newLimiter(t)
 	ctx := testCtx(t)

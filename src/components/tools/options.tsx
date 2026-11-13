@@ -7,15 +7,26 @@ import { FORMAT_INFO, ICO_SIZES, type IcoSize, type EncodeSupport, type ImageFor
 import { formatLabel, joinGerman, OUTPUT_FORMATS } from './formats';
 
 export function IcoSizes({ value, onChange }: { value: readonly IcoSize[]; onChange: (sizes: readonly IcoSize[]) => void }) {
-  return <fieldset className="fieldset">
-    <legend className="label">ICO-Größen</legend>
-    <div className="choice-group">{ICO_SIZES.map(size => <label key={size}>
-      <input type="checkbox" checked={value.includes(size)} disabled={value.length === 1 && value.includes(size)}
-        onChange={event => onChange(event.currentTarget.checked ? [...value, size].sort((a,b) => a-b) : value.filter(item => item !== size))} />
-      {size} px
-    </label>)}</div>
-    <p className="hint">Mindestens eine Größe ist erforderlich.</p>
-  </fieldset>;
+  const hintId = useId();
+  return (
+    <fieldset className="fieldset" aria-describedby={hintId}>
+      <legend className="legend">ICO-Größen</legend>
+      <div className="choice-group">
+        {ICO_SIZES.map(size => (
+          <label key={size} className="tabular-nums">
+            <input
+              type="checkbox"
+              checked={value.includes(size)}
+              disabled={value.length === 1 && value.includes(size)}
+              onChange={event => onChange(event.currentTarget.checked ? [...value, size].sort((a, b) => a - b) : value.filter(item => item !== size))}
+            />
+            {size} px
+          </label>
+        ))}
+      </div>
+      <p id={hintId} className="hint">Mindestens eine Größe ist erforderlich.</p>
+    </fieldset>
+  );
 }
 
 export interface FormatSelectProps {
@@ -103,7 +114,7 @@ export function QualitySlider({ format, value, onChange, disabled = false }: Qua
         <label htmlFor={id} className="label">
           Qualität
         </label>
-        <output htmlFor={id} className="text-[0.9375rem] font-semibold tabular-nums">
+        <output htmlFor={id} className="rounded-lg border border-border bg-surface px-2 py-1 text-sm font-semibold tabular-nums">
           {value} %
         </output>
       </div>
@@ -145,7 +156,7 @@ export function BackgroundColor({ format, value, onChange, disabled = false }: B
       <label htmlFor={id} className="label">
         Hintergrundfarbe
       </label>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <input
           id={id}
           type="color"
