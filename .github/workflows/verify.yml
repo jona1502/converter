@@ -111,8 +111,19 @@ jobs:
       # Browser kommen aus dem Cache; Systempakete installiert --with-deps weiterhin.
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: uv sync --frozen --project converter
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # Stellt das Runtime-Token für den gha-Cache von buildx bake bereit.
+      - uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+      - name: Build images with layer cache
+        run: |
+          # Je Ziel ein eigener Cache-Scope, sonst überschreiben sich die Ziele.
+          set=()
+          for target in migrate api worker web; do
+            set+=(--set "$target.cache-from=type=gha,scope=$target" --set "$target.cache-to=type=gha,scope=$target,mode=max")
+          done
+          docker buildx bake -f compose.yaml --load "${set[@]}" migrate api worker web
       - name: Full stack
-        run: docker compose up -d --build --wait
+        run: docker compose up -d --wait --no-build
       - name: Real isolated Go to Python integration
         run: |
           mkdir -p server/.data
