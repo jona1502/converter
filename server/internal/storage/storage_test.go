@@ -399,6 +399,43 @@ func TestConcurrentCreateAndDeleteInSameJob(t *testing.T) {
 	}
 }
 
+// Ein paralleles Delete kann das Jobverzeichnis entfernen, nachdem Create es
+// gesehen hat, aber bevor das darunterliegende Verzeichnis angelegt ist. Create
+// muss die Elternkette dann erneut anlegen statt mit ENOENT zu scheitern
+// (CI-Fehler in TestConcurrentCreateAndDeleteInSameJob).
+func TestCreateRetriesWhenParentVanishesDuringMkdir(t *testing.T) {
+	s := newStorage(t)
+	job := newID(t)
+	jobDir, err := s.Path(storage.JobKey(job))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(jobDir, storage.DirMode); err != nil {
+		t.Fatal(err)
+	}
+	removed := false
+	restore := storage.SetBeforeMkdirHook(func(string) {
+		if !removed {
+			removed = true
+			if err := os.RemoveAll(jobDir); err != nil {
+				t.Error(err)
+			}
+		}
+	})
+	defer restore()
+
+	w, err := s.Create(storage.ResultKey(job, newID(t), newID(t)))
+	if err != nil {
+		t.Fatalf("Create nach verschwundenem Jobverzeichnis: %v", err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if !removed {
+		t.Fatal("Hook wurde nicht ausgelöst")
+	}
+}
+
 func TestFreeBytes(t *testing.T) {
 	s := newStorage(t)
 	free, err := s.FreeBytes()
