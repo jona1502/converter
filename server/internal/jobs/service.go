@@ -31,6 +31,7 @@ const cleanupTimeout = 10 * time.Second
 type Limits struct {
 	ImageMaxInputBytes   int64         // 52_428_800
 	PDFMaxInputBytes     int64         // 100_000_000
+	AudioMaxInputBytes   int64         // 104_857_600
 	StorageBudgetBytes   int64         // 5_000_000_000
 	SessionMaxActiveJobs int           // 3
 	GlobalMaxActiveJobs  int           // 50
@@ -39,11 +40,14 @@ type Limits struct {
 	JobMaxAttempts       int           // 3
 }
 
-// MaxUploadInputBytes = max(Bild, PDF); so viel reserviert jede Annahme.
-func (l Limits) MaxUploadInputBytes() int64 { return max(l.ImageMaxInputBytes, l.PDFMaxInputBytes) }
+// MaxUploadInputBytes = max(Bild, PDF, Audio); so viel reserviert jede
+// Annahme, weil das Werkzeug erst nach dem Lesen der Optionen feststeht.
+func (l Limits) MaxUploadInputBytes() int64 {
+	return max(l.ImageMaxInputBytes, l.PDFMaxInputBytes, l.AudioMaxInputBytes)
+}
 
 func (l Limits) validate() error {
-	if l.ImageMaxInputBytes <= 0 || l.PDFMaxInputBytes <= 0 || l.StorageBudgetBytes <= 0 ||
+	if l.ImageMaxInputBytes <= 0 || l.PDFMaxInputBytes <= 0 || l.AudioMaxInputBytes <= 0 || l.StorageBudgetBytes <= 0 ||
 		l.SessionMaxActiveJobs <= 0 || l.GlobalMaxActiveJobs <= 0 || l.UploadMax <= 0 ||
 		l.JobTTL <= 0 || l.JobMaxAttempts <= 0 {
 		return errors.New("jobs: Grenzwerte müssen positiv sein")

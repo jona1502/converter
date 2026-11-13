@@ -58,7 +58,7 @@ func (s sessions) CreateSession(ctx context.Context, h auth.TokenHash) (auth.Sto
 }
 
 func New(cfg *config.Config, pool *pgxpool.Pool, files *storage.Local, limiter *ratelimit.Limiter) (*API, error) {
-	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
+	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, AudioMaxInputBytes: cfg.AudioMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
 	if err != nil {
 		return nil, err
 	}
