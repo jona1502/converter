@@ -1,35 +1,57 @@
 name: Verify converter
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+# Neuer Push auf denselben PR bricht den laufenden, veralteten Lauf ab.
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+# Unabhängige Prüfungen laufen als parallele Jobs statt nacheinander.
 jobs:
-  verify:
+  go:
+    name: Go checks
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
-      # A shared test IP drives hundreds of independent browser sessions.
-      # Default production limits are covered separately by backend tests.
-      CONVERTER_IP_CREATES_PER_MINUTE: "1000"
-      CONVERTER_SESSION_CREATES_PER_MINUTE: "1000"
-      CONVERTER_SESSION_NEW_PER_MINUTE: "1000"
-      E2E_BASE_URL: http://localhost:8080
+      # Modul-, Build- und govulncheck-Cache des go-Containers als Hostpfad.
+      CONVERTER_TEST_GOCACHE: ${{ github.workspace }}/../gocache
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          node-version: "24"
-          cache: npm
+          path: ${{ github.workspace }}/../gocache
+          key: go-${{ runner.os }}-${{ hashFiles('server/go.sum', 'server/go.mod', 'server/compose.test.yaml') }}
+          restore-keys: go-${{ runner.os }}-
+      - run: mkdir -p "$CONVERTER_TEST_GOCACHE"
+      - run: docker compose -f server/compose.test.yaml up -d --wait db valkey
+      - name: gofmt, vet and race tests against isolated PostgreSQL and Valkey
+        run: docker compose -f server/compose.test.yaml run --rm go sh -c 'test -z "$(gofmt -l .)" && go vet ./... && go test -race ./...'
+      - name: govulncheck
+        run: docker compose -f server/compose.test.yaml run --rm go go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+      - name: Stop containers
+        if: always()
+        run: docker compose -f server/compose.test.yaml down
+      # Container schreibt als root; actions/cache muss alles lesen können.
+      - name: Make Go cache readable for actions/cache
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" "$CONVERTER_TEST_GOCACHE"
+
+  codec:
+    name: Codec checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
         with:
           version: "0.12.0"
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox webkit
+          enable-cache: true
+          cache-dependency-glob: converter/uv.lock
       - run: uv sync --frozen --project converter
-      - run: docker compose -f server/compose.test.yaml up -d --wait db valkey
-      - name: Go checks against isolated PostgreSQL and Valkey
-        run: |
-          docker compose -f server/compose.test.yaml run --rm go sh -c 'test -z "$(gofmt -l .)" && go vet ./... && go test -race ./...'
-          docker compose -f server/compose.test.yaml run --rm go go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
       - name: Independent codec checks
         working-directory: converter
         run: |
@@ -37,11 +59,62 @@ jobs:
           uv run ruff format --check .
           uv run mypy
           uv run pytest
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # Browser kommen aus dem Cache; Systempakete installiert --with-deps weiterhin.
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: node scripts/generate-api-types.mjs --check
       - run: npm run check
       - run: npm test
+
+  stack:
+    name: Full stack integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CONVERTER_TEST_GOCACHE: ${{ github.workspace }}/../gocache
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          version: "0.12.0"
+          enable-cache: true
+          cache-dependency-glob: converter/uv.lock
+      - run: uv sync --frozen --project converter
+      # Nur lesen: der Go-Job pflegt diesen Cache.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/../gocache
+          key: go-${{ runner.os }}-${{ hashFiles('server/go.sum', 'server/go.mod', 'server/compose.test.yaml') }}
+          restore-keys: go-${{ runner.os }}-
+      - run: mkdir -p "$CONVERTER_TEST_GOCACHE"
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # Stellt das Runtime-Token für den gha-Cache von buildx bake bereit.
+      - uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+      - name: Build images with layer cache
+        run: |
+          # Je Ziel ein eigener Cache-Scope, sonst überschreiben sich die Ziele.
+          set=()
+          for target in migrate api worker web; do
+            set+=(--set "$target.cache-from=type=gha,scope=$target" --set "$target.cache-to=type=gha,scope=$target,mode=max")
+          done
+          docker buildx bake -f compose.yaml --load "${set[@]}" migrate api worker web
       - name: Full stack
-        run: docker compose up -d --build --wait
+        run: docker compose up -d --wait --no-build
       - name: Real isolated Go to Python integration
         run: |
           mkdir -p server/.data
@@ -49,7 +122,6 @@ jobs:
           docker run --rm --init --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --tmpfs /tmp:rw,noexec,nosuid,size=128m --mount "type=bind,source=$PWD/server/.data,target=/integration,readonly" -e CONVERTER_TEST_PYTHON=/opt/venv/bin/python --entrypoint /integration/converter.test mi-converter-go-worker:local '-test.run=^TestRealPython' -test.v
       - name: Real API conversion smoke
         run: uv run --project converter python scripts/smoke-stack.py
-      - run: npm run test:e2e
       - name: Failure diagnostics
         if: failure()
         run: docker compose ps; docker compose logs --tail 80
@@ -58,3 +130,56 @@ jobs:
         run: |
           docker compose down
           docker compose -f server/compose.test.yaml down
+
+  e2e:
+    name: e2e (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Je Playwright-Projekt ein eigener Job mit eigenem Stack.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {project: chromium, browser: chromium}
+          - {project: firefox, browser: firefox}
+          - {project: webkit, browser: webkit}
+          - {project: mobile, browser: chromium}
+    env:
+      # A shared test IP drives hundreds of independent browser sessions.
+      # Default production limits are covered separately by backend tests.
+      CONVERTER_IP_CREATES_PER_MINUTE: "1000"
+      CONVERTER_SESSION_CREATES_PER_MINUTE: "1000"
+      CONVERTER_SESSION_NEW_PER_MINUTE: "1000"
+      E2E_BASE_URL: http://localhost:8080
+      PW_WORKERS: "4"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ matrix.browser }}-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+      - name: Build images from layer cache
+        run: |
+          # Nur lesen: der Stack-Job schreibt den Cache.
+          set=()
+          for target in migrate api worker web; do
+            set+=(--set "$target.cache-from=type=gha,scope=$target")
+          done
+          docker buildx bake -f compose.yaml --load "${set[@]}" migrate api worker web
+      - name: Full stack
+        run: docker compose up -d --wait --no-build
+      - run: npx playwright test --project=${{ matrix.project }}
+      - name: Failure diagnostics
+        if: failure()
+        run: docker compose ps; docker compose logs --tail 80
+      - name: Stop containers
+        if: always()
+        run: docker compose down
