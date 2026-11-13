@@ -8,6 +8,7 @@ Go-Worker vorab an.
 from __future__ import annotations
 
 import io
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -15,8 +16,10 @@ import numpy as np
 import pytest
 import soundfile as sf
 
+from converter.errors import ProcessingError
 from converter.limits import Limits
 from converter.options import AudioOptions, parse_options
+from converter.processing.audio import pipeline
 from converter.processing.audio.pipeline import convert
 from tests.helpers import target_file
 
@@ -174,3 +177,89 @@ def test_quality_changes_size(tmp_path: Path, limits: Limits, output_format: str
         convert(tmp_path / "input", target, options(format=output_format, quality=quality), limits)
         sizes.append(target.stat().st_size)
     assert sizes[0] < sizes[1]
+
+
+# --- Grenzen und Fehler -------------------------------------------------------
+
+
+def test_duration_limit_from_header(tmp_path: Path, limits: Limits) -> None:
+    write_input(tmp_path / "input", "wav", channels=1, rate=8000, seconds=3)
+    target = target_file(tmp_path / "output")
+    with pytest.raises(ProcessingError) as exc:
+        convert(
+            tmp_path / "input", target, options(), replace(limits, audio_max_duration_seconds=2)
+        )
+    assert exc.value.code == "duration-too-long"
+    assert target.stat().st_size == 0
+
+
+def test_lying_header_is_caught_while_decoding(
+    tmp_path: Path, limits: Limits, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_input(tmp_path / "input", "flac", channels=1, rate=8000, seconds=3)
+    # Header behauptet 1 Frame; erst das blockweise Dekodieren zeigt die Wahrheit.
+    monkeypatch.setattr(pipeline, "header_frames", lambda _reader: 1)
+    monkeypatch.setattr(pipeline, "BLOCK_FRAMES", 4000)
+    with pytest.raises(ProcessingError) as exc:
+        convert(
+            tmp_path / "input",
+            target_file(tmp_path / "output"),
+            options(),
+            replace(limits, audio_max_duration_seconds=2),
+        )
+    assert exc.value.code == "duration-too-long"
+
+
+@pytest.mark.parametrize(
+    ("prepare", "limit"),
+    [
+        (lambda p: write_input(p, "wav", channels=3), {"audio_max_channels": 2}),
+        (lambda p: write_input(p, "wav", rate=48_000), {"audio_max_sample_rate": 44_100}),
+    ],
+)
+def test_channel_and_rate_limits(tmp_path: Path, limits: Limits, prepare: Any, limit: Any) -> None:
+    prepare(tmp_path / "input")
+    with pytest.raises(ProcessingError) as exc:
+        run(tmp_path, replace(limits, **limit))
+    assert exc.value.code == "unsupported-audio"
+
+
+@pytest.mark.parametrize(
+    ("channels", "rate"),
+    [(3, RATE), (2, 96_000)],
+    ids=["too-many-channels", "unsupported-rate"],
+)
+def test_mp3_target_constraints(tmp_path: Path, limits: Limits, channels: int, rate: int) -> None:
+    write_input(tmp_path / "input", "wav", channels=channels, rate=rate)
+    with pytest.raises(ProcessingError) as exc:
+        run(tmp_path, limits, format="mp3")
+    assert exc.value.code == "unsupported-audio"
+    # Mit Downmix passen drei Kanäle in MP3.
+    if channels == 3:
+        target = target_file(tmp_path / "mono")
+        details = convert(
+            tmp_path / "input", target, options(format="mp3", channels="mono"), limits
+        )
+        assert details["channels"] == 1 and sf.info(target).channels == 1
+
+
+def test_input_size_limit(tmp_path: Path, limits: Limits) -> None:
+    write_input(tmp_path / "input", "wav")
+    with pytest.raises(ProcessingError) as exc:
+        run(tmp_path, replace(limits, audio_max_input_bytes=100))
+    assert exc.value.code == "file-too-large"
+
+
+@pytest.mark.parametrize("output_format", ["wav", "flac", "mp3", "ogg"])
+def test_output_limit(tmp_path: Path, limits: Limits, output_format: str) -> None:
+    write_input(tmp_path / "input", "wav")
+    target = target_file(tmp_path / "output")
+    with pytest.raises(ProcessingError) as exc:
+        convert(
+            tmp_path / "input",
+            target,
+            options(format=output_format),
+            replace(limits, audio_max_output_bytes=500),
+        )
+    assert exc.value.code == "result-too-large"
+    assert target.stat().st_size <= 500
