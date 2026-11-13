@@ -314,12 +314,22 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 		return httpapi.ServiceUnavailable()
 	}
 	inputs, outputs := report.ImageFormats()
-	out := apitypes.Capabilities{APIVersion: "1", Tools: []apitypes.Tool{"image-convert", "image-compress", "image-resize", "pdf-compress"}, Image: apitypes.ImageCapabilities{QualityFormats: []apitypes.OutputFormat{"jpeg", "webp"}, IcoSizes: []int{16, 32, 48, 64, 128, 256}, DefaultIcoSizes: []int{16, 32, 48, 256}, MaxFileBytes: a.cfg.ImageMaxInputBytes, MaxPixels: a.cfg.ImageMaxPixels, MaxEdge: a.cfg.ImageMaxEdge, MaxOutputBytes: a.cfg.ImageMaxOutputBytes}, Pdf: apitypes.PdfCapabilities{MaxFileBytes: a.cfg.PdfMaxInputBytes, MaxResultBytesTotal: a.cfg.PdfMaxResultsTotalBytes, MaxImagePixels: a.cfg.PdfImageMaxPixels}, Jobs: apitypes.JobCapabilities{TTLSeconds: int(a.cfg.JobTTL / time.Second), MaxActivePerSession: a.cfg.SessionMaxActiveJobs, MaxBatchFiles: 30, CreatePerMinute: a.cfg.SessionCreatesPerMinute}}
+	out := apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools(), Image: apitypes.ImageCapabilities{QualityFormats: []apitypes.OutputFormat{"jpeg", "webp"}, IcoSizes: []int{16, 32, 48, 64, 128, 256}, DefaultIcoSizes: []int{16, 32, 48, 256}, MaxFileBytes: a.cfg.ImageMaxInputBytes, MaxPixels: a.cfg.ImageMaxPixels, MaxEdge: a.cfg.ImageMaxEdge, MaxOutputBytes: a.cfg.ImageMaxOutputBytes}, Pdf: apitypes.PdfCapabilities{MaxFileBytes: a.cfg.PdfMaxInputBytes, MaxResultBytesTotal: a.cfg.PdfMaxResultsTotalBytes, MaxImagePixels: a.cfg.PdfImageMaxPixels}, Jobs: apitypes.JobCapabilities{TTLSeconds: int(a.cfg.JobTTL / time.Second), MaxActivePerSession: a.cfg.SessionMaxActiveJobs, MaxBatchFiles: 30, CreatePerMinute: a.cfg.SessionCreatesPerMinute}}
 	for _, f := range inputs {
 		out.Image.InputFormats = append(out.Image.InputFormats, apitypes.InputFormat(f))
 	}
 	for _, f := range outputs {
 		out.Image.OutputFormats = append(out.Image.OutputFormats, apitypes.OutputFormat(f))
+	}
+	out.Audio = apitypes.AudioCapabilities{QualityFormats: []apitypes.AudioFormat{apitypes.AudioMP3, apitypes.AudioOGG},
+		DefaultQuality: .8, MaxFileBytes: a.cfg.AudioMaxInputBytes, MaxDurationSeconds: int(a.cfg.AudioMaxDurationSeconds),
+		MaxChannels: int(a.cfg.AudioMaxChannels), MaxSampleRate: int(a.cfg.AudioMaxSampleRate), MaxOutputBytes: a.cfg.AudioMaxOutputBytes}
+	audioIn, audioOut := report.AudioFormats()
+	for _, f := range audioIn {
+		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
+	}
+	for _, f := range audioOut {
+		out.Audio.OutputFormats = append(out.Audio.OutputFormats, apitypes.AudioFormat(f))
 	}
 	for _, level := range []struct {
 		name      string
