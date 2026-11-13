@@ -169,7 +169,7 @@
   die Aktivierung nicht – dort zusätzlich href entfernen.)
     .btn                   Basis, Radius 12px (immer zusätzlich zu einer Variante verwenden)
     .btn-primary           Hauptaktion (Mint-Fläche, dunkler Text)
-    .btn-secondary         Nebenaktion (graue Fläche)
+    .btn-secondary         Nebenaktion (transparent, Rand und Text in Akzentfarbe)
     .btn-danger            destruktive Aktion (z. B. „Alle entfernen“)
     .btn-ghost             zurückhaltende Aktion ohne Fläche (z. B. „Entfernen“ in Listen)
     .btn-sm / .btn-lg      kleinere/größere Variante
@@ -325,13 +325,18 @@
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
-    @apply cursor-not-allowed border-transparent bg-surface-muted text-muted shadow-none;
+    @apply cursor-not-allowed border-border-strong bg-transparent text-muted shadow-none;
   }
   .btn-primary {
     @apply bg-accent-fill text-on-accent;
   }
+  .btn-primary:disabled,
+  .btn-primary[aria-disabled="true"] {
+    @apply border-transparent bg-surface-muted;
+  }
+  /* Nach .mi-btn-secondary: transparent, 1px Rand und Text in Akzentfarbe. */
   .btn-secondary {
-    @apply bg-fill text-ink;
+    @apply border-accent bg-transparent text-accent;
   }
   .btn-danger {
     @apply border-danger bg-transparent text-danger;
@@ -344,7 +349,7 @@
     @apply hover:bg-accent-fill-hover;
   }
   .btn-secondary:not(:disabled, [aria-disabled="true"]) {
-    @apply hover:bg-fill-hover;
+    @apply hover:border-accent-fill hover:bg-accent-fill hover:text-on-accent;
   }
   .btn-danger:not(:disabled, [aria-disabled="true"]) {
     @apply hover:bg-danger-soft;
