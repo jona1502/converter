@@ -9,6 +9,10 @@
   Umschalter im Header). prefers-color-scheme wird nicht zur Auswahl verwendet; ohne
   JavaScript bleibt das Design dunkel. Klassen müssen für das Theme nicht geändert werden.
   Schrift: reiner System-Schriftstapel, es werden keine Schriftdateien geladen.
+  Aus der Dateiwerkstatt (PR #1) übernommen und unabhängig vom Theme: Abstandsskala
+  --space-workshop-*, Fokuskontur 3 px mit 3 px Abstand, Mindesthöhe 44 px für Buttons und
+  Segmentlabels, Symbolbuttons mindestens 44 px breit, Badges mindestens 14 px. Die Farben der
+  Dateiwerkstatt (Papier/Petrol) sind durch die Muhr-Werte unten ersetzt.
 
   Kontraste (WCAG 2.x, rechnerisch geprüft) – dunkel | hell:
     ink auf canvas/surface/surface-muted ............... 18.9 / 18.1 / 17.4 | 18.9 / 19.8 / 17.9 : 1
