@@ -224,8 +224,8 @@ type Upload struct {
 	Size         int64
 	SHA256       [32]byte
 	InputFormat  string
-	// OutputFormat: Bildwerkzeuge, tatsächliches Zielformat ("original"
-	// bereits aufgelöst). PDFLevels: pdf-compress, Reihenfolge = ordinal.
+	// OutputFormat: Bild- und Audiowerkzeuge, tatsächliches Zielformat
+	// ("original" bereits aufgelöst). PDFLevels: pdf-compress, Reihenfolge = ordinal.
 	OutputFormat string
 	PDFLevels    []string
 }
@@ -241,6 +241,14 @@ func (u Upload) resultRows(originalName string) ([]resultRow, error) {
 				name: PDFDownloadName(originalName, level)})
 		}
 		return rows, nil
+	}
+	if u.Tool == "audio-convert" {
+		mime, ok := AudioMIME[u.OutputFormat]
+		if !ok {
+			return nil, errors.New("jobs: Audio-Zielformat nicht erzeugbar")
+		}
+		return []resultRow{{ordinal: 0, mime: mime,
+			name: AudioDownloadName(originalName, u.InputFormat, u.OutputFormat)}}, nil
 	}
 	mime, ok := OutputMIME[u.OutputFormat]
 	if !ok {
@@ -282,8 +290,11 @@ func (s *Service) Finalize(ctx context.Context, sessionID [16]byte, r Reservatio
 	jobID := r.ID
 	targetKey := storage.InputKey(jobID)
 	fallback := ImageFallbackBase
-	if u.InputFormat == "pdf" {
+	switch {
+	case u.InputFormat == "pdf":
 		fallback = PDFFallbackBase
+	case u.Tool == "audio-convert":
+		fallback = AudioFallbackBase
 	}
 	rows, err := u.resultRows(u.OriginalName)
 	if err == nil && u.Size > r.Bytes {

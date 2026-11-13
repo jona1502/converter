@@ -14,6 +14,7 @@ const (
 	MaxBaseLength     = 100
 	ImageFallbackBase = "bild"
 	PDFFallbackBase   = "dokument"
+	AudioFallbackBase = "audio"
 )
 
 // OutputExtensions und OutputMIME je Ausgabeformat (domain.py).
@@ -26,6 +27,14 @@ var (
 )
 
 const PDFMIME = "application/pdf"
+
+// AudioExtensions und AudioMIME je Audio-Ausgabeformat (audio-convert).
+var (
+	AudioExtensions = map[string]string{"mp3": "mp3", "wav": "wav", "flac": "flac", "ogg": "ogg"}
+	AudioMIME       = map[string]string{
+		"mp3": "audio/mpeg", "wav": "audio/wav", "flac": "audio/flac", "ogg": "audio/ogg",
+	}
+)
 
 func isControl(r rune) bool { return r <= 0x1f || (r >= 0x7f && r <= 0x9f) }
 
@@ -157,6 +166,16 @@ func ImageDownloadName(originalName, tool, inputFormat, outputFormat string) str
 		name += "-" + suffix
 	}
 	return name + "." + OutputExtensions[outputFormat]
+}
+
+// AudioDownloadName wie der Bildkonverter: Suffix "konvertiert" nur, wenn
+// sich das Format nicht ändert. output muss ein Audio-Ausgabeformat sein.
+func AudioDownloadName(originalName, inputFormat, outputFormat string) string {
+	name := CleanBase(originalName, AudioFallbackBase)
+	if inputFormat == outputFormat {
+		name += "-konvertiert"
+	}
+	return name + "." + AudioExtensions[outputFormat]
 }
 
 // PDFDownloadName wie naming.pdf_download_name.
