@@ -1,14 +1,17 @@
 [project]
 name = "mi-converter-converter"
 version = "0.1.0"
-description = "Privater, isolierter Bild-/PDF-Konverter (Pillow/pikepdf) für den Go-Worker"
+description = "Privater, isolierter Bild-/PDF-/Audio-Konverter (Pillow/pikepdf/soundfile) für den Go-Worker"
 requires-python = ">=3.13,<3.14"
 # Laufzeit ausschließlich Pillow und pikepdf, exakt die Versionen aus
-# backend/uv.lock (gleiche geprüften Codecs und Lizenzen). Kein FastAPI,
-# SQLAlchemy, Celery, Redis oder pydantic.
+# backend/uv.lock (gleiche geprüften Codecs und Lizenzen), dazu soundfile
+# (Wheel mit gebündeltem libsndfile inklusive MP3) und numpy für Audio.
+# Kein FastAPI, SQLAlchemy, Celery, Redis, pydantic, ffmpeg oder PyAV.
 dependencies = [
     "pillow==13.0.0",
     "pikepdf==10.17.0",
+    "soundfile==0.14.0",
+    "numpy==2.5.4",
 ]
 
 [dependency-groups]
@@ -69,3 +72,8 @@ pythonpath = ["."]
 addopts = ["-ra", "--strict-markers", "--strict-config"]
 xfail_strict = true
 filterwarnings = ["error"]
+
+[[tool.mypy.overrides]]
+# soundfile ist annotiert, liefert aber kein py.typed.
+module = ["soundfile"]
+follow_untyped_imports = true

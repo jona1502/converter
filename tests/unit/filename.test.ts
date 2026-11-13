@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildOutputFileName, makeUniqueFileNames } from '../../src/lib/image/filename';
+import { buildFileName, buildOutputFileName, makeUniqueFileNames } from '../../src/lib/image/filename';
 
 describe('buildOutputFileName', () => {
   it('ersetzt die Endung durch die des Zielformats', () => {
@@ -69,5 +69,19 @@ describe('makeUniqueFileNames', () => {
     expect(makeUniqueFileNames(['a.png', 'a-2.png', 'a.png'])).toEqual(['a.png', 'a-2.png', 'a-3.png']);
     expect(makeUniqueFileNames(['a.png', 'a.png', 'a-2.png'])).toEqual(['a.png', 'a-2.png', 'a-2-2.png']);
     expect(makeUniqueFileNames([])).toEqual([]);
+  });
+});
+
+describe('buildFileName', () => {
+  it('nutzt freie Endung und eigenen Ersatzstamm, sonst dieselben Regeln', () => {
+    expect(buildFileName('Song.WAV', 'mp3', '', 'audio')).toBe('Song.mp3');
+    expect(buildFileName('Song.mp3', 'mp3', 'konvertiert', 'audio')).toBe('Song-konvertiert.mp3');
+    expect(buildFileName('‮⁧.flac', 'ogg', '', 'audio')).toBe('audio.ogg');
+    expect(buildFileName('../a.wav', 'flac', '', 'audio')).toBe('_a.flac');
+    expect(buildFileName('CON.wav', 'wav', '', 'audio')).toBe('_CON.wav');
+  });
+
+  it('liefert für Bildformate dasselbe wie buildOutputFileName', () => {
+    expect(buildFileName('foto.png', 'jpg', 'klein', 'bild')).toBe(buildOutputFileName('foto.png', 'jpeg', 'klein'));
   });
 });

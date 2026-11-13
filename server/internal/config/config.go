@@ -64,6 +64,11 @@ type Config struct {
 	PdfMaxInputBytes         int64
 	PdfMaxResultsTotalBytes  int64
 	PdfImageMaxPixels        int64
+	AudioMaxInputBytes       int64
+	AudioMaxDurationSeconds  int64
+	AudioMaxChannels         int64
+	AudioMaxSampleRate       int64
+	AudioMaxOutputBytes      int64
 	JobTTL                   time.Duration
 	JobMaxAttempts           int
 	SessionTTL               time.Duration
@@ -75,6 +80,7 @@ type Config struct {
 	SessionNewPerMinute      int
 	ImageTimeout             time.Duration
 	PdfTimeout               time.Duration
+	AudioTimeout             time.Duration
 	StorageBudgetBytes       int64
 	CleanupInterval          time.Duration
 	DownloadMax              time.Duration
@@ -126,6 +132,11 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.PdfMaxInputBytes = p.positive("PDF_MAX_INPUT_BYTES", 100_000_000)
 	c.PdfMaxResultsTotalBytes = p.positive("PDF_MAX_RESULTS_TOTAL_BYTES", 300_000_000)
 	c.PdfImageMaxPixels = p.positive("PDF_IMAGE_MAX_PIXELS", 40_000_000)
+	c.AudioMaxInputBytes = p.positive("AUDIO_MAX_INPUT_BYTES", 104_857_600)
+	c.AudioMaxDurationSeconds = p.positive("AUDIO_MAX_DURATION_SECONDS", 1800)
+	c.AudioMaxChannels = p.positive("AUDIO_MAX_CHANNELS", 8)
+	c.AudioMaxSampleRate = p.positive("AUDIO_MAX_SAMPLE_RATE", 192_000)
+	c.AudioMaxOutputBytes = p.positive("AUDIO_MAX_OUTPUT_BYTES", 419_430_400)
 
 	c.JobTTL = p.seconds("JOB_TTL_SECONDS", 3600)
 	c.JobMaxAttempts = int(p.positive("JOB_MAX_ATTEMPTS", 3))
@@ -139,6 +150,7 @@ func Load(lookup LookupFunc) (*Config, error) {
 
 	c.ImageTimeout = p.seconds("IMAGE_TIMEOUT_SECONDS", 120)
 	c.PdfTimeout = p.seconds("PDF_TIMEOUT_SECONDS", 300)
+	c.AudioTimeout = p.seconds("AUDIO_TIMEOUT_SECONDS", 300)
 
 	c.StorageBudgetBytes = p.positive("STORAGE_BUDGET_BYTES", 5_000_000_000)
 	c.CleanupInterval = p.seconds("CLEANUP_INTERVAL_SECONDS", 60)
@@ -171,7 +183,8 @@ func (c *Config) crossChecks() []string {
 	if c.SessionTTL < c.JobTTL {
 		problems = append(problems, Prefix+"SESSION_TTL_SECONDS muss JOB_TTL_SECONDS abdecken")
 	}
-	need := max(c.DownloadMax, c.ImageTimeout+c.CleanupInterval, c.PdfTimeout+c.CleanupInterval) +
+	need := max(c.DownloadMax, c.ImageTimeout+c.CleanupInterval, c.PdfTimeout+c.CleanupInterval,
+		c.AudioTimeout+c.CleanupInterval) +
 		c.CleanupInterval + 10*time.Second
 	if c.PhysicalDeleteMax < need {
 		problems = append(problems, Prefix+"PHYSICAL_DELETE_MAX_SECONDS muss Download, Parser-Zeitlimit und Cleanup-Karenz abdecken")
@@ -211,7 +224,7 @@ func (c *Config) IsProduction() bool { return c.Environment == Production }
 
 // MaxUploadInputBytes: größte Eingabe über alle Werkzeuge.
 func (c *Config) MaxUploadInputBytes() int64 {
-	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes)
+	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes, c.AudioMaxInputBytes)
 }
 
 // SlogLevel bildet LogLevel auf log/slog ab.

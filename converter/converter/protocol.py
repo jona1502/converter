@@ -8,7 +8,10 @@ Anfrage: genau ein JSON-Objekt über stdin (höchstens ``MAX_REQUEST_BYTES``)::
      "results": [{"id": "<uuid>", "level": null | "high" | ..., "path": "/abs/out"}],
      "limits": {"imageMaxInputBytes": ..., "imageMaxPixels": ..., "imageMaxEdge": ...,
                 "imageMaxOutputBytes": ..., "pdfMaxInputBytes": ...,
-                "pdfMaxResultsTotalBytes": ..., "pdfImageMaxPixels": ...},
+                "pdfMaxResultsTotalBytes": ..., "pdfImageMaxPixels": ...,
+                "audioMaxInputBytes": ..., "audioMaxDurationSeconds": ...,
+                "audioMaxChannels": ..., "audioMaxSampleRate": ...,
+                "audioMaxOutputBytes": ...},
      "memory": <RLIMIT_AS Bytes>, "timeout": <Sekunden>, "outputLimit": <RLIMIT_FSIZE Bytes>}
 
 Alle Felder sind Pflicht, unbekannte Felder und doppelte Schlüssel sind Fehler.
@@ -17,7 +20,7 @@ Dateien an, folgt keinen Symlinks und schreibt nur in diese Dateien.
 
 Ereignisse: JSONL über stdout, kompakt, ASCII, jede Zeile < ``MAX_EVENT_BYTES``::
 
-    {"kind":"progress","phase":"encode"}                                  Bild
+    {"kind":"progress","phase":"encode"}                                  Bild, Audio
     {"kind":"analysis","analysis":{...PdfAnalysis...}}                    PDF, genau einmal
     {"kind":"progress","phase":"variant",
      "progress":{"step":"variant","level":"high","current":3,"total":12}} PDF, gedrosselt
@@ -41,7 +44,7 @@ from typing import IO, Any, Final
 from converter import validation as v
 from converter.errors import ProtocolError
 from converter.limits import Limits, parse_limits
-from converter.options import ImageOptions, JobOptions, parse_options
+from converter.options import AudioOptions, ImageOptions, JobOptions, parse_options
 
 PROTOCOL_VERSION: Final = 1
 MAX_REQUEST_BYTES: Final = 64 * 1024
@@ -80,6 +83,8 @@ RESULT_CODES: Final = frozenset(
         "unsupported-type",
         "original-format-unsupported",
         "invalid-options",
+        "duration-too-long",
+        "unsupported-audio",
     }
 )
 # protocol-error/sandbox-failed sind intern: Go bildet sie auf worker-failed ab.
@@ -140,7 +145,7 @@ def _results(value: object, options: JobOptions) -> tuple[ResultTarget, ...]:
         if level is not None and type(level) is not str:
             raise v.fail(CODE, f"{where}.level: string or null expected")
         targets.append(ResultTarget(result_id, level, _absolute(raw["path"], f"{where}.path")))
-    if isinstance(options, ImageOptions):
+    if isinstance(options, ImageOptions | AudioOptions):
         expected: list[str | None] = [None]
     else:
         expected = list(options.levels)

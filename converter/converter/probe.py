@@ -2,8 +2,9 @@
 
 Wie ``backend/app/api/capabilities.py`` bzw. ``capabilities()`` der
 Bildpipeline, aber zusätzlich mit den Encoderparametern der Pipeline für
-jedes Ausgabeformat und einer PDF-Rundreise mit pikepdf. Schreibt nichts
-auf die Platte und läuft nach ``sandbox.isolate``.
+jedes Ausgabeformat, einer PDF-Rundreise mit pikepdf und Audio-Rundreisen
+mit soundfile (libsndfile aus dem Wheel). Schreibt nichts auf die Platte und
+läuft nach ``sandbox.isolate``.
 """
 
 from __future__ import annotations
@@ -13,10 +14,13 @@ import platform
 import zlib
 from typing import Any
 
+import numpy as np
 import pikepdf
 import PIL
+import soundfile as sf
 from PIL import Image
 
+from converter.processing.audio import pipeline as audio
 from converter.processing.images.pipeline import INPUTS, OUTPUTS, flatten, save_options
 from converter.protocol import PROTOCOL_VERSION
 
@@ -96,16 +100,82 @@ def probe_pdf() -> bool:
         return False
 
 
+AUDIO_RATE = 44_100
+AUDIO_FRAMES = 4410
+# Testsignal zum Schreiben der Eingabeproben (Container, Subtyp).
+AUDIO_SAMPLES = {
+    "mp3": ("MP3", "MPEG_LAYER_III"),
+    "wav": ("WAV", "PCM_16"),
+    "flac": ("FLAC", "PCM_16"),
+    "ogg": ("OGG", "VORBIS"),
+}
+
+
+def _tone() -> Any:
+    t = np.arange(AUDIO_FRAMES) / AUDIO_RATE
+    left = 0.5 * np.sin(2 * np.pi * 440 * t)
+    return np.stack([left, left], axis=1)
+
+
+def _audible(data: bytes, name: str) -> bool:
+    with sf.SoundFile(io.BytesIO(data)) as decoded:
+        samples = decoded.read(dtype="float64", always_2d=True)
+        return bool(
+            audio.CONTAINERS.get(decoded.format) == name
+            and decoded.samplerate == AUDIO_RATE
+            and decoded.channels == 2
+            and len(samples) > AUDIO_FRAMES // 2
+            and float(np.max(np.abs(samples))) > 0.25
+        )
+
+
+def probe_audio_input(name: str) -> bool:
+    try:
+        container, subtype = AUDIO_SAMPLES[name]
+        buffer = io.BytesIO()
+        sf.write(buffer, _tone(), AUDIO_RATE, format=container, subtype=subtype)
+        return _audible(buffer.getvalue(), name)
+    except (sf.LibsndfileError, RuntimeError, ValueError, TypeError, KeyError):
+        return False
+
+
+def probe_audio_output(name: str) -> bool:
+    """Kodiert mit Container, Subtyp und Qualitätsstufe der Pipeline."""
+    try:
+        container, subtype = audio.target_format(name, "PCM_16")
+        buffer = io.BytesIO()
+        with sf.SoundFile(
+            buffer,
+            "w",
+            samplerate=AUDIO_RATE,
+            channels=2,
+            subtype=subtype,
+            format=container,
+            **audio.encoder_options(name, 0.8),
+        ) as encoded:
+            encoded.write(_tone())
+        return _audible(buffer.getvalue(), name)
+    except (sf.LibsndfileError, RuntimeError, ValueError, TypeError, AssertionError):
+        return False
+
+
 def run_probe() -> dict[str, Any]:
     return {
         "protocolVersion": PROTOCOL_VERSION,
         "inputFormats": [name for name in INPUTS if probe_input(name)],
         "outputFormats": [name for name in OUTPUTS if probe_output(name)],
         "pdf": probe_pdf(),
+        "audio": {
+            "inputFormats": [name for name in audio.INPUTS if probe_audio_input(name)],
+            "outputFormats": [name for name in audio.OUTPUTS if probe_audio_output(name)],
+        },
         "versions": {
             "python": platform.python_version(),
             "pillow": PIL.__version__,
             "pikepdf": pikepdf.__version__,
             "qpdf": pikepdf.__libqpdf_version__,
+            "soundfile": sf.__version__,
+            "libsndfile": sf.__libsndfile_version__,
+            "numpy": np.__version__,
         },
     }

@@ -42,10 +42,18 @@ function stripExtension(name: string): string {
  * reservierte Windows-Namen (CON, NUL, COM1 …) mit "_" versehen.
  */
 export function buildOutputFileName(originalName: string, format: ImageFormat, suffix: string): string {
+  return buildFileName(originalName, FORMAT_INFO[format].extension, suffix, FALLBACK_BASE);
+}
+
+/**
+ * Wie buildOutputFileName, aber mit freier Endung und eigenem Ersatzstamm für Namen, die nach der
+ * Bereinigung leer sind (z. B. „audio“ für das Audiowerkzeug).
+ */
+export function buildFileName(originalName: string, extension: string, suffix: string, fallbackBase: string): string {
   const raw = typeof originalName === 'string' ? originalName : '';
-  const base = avoidReservedName(truncate(sanitize(stripExtension(raw)), MAX_BASE_LENGTH) || FALLBACK_BASE);
+  const base = avoidReservedName(truncate(sanitize(stripExtension(raw)), MAX_BASE_LENGTH) || fallbackBase);
   const cleanSuffix = truncate(sanitize(typeof suffix === 'string' ? suffix : ''), 40);
-  return `${base}${cleanSuffix ? `-${cleanSuffix}` : ''}.${FORMAT_INFO[format].extension}`;
+  return `${base}${cleanSuffix ? `-${cleanSuffix}` : ''}.${extension}`;
 }
 
 /**

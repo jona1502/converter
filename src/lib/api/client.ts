@@ -7,6 +7,9 @@ export interface Capabilities {
   image: {outputFormats: string[]; inputFormats: string[]; maxFileBytes: number; maxPixels: number; maxEdge: number};
   jobs: {ttlSeconds: number; maxActivePerSession: number; maxBatchFiles: number};
   pdf: {maxFileBytes: number};
+  /** Fehlt bei älteren Servern; dann ist audio-convert nicht verfügbar. */
+  audio?: ApiSchemas['AudioCapabilities'];
+  tools?: Tool[];
 }
 const messages: Record<string, string> = {
   'session-required': 'Ihre Sitzung ist abgelaufen. Bitte starten Sie die Verarbeitung erneut.',

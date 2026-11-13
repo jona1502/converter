@@ -49,6 +49,9 @@ func parseOptions(raw []byte) (options, error) {
 		canonical, err := jobs.CanonicalJSON(map[string]any{"tool": "pdf-compress", "levels": values})
 		return options{tool: "pdf-compress", canonical: canonical, levels: names}, err
 	}
+	if audio, ok := input.Audio(); ok {
+		return parseAudioOptions(audio)
+	}
 	image, ok := input.Image()
 	if !ok {
 		return options{}, invalidOptions()
@@ -119,4 +122,22 @@ func parseOptions(raw []byte) (options, error) {
 	}
 	canonical, err := jobs.CanonicalJSON(map[string]any{"tool": string(image.Tool), "format": target, "quality": quality, "background": background, "resize": resize, "icoSizes": ico})
 	return options{tool: string(image.Tool), canonical: canonical, format: target, resizeMode: mode}, err
+}
+
+// parseAudioOptions prüft audio-convert (Vertrag §4 „Optionen Audio“) und
+// liefert das kanonische JSON mit Standardwerten. quality ist auch bei
+// WAV/FLAC zulässig, wirkt dort aber nicht.
+func parseAudioOptions(audio *apitypes.AudioOptions) (options, error) {
+	target := string(audio.Format)
+	if !slices.Contains(apitypes.AudioFormats(), audio.Format) {
+		return options{}, invalidOptions()
+	}
+	quality := audio.Quality.Or(.8)
+	channels := audio.Channels.Or(apitypes.ChannelsOriginal)
+	if math.IsNaN(quality) || math.IsInf(quality, 0) || quality < 0 || quality > 1 ||
+		!slices.Contains(apitypes.AudioChannelModes(), channels) {
+		return options{}, invalidOptions()
+	}
+	canonical, err := jobs.CanonicalJSON(map[string]any{"tool": "audio-convert", "format": target, "quality": quality, "channels": string(channels)})
+	return options{tool: "audio-convert", canonical: canonical, format: target}, err
 }

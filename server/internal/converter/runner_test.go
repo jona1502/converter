@@ -56,6 +56,19 @@ func TestProcessHelper(t *testing.T) {
 			fmt.Println(`{"kind":"progress","phase":"encode"}`)
 		}
 	}
+	if mode == "audio" || mode == "audio-bad" || mode == "audio-large" {
+		size := 6
+		if mode == "audio-large" {
+			size = 2048
+		}
+		_ = os.WriteFile(req.Results[0].Path, make([]byte, size), 0600)
+		fmt.Println(`{"kind":"progress","phase":"encode"}`)
+		channels := 2
+		if mode == "audio-bad" {
+			channels = 9
+		}
+		fmt.Printf("{\"kind\":\"result\",\"id\":%q,\"details\":{\"format\":\"mp3\",\"durationSeconds\":1.5,\"sampleRate\":44100,\"channels\":%d,\"qualityApplied\":true}}\n", req.Results[0].ID, channels)
+	}
 	os.Exit(0)
 }
 
@@ -152,7 +165,8 @@ func TestReportRoundtripRejectsStaleFutureAndSymlink(t *testing.T) {
 	now := time.Now().UTC()
 	report := Report{SchemaVersion: ReportSchemaVersion, ProtocolVersion: ProtocolVersion, GeneratedAt: now,
 		InputFormats: RequiredInputFormats, OutputFormats: RequiredOutputFormats, PDF: true,
-		Versions: Versions{Python: "3.13.17", Pillow: "13.0.0", Pikepdf: "10.17.0", Qpdf: "12.3"}}
+		Audio:    AudioReport{InputFormats: RequiredAudioFormats, OutputFormats: RequiredAudioFormats},
+		Versions: Versions{Python: "3.13.17", Pillow: "13.0.0", Pikepdf: "10.17.0", Qpdf: "12.3", Soundfile: "0.14.0", Libsndfile: "1.2.2", Numpy: "2.5.4"}}
 	path := filepath.Join(t.TempDir(), ReportFile)
 	if err := WriteReport(path, report); err != nil {
 		t.Fatal(err)
@@ -177,7 +191,9 @@ func TestReportRoundtripRejectsStaleFutureAndSymlink(t *testing.T) {
 func TestAdapterRetryRestrictsLevelsAndRemainingPDFBudget(t *testing.T) {
 	cfg := &config.Config{ImageMaxInputBytes: 52428800, ImageMaxPixels: 40000000, ImageMaxEdge: 16384,
 		ImageMaxOutputBytes: 104857600, PdfMaxInputBytes: 100000000, PdfMaxResultsTotalBytes: 300000000,
-		PdfImageMaxPixels: 40000000, ImageTimeout: 120 * time.Second, PdfTimeout: 300 * time.Second}
+		PdfImageMaxPixels: 40000000, ImageTimeout: 120 * time.Second, PdfTimeout: 300 * time.Second,
+		AudioMaxInputBytes: 104857600, AudioMaxDurationSeconds: 1800, AudioMaxChannels: 8,
+		AudioMaxSampleRate: 192000, AudioMaxOutputBytes: 419430400, AudioTimeout: 300 * time.Second}
 	processor := NewProcessor(nil, cfg)
 	req, err := processor.request(jobs.Task{Tool: "pdf-compress", InputPath: "/data/input", OutputBudget: 250000000,
 		Options: json.RawMessage(`{"tool":"pdf-compress","levels":["high","balanced","small"]}`),

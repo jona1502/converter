@@ -32,12 +32,19 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
-		PdfImageMaxPixels: c.PdfImageMaxPixels,
+		PdfImageMaxPixels:  c.PdfImageMaxPixels,
+		AudioMaxInputBytes: c.AudioMaxInputBytes, AudioMaxDurationSeconds: c.AudioMaxDurationSeconds,
+		AudioMaxChannels: c.AudioMaxChannels, AudioMaxSampleRate: c.AudioMaxSampleRate,
+		AudioMaxOutputBytes: c.AudioMaxOutputBytes,
 	}
 	req := Request{Source: task.InputPath, Options: task.Options, Limits: limits,
 		MemoryBytes: 1 << 30, Timeout: c.ImageTimeout, OutputLimit: c.ImageMaxOutputBytes}
 	for _, target := range task.Results {
 		req.Results = append(req.Results, ResultTarget{ID: storage.FormatUUID(target.ID), Level: target.Level, Path: target.Path})
+	}
+	if task.Tool == "audio-convert" {
+		req.Timeout = c.AudioTimeout
+		req.OutputLimit = c.AudioMaxOutputBytes
 	}
 	if task.Tool == "pdf-compress" {
 		if task.OutputBudget <= 0 {

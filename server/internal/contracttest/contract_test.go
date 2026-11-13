@@ -160,6 +160,27 @@ func TestSerializedDTOsValidate(t *testing.T) {
 		t.Fatalf("Session: %v", err)
 	}
 
+	audio := mustJSON(t, apitypes.AudioCapabilities{
+		InputFormats: apitypes.AudioFormats(), OutputFormats: apitypes.AudioFormats(),
+		QualityFormats: []apitypes.AudioFormat{apitypes.AudioMP3, apitypes.AudioOGG}, DefaultQuality: .8,
+		MaxFileBytes: 104_857_600, MaxDurationSeconds: 1800, MaxChannels: 8, MaxSampleRate: 192_000,
+		MaxOutputBytes: 419_430_400,
+	})
+	if err := spec.ValidateComponent("AudioCapabilities", audio); err != nil {
+		t.Fatalf("AudioCapabilities: %v\n%s", err, audio)
+	}
+	if empty := mustJSON(t, apitypes.AudioCapabilities{}); !strings.Contains(string(empty), `"inputFormats":[]`) {
+		t.Fatalf("leere Formatliste nicht als [] serialisiert: %s", empty)
+	}
+
+	details := mustJSON(t, apitypes.AudioDetails{Format: apitypes.AudioWAV, DurationSeconds: 0.3, SampleRate: 44_100, Channels: 1})
+	if err := spec.ValidateComponent("AudioDetails", details); err != nil {
+		t.Fatalf("AudioDetails: %v", err)
+	}
+	if err := spec.ValidateComponent("AudioDetails", []byte(`{"format":"m4a","durationSeconds":1,"sampleRate":1,"channels":1,"qualityApplied":false}`)); err == nil {
+		t.Fatal("AudioDetails mit unbekanntem Format akzeptiert")
+	}
+
 	caps := mustJSON(t, apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools()})
 	schema, err = spec.ResponseSchema("/api/v1/capabilities", "GET", 200)
 	if err != nil {
@@ -178,6 +199,8 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"image-compress","format":"jpeg","background":"#00ff00","resize":{"mode":"maxEdge","maxEdge":100}}`,
 		`{"tool":"pdf-compress","levels":["small","high"]}`,
 		`{"tool":"pdf-compress"}`,
+		`{"tool":"audio-convert","format":"mp3","quality":0.5,"channels":"mono"}`,
+		`{"tool":"audio-convert","format":"flac"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -207,6 +230,9 @@ func TestValidatorRejectsViolations(t *testing.T) {
 		"exclusiveMinimum":        {"ResizeMaxEdge", `{"mode":"maxEdge","maxEdge":0}`},
 		"minItems":                {"PdfOptions", `{"tool":"pdf-compress","levels":[]}`},
 		"oneOf ohne Treffer":      {"JobOptions", `{"tool":"video"}`},
+		"Audioformat":             {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
+		"Audiokanäle":             {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
+		"Audio ohne Bildfelder":   {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
 		"const":                   {"LiveResponse", `{"status":"nein"}`},
 		"additionalProperties":    {"ReadyResponse", `{"status":"ok","checks":{"db":"vielleicht"}}`},
 		"ready status":            {"ReadyResponse", `{"status":"kaputt","checks":{}}`},

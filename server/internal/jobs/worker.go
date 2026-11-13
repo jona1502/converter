@@ -175,8 +175,11 @@ func (w *Worker) Process(runCtx context.Context, task *Task) {
 	defer cancel(nil)
 
 	timeout := w.rt.cfg.ImageTimeout
-	if task.Tool == "pdf-compress" {
+	switch task.Tool {
+	case "pdf-compress":
 		timeout = w.rt.cfg.PDFTimeout
+	case "audio-convert":
+		timeout = w.rt.cfg.AudioTimeout
 	}
 	timer := time.AfterFunc(timeout, func() { cancel(errTimeout) })
 	defer timer.Stop()

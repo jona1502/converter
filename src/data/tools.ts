@@ -4,7 +4,7 @@
  * Ein Werkzeug erst freischalten, wenn seine Seite unter `href` existiert.
  */
 
-export type ToolCategory = 'bilder' | 'pdf';
+export type ToolCategory = 'bilder' | 'pdf' | 'audio';
 export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
 
 export interface ToolCategoryInfo {
@@ -28,7 +28,11 @@ export interface Tool {
   readonly available: boolean;
 }
 
-export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [{ id: 'bilder', title: 'Bilder' }, { id: 'pdf', title: 'PDF' }];
+export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [
+  { id: 'bilder', title: 'Bilder' },
+  { id: 'pdf', title: 'PDF' },
+  { id: 'audio', title: 'Audio' },
+];
 
 export const TOOLS: readonly Tool[] = [
   {
@@ -65,6 +69,15 @@ export const TOOLS: readonly Tool[] = [
     href: '/bilder/skalieren',
     category: 'bilder',
     operation: 'skalieren',
+    available: true,
+  },
+  {
+    id: 'audio-konvertieren',
+    title: 'Audio konvertieren',
+    description: 'MP3, WAV, FLAC und OGG ineinander umwandeln, auf Wunsch in Mono.',
+    href: '/audio/konvertieren',
+    category: 'audio',
+    operation: 'konvertieren',
     available: true,
   },
 ];

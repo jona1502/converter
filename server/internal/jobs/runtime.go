@@ -25,11 +25,13 @@ import (
 type RuntimeConfig struct {
 	ImageMaxOutputBytes     int64         // 104_857_600, Arbeitsreserve je Bildauftrag
 	PDFMaxResultsTotalBytes int64         // 300_000_000, Gesamtbudget je PDF-Auftrag
+	AudioMaxOutputBytes     int64         // 419_430_400, Arbeitsreserve je Audioauftrag
 	StorageBudgetBytes      int64         // 5_000_000_000
 	Lease                   time.Duration // 30 s (LEASE_SECONDS)
 	HeartbeatInterval       time.Duration // 2 s (runner.py)
 	ImageTimeout            time.Duration // 120 s
 	PDFTimeout              time.Duration // 300 s
+	AudioTimeout            time.Duration // 300 s
 }
 
 // DefaultRuntimeConfig entspricht den Python-Defaults.
@@ -37,11 +39,13 @@ func DefaultRuntimeConfig() RuntimeConfig {
 	return RuntimeConfig{
 		ImageMaxOutputBytes:     104_857_600,
 		PDFMaxResultsTotalBytes: 300_000_000,
+		AudioMaxOutputBytes:     419_430_400,
 		StorageBudgetBytes:      5_000_000_000,
 		Lease:                   30 * time.Second,
 		HeartbeatInterval:       2 * time.Second,
 		ImageTimeout:            120 * time.Second,
 		PDFTimeout:              300 * time.Second,
+		AudioTimeout:            300 * time.Second,
 	}
 }
 
@@ -52,6 +56,12 @@ func (c RuntimeConfig) withDefaults() RuntimeConfig {
 	}
 	if c.PDFMaxResultsTotalBytes <= 0 {
 		c.PDFMaxResultsTotalBytes = d.PDFMaxResultsTotalBytes
+	}
+	if c.AudioMaxOutputBytes <= 0 {
+		c.AudioMaxOutputBytes = d.AudioMaxOutputBytes
+	}
+	if c.AudioTimeout <= 0 {
+		c.AudioTimeout = d.AudioTimeout
 	}
 	if c.StorageBudgetBytes <= 0 {
 		c.StorageBudgetBytes = d.StorageBudgetBytes
@@ -74,7 +84,7 @@ func (c RuntimeConfig) withDefaults() RuntimeConfig {
 // staleGrace: stale_attempts.reap_after = now + max(Timeouts) + 10 s
 // (runtime.retire_attempt), damit ein verwaister Kindprozess sicher beendet ist.
 func (c RuntimeConfig) staleGrace() time.Duration {
-	return max(c.ImageTimeout, c.PDFTimeout) + 10*time.Second
+	return max(c.ImageTimeout, c.PDFTimeout, c.AudioTimeout) + 10*time.Second
 }
 
 // Runtime führt die Datenbankübergänge eines Workers aus.
@@ -206,6 +216,9 @@ func (rt *Runtime) claimJob(ctx context.Context, tx pgx.Tx, jobID [16]byte) (*Ta
 		return nil, nil
 	}
 	working := rt.cfg.ImageMaxOutputBytes
+	if tool == "audio-convert" {
+		working = rt.cfg.AudioMaxOutputBytes
+	}
 	if tool == "pdf-compress" {
 		// Bereits veröffentlichte Stufen zählen gegen das Gesamtbudget.
 		working = max(0, rt.cfg.PDFMaxResultsTotalBytes-(reserved-inputSize))
@@ -399,7 +412,8 @@ func (rt *Runtime) PublishResult(ctx context.Context, t *Task, resultID [16]byte
 		return false, nil
 	}
 	var width, height *int64
-	if t.Tool != "pdf-compress" {
+	// Nur Bilder haben Abmessungen; Audio und PDF lassen input_width/height NULL.
+	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" {
 		var err error
 		if width, height, err = sourceSize(details); err != nil {
 			return false, err

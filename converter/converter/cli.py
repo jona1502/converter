@@ -5,7 +5,7 @@ schreibt JSONL-Ereignisse auf stdout. ``probe``: isoliert sich, prüft echte
 Rundreisen aller Formate und schreibt genau ein JSON-Objekt.
 
 Vor ``sandbox.isolate`` werden nur Standardbibliothek und reine
-Python-Module dieses Pakets geladen; Pillow/pikepdf erst danach.
+Python-Module dieses Pakets geladen; Pillow/pikepdf/soundfile/numpy erst danach.
 """
 
 from __future__ import annotations
@@ -38,6 +38,16 @@ def claim_stdout() -> IO[bytes]:
     return protocol
 
 
+def single_threaded() -> None:
+    """Native Rechenbibliotheken (numpy/OpenBLAS) ohne Threadpools laden.
+
+    Jeder Thread reserviert Adressraum; unter RLIMIT_AS könnten viele Kerne
+    sonst schon den Import scheitern lassen. Vor dem Import aufrufen.
+    """
+    for name in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+        os.environ[name] = "1"
+
+
 def _fatal(writer: EventWriter, code: str) -> int:
     # Ist stdout schon geschlossen (Go beendet), bleibt nur der Exit-Code.
     with contextlib.suppress(Exception):
@@ -59,6 +69,7 @@ def run(stdin: IO[bytes], stdout: IO[bytes]) -> int:
         return _fatal(writer, "sandbox-failed")
     try:
         # Erst nach der Isolation native Parser importieren.
+        single_threaded()
         from converter.execute import execute
 
         execute(request, writer)
@@ -77,6 +88,7 @@ def probe(stdout: IO[bytes]) -> int:
     except Exception:
         return _fatal(EventWriter(stdout), "sandbox-failed")
     try:
+        single_threaded()
         from converter.probe import run_probe
 
         report = run_probe()

@@ -27,7 +27,7 @@ FORBIDDEN = {
     "pydantic_settings",
     "uvicorn",
 }
-NATIVE = {"PIL", "pikepdf"}
+NATIVE = {"PIL", "pikepdf", "soundfile", "numpy"}
 PRE_SANDBOX = [
     "converter",
     "converter.cli",

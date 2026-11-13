@@ -6,9 +6,9 @@ Stand: B01 (24.10.2026). Verbindlicher Vertrag zwischen Frontend (`src/lib/api/`
 
 ## 1. Umfang
 
-- Vier Werkzeuge: `image-convert`, `image-compress`, `image-resize`, `pdf-compress`.
-- Ein Bild = ein Auftrag mit genau einem Ergebnis. Eine PDF = ein Auftrag mit bis zu drei sequenziell erzeugten Ergebnissen (`high`, `balanced`, `small`).
-- Nicht im Umfang: Konten, Abos, Office/Audio/Video, OCR, ZIP-Downloads, Moduswahlschalter Browser/Server, automatische Rückfälle zwischen Server und Browser.
+- Fünf Werkzeuge: `image-convert`, `image-compress`, `image-resize`, `pdf-compress`, `audio-convert`.
+- Ein Bild = ein Auftrag mit genau einem Ergebnis. Eine PDF = ein Auftrag mit bis zu drei sequenziell erzeugten Ergebnissen (`high`, `balanced`, `small`). Eine Audiodatei = ein Auftrag mit genau einem Ergebnis.
+- Nicht im Umfang: Konten, Abos, Office/Video, M4A/AAC, OCR, ZIP-Downloads, Moduswahlschalter Browser/Server, automatische Rückfälle zwischen Server und Browser.
 
 ## 2. Allgemeines
 
@@ -17,7 +17,7 @@ Stand: B01 (24.10.2026). Verbindlicher Vertrag zwischen Frontend (`src/lib/api/`
 - Jede Antwort trägt `X-Request-Id` (vom Proxy übernommen, falls gültig, sonst erzeugt). Die ID erscheint in Logs, nie Dateiinhalte, Originalnamen, Cookies oder Tokens.
 - Alle API-Antworten: `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`.
 - Konfiguration über Umgebungsvariablen mit Präfix `CONVERTER_` (z. B. `CONVERTER_SECRET_KEY`, `CONVERTER_ALLOWED_ORIGINS`, `CONVERTER_TRUSTED_PROXIES`, `CONVERTER_SESSION_COOKIE_SECURE`); Namen in diesem Dokument ohne Präfix.
-- Logs: Ausnahmen aus Upload, Storage und Verarbeitung (Pillow, pikepdf, Dateisystem) können Pfade oder Originalnamen enthalten. Sie werden nur mit Ausnahmetyp, Auftrags-ID und internem Fehlercode geloggt, nicht mit ihrem Text; eigene Ausnahmen enthalten nie Dateinamen, Inhalte, Tokens oder Pfade.
+- Logs: Ausnahmen aus Upload, Storage und Verarbeitung (Pillow, pikepdf, soundfile, Dateisystem) können Pfade oder Originalnamen enthalten. Sie werden nur mit Ausnahmetyp, Auftrags-ID und internem Fehlercode geloggt, nicht mit ihrem Text; eigene Ausnahmen enthalten nie Dateinamen, Inhalte, Tokens oder Pfade.
 
 ### Fehlerformat
 
@@ -42,7 +42,7 @@ Stand: B01 (24.10.2026). Verbindlicher Vertrag zwischen Frontend (`src/lib/api/`
 | `invalid-request` | 400/422 | Anfrage formal ungültig (Multipart kaputt, JSON unlesbar, unbekannte Felder) |
 | `invalid-options` | 422 | Optionen semantisch ungültig (z. B. ICO mit Resize, Prozent > 100 ohne Vergrößerung) |
 | `missing-file` | 422 | Kein oder mehr als ein Dateiteil |
-| `unsupported-type` | 415 | Bytes passen zu keinem unterstützten Eingabeformat des Werkzeugs |
+| `unsupported-type` | 415 | Bytes passen zu keinem unterstützten Eingabeformat des Werkzeugs (Audio: MP3, WAV, FLAC, OGG per Signatur) |
 | `not-pdf` | 415 | Keine `%PDF-`-Signatur in den ersten 1024 Bytes |
 | `file-too-large` | 413 | Eingabelimit überschritten (auch ohne/mit falschem `Content-Length`) |
 | `dimensions-too-large` | 422 | Eingabe- oder Zielabmessungen über Limit |
@@ -70,8 +70,10 @@ Auftrags- und Ergebnisfehler (`job.error.code`, `result.error.code`) verwenden z
 | `encode-failed` | Ergebnis konnte nicht erzeugt werden |
 | `encrypted` | PDF verschlüsselt (auch mit leerem Benutzerpasswort) |
 | `parse-failed` | PDF beschädigt oder nicht lesbar |
-| `result-too-large` | Bildergebnis > 104.857.600 Bytes bzw. PDF-Ergebnisbudget 300.000.000 Bytes überschritten |
-| `timeout` | Prozesszeitlimit überschritten (120 s Bild, 300 s PDF gesamt) |
+| `result-too-large` | Bildergebnis > 104.857.600 Bytes, PDF-Ergebnisbudget 300.000.000 Bytes bzw. Audioergebnis > 419.430.400 Bytes überschritten |
+| `duration-too-long` | Audiodauer über der Grenze (1800 s); geprüft laut Header und erneut beim Dekodieren |
+| `unsupported-audio` | Audio lesbar, aber nicht verarbeitbar: Kanäle (> 8) oder Abtastrate (> 192.000 Hz) über der Grenze, Ogg ohne Vorbis/Opus, oder vom Zielformat ohne Resampling nicht darstellbar (MP3: nur LAME-Raten 8–48 kHz und höchstens zwei Kanäle; Abhilfe bei Kanälen: Mono) |
+| `timeout` | Prozesszeitlimit überschritten (120 s Bild, 300 s PDF gesamt, 300 s Audio) |
 | `memory-limit` | Kindprozess durch Speichermangel beendet |
 | `worker-failed` | Verarbeitung nach begrenzten Versuchen abgebrochen (z. B. wiederholter Absturz) |
 | `storage-full` | Ergebnis konnte wegen Speicherbudget nicht geschrieben werden |
@@ -101,7 +103,7 @@ Ohne Sitzung abrufbar. Liefert, was das ausgelieferte Image tatsächlich kann (b
 ```json
 {
   "apiVersion": "1",
-  "tools": ["image-convert", "image-compress", "image-resize", "pdf-compress"],
+  "tools": ["image-convert", "image-compress", "image-resize", "pdf-compress", "audio-convert"],
   "image": {
     "inputFormats": ["jpeg", "png", "webp", "gif", "bmp", "ico", "avif"],
     "outputFormats": ["jpeg", "png", "webp", "bmp", "ico"],
@@ -123,11 +125,22 @@ Ohne Sitzung abrufbar. Liefert, was das ausgelieferte Image tatsächlich kann (b
       { "level": "small", "targetDpi": 100, "maxImageEdge": 1300, "quality": 0.55, "minDownscaleFactor": 0.9 }
     ]
   },
+  "audio": {
+    "inputFormats": ["mp3", "wav", "flac", "ogg"],
+    "outputFormats": ["mp3", "wav", "flac", "ogg"],
+    "qualityFormats": ["mp3", "ogg"],
+    "defaultQuality": 0.8,
+    "maxFileBytes": 104857600,
+    "maxDurationSeconds": 1800,
+    "maxChannels": 8,
+    "maxSampleRate": 192000,
+    "maxOutputBytes": 419430400
+  },
   "jobs": { "ttlSeconds": 3600, "maxActivePerSession": 3, "maxBatchFiles": 30, "createPerMinute": 10 }
 }
 ```
 
-Fehlt im Container ein Pflichtformat (Plan Abschnitt 5), ist das ein Abnahmefehler; `/ready` meldet dann `capabilities: fail`.
+Fehlt im Container ein Pflichtformat (Plan Abschnitt 5; für Audio alle vier Ein- und Ausgabeformate), ist das ein Abnahmefehler; `/ready` meldet dann `capabilities: fail`. `audio.inputFormats`/`outputFormats` stammen aus der Probe (echte Rundreise mit soundfile), die übrigen Audiofelder aus der Konfiguration. Schema: Komponente `AudioCapabilities`.
 
 ### `POST /api/v1/jobs`
 
@@ -152,7 +165,7 @@ Ablauf in der API (Reihenfolge ist Teil des Vertrags):
 4. Body mit dem Streaming-Parser von `python-multipart` direkt aus `Request.stream()` lesen; FastAPIs `Form`/`UploadFile` werden für diesen Endpunkt **nicht** verwendet, weil sie den Body vor jeder Prüfung vollständig einlesen bzw. ohne Größenlimit spoolen. Der erste Teil muss `options` sein, sonst `422 invalid-request`.
 5. Optionen streng validieren (unbekannte Felder → `422 invalid-request`).
 6. Datei streamend in eine private Spool-Datei schreiben, dabei Bytes zählen und SHA-256 berechnen; Limit überschritten → Abbruch `413 file-too-large`, Spool-Datei sofort löschen. `Content-Length` wird nicht vertraut. Gesamtdauer begrenzt durch `UPLOAD_MAX_SECONDS`; Mindestrate/Leerlauf zusätzlich am Proxy (`client_body_timeout`).
-7. Bytes-Signatur prüfen (`415`), bei Bildern Header-Probe ohne Dekodieren (Abmessungen, Animation soweit aus dem Header erkennbar), `original-format-unsupported`.
+7. Bytes-Signatur prüfen (`415`), bei Bildern Header-Probe ohne Dekodieren (Abmessungen, Animation soweit aus dem Header erkennbar), `original-format-unsupported`. Audio-Signaturen: MP3 = `ID3`-Tag (Version 2–4) oder MPEG-Frame-Sync mit gültigem Kopf (Version, Layer, Bitrate, Abtastrate) am Dateianfang; WAV = `RIFF....WAVE`; FLAC = `fLaC`; OGG = `OggS` (Version 0). Dauer, Kanäle und Abtastrate prüft erst der Worker.
 8. In **einer** DB-Transaktion: Reservierung in den Auftrag überführen (Reservierung auf tatsächliche Größe plus Ergebnisbudget anpassen), Auftrag (`queued`), Ergebniszeilen (`pending`), Outbox-Eintrag; Spool-Datei atomar an den finalen privaten Ort verschieben. Erst nach erfolgreichem Commit `202`. Scheitert der Commit, werden Datei und Reservierung entfernt.
 
 Idempotenz: Fingerabdruck = SHA-256 über `tool`, kanonisches Options-JSON, Datei-SHA-256 und -Größe. Schlüssel ist an die Sitzung gebunden.
@@ -183,6 +196,19 @@ Antwort `202` (bzw. `200` bei Replay): `Job` (Abschnitt 5) und `Location: /api/v
 - `resize`: exakt die Regeln von `ResizeOptions` in `src/lib/image/types.ts` (`none` | `percent` | `dimensions` | `maxEdge`; Rundung `round`, Mindestens 1 px, Vergrößerung nur mit `allowUpscale`). Bei `ico` nur `none`.
 - `icoSizes`: nur bei `ico`; Teilmenge von 16/32/48/64/128/256 ohne Duplikate, mindestens ein Wert. Einpassen (contain), zentriert, transparenter Rand; kleinere Quellen werden vergrößert und als `upscaled` gemeldet.
 - EXIF-Orientierung wird angewendet; Abmessungen und Resize beziehen sich auf die orientierungskorrigierte Größe. Metadaten (EXIF, ICC außer sRGB-Konvertierung) werden nicht übernommen.
+
+#### Optionen Audio
+
+```json
+{ "tool": "audio-convert", "format": "mp3", "quality": 0.8, "channels": "original" }
+```
+
+- `format`: `mp3` | `wav` | `flac` | `ogg` (Ogg Vorbis). Kein `original`.
+- `quality`: Zahl 0..1, Standard 0,8. Wirkt nur bei MP3 (LAME VBR) und OGG (Vorbis): `compression_level = 1 − quality` (MP3 höchstens 0,99). Bei WAV/FLAC zulässig, aber ohne Wirkung; das Ergebnis meldet `qualityApplied: false`. Die Oberfläche zeigt die Option dort nicht an.
+- `channels`: `original` (Standard) | `mono` (Downmix als Mittelwert aller Kanäle).
+- Die Abtastrate bleibt erhalten (kein Resampling). WAV-Ausgabe PCM 16 Bit, bei 24-/32-Bit- bzw. Float-Quellen `PCM_24`/`PCM_32`/`FLOAT`; FLAC 16 Bit, ab 24-Bit-Quellen 24 Bit. Werte über ±1 (z. B. aus MP3) werden begrenzt.
+- Tags, Cover und sonstige Metadaten werden nicht übernommen.
+- Eingabe: MP3, WAV, FLAC, OGG (Vorbis oder Opus).
 
 #### Optionen PDF
 
@@ -280,8 +306,8 @@ cancelled ◀── cancel ─┘        jeder Zustand ──TTL──▶ expire
 
 - „Hochladen“ ist ein reiner Frontendzustand; ein Auftrag existiert erst nach `202`.
 - Jeder Übergang ist ein bedingtes Update (`WHERE state = … AND version = …` bzw. passende Lease). Endzustände werden nie verlassen (außer zu `expired`). Ein verspäteter oder doppelter Worker kann `cancelled`, gelöschte oder abgelaufene Aufträge nicht wiederbeleben.
-- `phase` (nur bei `running`): `analyze` | `variant` | `encode` (Bild) | `save`; sonst `null`.
-- `progress` enthält nur echte Zähler: bei PDF `step`, `level`, `current`/`total` = bearbeitete/alle Bilder der aktuellen Variante; bei Bildern `null`. Keine erfundenen Prozentwerte.
+- `phase` (nur bei `running`): `analyze` | `variant` | `encode` (Bild, Audio) | `save`; sonst `null`.
+- `progress` enthält nur echte Zähler: bei PDF `step`, `level`, `current`/`total` = bearbeitete/alle Bilder der aktuellen Variante; bei Bildern und Audio `null`. Keine erfundenen Prozentwerte.
 
 ### Ergebniszustände
 
@@ -290,6 +316,7 @@ cancelled ◀── cancel ─┘        jeder Zustand ──TTL──▶ expire
 ### `details`
 
 - Bild: `{ "format", "width", "height", "sourceWidth", "sourceHeight", "upscaled", "transparencyFlattened", "qualityApplied" }`.
+- Audio: `{ "format", "durationSeconds", "sampleRate", "channels", "qualityApplied" }` (Komponente `AudioDetails`). `durationSeconds` ist die tatsächlich dekodierte Dauer (auf Millisekunden gerundet), `channels` die Kanalzahl des Ergebnisses. `input.width`/`input.height` bleiben bei Audio `null`.
 - PDF-Variante: wie `PdfVariantResult` in `src/lib/pdf/types.ts` ohne `blob`: `originalSize`, `imagesRecompressed`, `imagesResized`, `imagesSkipped`, `imagesNotSmaller`, `streamsCompressed`, `objectsRemoved`, `notes[]` (Codes wie dort). `size` kann größer als die Eingabe sein; das wird offen angezeigt.
 
 ### `analysis` (PDF)
@@ -300,6 +327,7 @@ Wie `PdfAnalysis` in `src/lib/pdf/types.ts` (`fileSize`, `pdfVersion`, `pageCoun
 
 - Bild: `<stamm>-<suffix>.<ext>`; Suffix `konvertiert` (Konverter, nur wenn Zielformat = Eingabeformat, sonst ohne Suffix wie bisher), `komprimiert`, `skaliert`. Endungen `jpg`, `png`, `webp`, `bmp`, `ico`. Fallback-Stamm `bild`.
 - PDF: `<stamm>-<level>.pdf`, Fallback-Stamm `dokument`.
+- Audio: `<stamm>.<ext>`, Suffix `-konvertiert` nur, wenn Zielformat = Eingabeformat (wie beim Bildkonverter). Endungen `mp3`, `wav`, `flac`, `ogg`; MIME `audio/mpeg`, `audio/wav`, `audio/flac`, `audio/ogg`. Fallback-Stamm `audio`.
 - Eindeutigkeit innerhalb eines Stapels (`a-2.webp`) stellt das Frontend über das `download`-Attribut her.
 
 ## 6. Grenzwerte (Startwerte, konfigurierbar)
@@ -312,11 +340,15 @@ Wie `PdfAnalysis` in `src/lib/pdf/types.ts` (`fileSize`, `pdfVersion`, `pageCoun
 | PDF-Eingabe | 100.000.000 Bytes | API (streamend) + Worker |
 | PDF-Ergebnisse gesamt | 300.000.000 Bytes | Worker |
 | Pixel je neu kodiertem PDF-Bild | 40.000.000 | Worker |
+| Audio-Eingabe | 104.857.600 Bytes | API (streamend) + Worker |
+| Audio-Dauer | 1800 s | Worker (Header, dann beim Dekodieren gezählt) |
+| Audio-Kanäle / Abtastrate | 8 / 192.000 Hz | Worker |
+| Audio-Ausgabe | 419.430.400 Bytes | Worker während des Schreibens |
 | Auftragsgültigkeit | 3600 s ab Annahme | API/Cleanup |
 | Aktive Aufträge je Sitzung | 3 | API |
 | Aktive Aufträge global | 50 | API |
 | Erstellungen je Minute | 10 je Sitzung und 10 je IP | API (Redis, prozessübergreifend) |
-| Prozesszeit | 120 s Bild, 300 s PDF gesamt | Worker (Kindprozess wird beendet) |
+| Prozesszeit | 120 s Bild, 300 s PDF gesamt, 300 s Audio | Worker (Kindprozess wird beendet) |
 | Speicherbudget | 5 GB inkl. Reservierungen | API (Annahme) + Worker (Schreiben) |
 | Cleanup-Intervall | 60 s | Cleanup-Dienst |
 | Physische Löschung nach Ablauf/Löschung | spätestens 10 min (Cleanup-Fenster + Download-Grenze) | Cleanup |
@@ -352,7 +384,7 @@ cleanup:    expired/deleted/Reservierungen/verwaist ─▶ Dateien löschen ─�
 - Speicher: zufällige interne Schlüssel (`jobs/<job_id>/input`, `jobs/<job_id>/results/<result_id>/<lease_token>`, `spool/<reservation_id>`), Verzeichnisse `0700`, Dateien `0600`, atomare Veröffentlichung über Temp-Datei + `os.replace`. Kein Benutzerpfad im Storage.
 - Speicherbudget (eine Tabelle `storage_usage` bzw. Summe über Reservierungen, Prüfung per bedingtem Update):
   - Annahme: Upload-Reservierung = maximale Eingabegröße des Werkzeugs, nach dem Upload auf die tatsächliche Größe gekürzt.
-  - Laufender Auftrag: zusätzlich eine Arbeitsreserve für temporäre Ergebnisdateien (Bild 104.857.600, PDF 100.000.000 je gleichzeitig geschriebener Variante). Da nur wenige Aufträge gleichzeitig laufen (ein Kindprozess je Worker), blockiert das nicht die Annahme.
+  - Laufender Auftrag: zusätzlich eine Arbeitsreserve für temporäre Ergebnisdateien (Bild 104.857.600, PDF 100.000.000 je gleichzeitig geschriebener Variante, Audio 419.430.400). Da nur wenige Aufträge gleichzeitig laufen (ein Kindprozess je Worker), blockiert das nicht die Annahme.
   - Veröffentlichung: Vor dem bedingten Update wird die tatsächliche Ergebnisgröße reserviert; reicht das Budget nicht → Ergebnis `storage-full`, eigene Datei löschen. Das PDF-Gesamtbudget 300.000.000 je Auftrag wird zusätzlich geprüft (`result-too-large`).
   - Freigabe bei physischer Löschung; Arbeitsreserve beim Endzustand.
 
