@@ -451,10 +451,15 @@
     @apply min-h-11 w-full rounded-control border border-border-control bg-surface px-3.5 py-2 text-[1.0625rem] text-ink;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
+  .input:hover:not(:disabled, :focus-visible),
+  .select:hover:not(:disabled, :focus-visible) {
+    @apply border-muted;
+  }
+  /* Mint-Fokus: Rand, Umrandung und weicher Schein in Fokusfarbe. */
   .input:focus-visible,
   .select:focus-visible {
     @apply border-focus outline-2 outline-offset-0 outline-focus;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-focus) 22%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-focus) 20%, transparent);
   }
   .input:disabled,
   .select:disabled {
