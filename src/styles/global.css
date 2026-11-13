@@ -188,7 +188,6 @@
     .page-section          vertikaler Abstand zwischen Seitenabschnitten
     .page-eyebrow          kleine Zeile über einer Überschrift (z. B. Produktname)
     .page-title / .page-lead  Seitenüberschrift (h1) und Einleitungstext
-    .hero / .hero-title / .hero-lead  zentrierter Einstieg der Startseite
     .section-title         Abschnittsüberschrift (h2)
     .step-title            zusätzlich zu .section-title: nummerierte Schritte der Werkzeugoberfläche
     .section-kicker        kleine Gruppenüberschrift (h3)
@@ -211,9 +210,7 @@
   Karten
     .card                  Fläche mit Haarlinie, Akzentkante oben und dezentem Verlauf
     .card-muted            ruhige Fläche mit Haarlinie, ohne Akzentkante (z. B. Optionsbereich)
-    .card-link             gesamte Karte als Link (auf <a>), Hover/Fokus-Zustand
     .card-title            Kartenüberschrift
-    .card-icon             Symbolfläche in einer Karte
 
   Formulare
     .field / .field-row / .label / .hint / .field-error
@@ -256,26 +253,18 @@
     letter-spacing: -0.016em;
   }
   /* Titel nach .mi-hero, Einleitung nach .mi-lead-airy. */
-  .page-title,
-  .hero-title {
+  .page-title {
     @apply font-semibold text-balance;
     font-size: clamp(2.25rem, 5vw, 3.5rem);
     line-height: 1.07;
     letter-spacing: -0.01em;
   }
-  .page-lead,
-  .hero-lead {
+  .page-lead {
     @apply mt-4 max-w-2xl text-muted text-pretty;
     font-size: clamp(1.125rem, 1.8vw, 1.5rem);
     font-weight: 300;
     line-height: 1.5;
     letter-spacing: -0.016em;
-  }
-  .hero {
-    @apply mx-auto flex max-w-4xl flex-col items-center pt-4 pb-4 text-center sm:pt-10;
-  }
-  .hero-lead {
-    @apply mx-auto mt-5;
   }
   /* Abschnittsüberschrift nach .mi-display-md. */
   .section-title {
@@ -415,7 +404,6 @@
   /* Karten */
   /* Nach .mi-card: Haarlinie, 2px-Akzentkante oben, Radius 14px, dezenter Verlauf. */
   .card,
-  .card-link,
   .variant-card {
     @apply rounded-card border border-border bg-surface;
     border-top: 2px solid var(--mi-card-edge);
@@ -427,30 +415,10 @@
   .card-muted {
     @apply rounded-card border border-border bg-surface-muted p-5 sm:p-6;
   }
-  .card-link {
-    @apply relative block p-6 text-ink no-underline;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  .card-link:hover {
-    @apply border-border-strong;
-    border-top-color: var(--color-accent);
-    box-shadow: var(--shadow-lift);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .card-link:hover {
-      transform: translateY(-4px);
-    }
-  }
-  .card-link:focus-visible {
-    @apply outline-3 outline-offset-3 outline-focus;
-  }
   .card-title {
     @apply text-xl font-semibold;
     font-family: var(--font-display);
     letter-spacing: -0.022em;
-  }
-  .card-icon {
-    @apply flex size-11 shrink-0 items-center justify-center rounded-control border border-border bg-accent-soft text-accent;
   }
 
   /* Formulare */
