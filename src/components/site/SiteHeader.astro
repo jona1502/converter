@@ -37,6 +37,11 @@ const operations: { id: ToolOperation; label: string }[] = [
         })}
       </ul>
     </nav>
+    {/* Ohne JavaScript verborgen (hidden); das Skript unten blendet den Umschalter ein. */}
+    <button type="button" class="theme-toggle" aria-pressed="false" aria-label="Helles Design" title="Helles Design" hidden>
+      <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+      <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" /></svg>
+    </button>
   </div>
 </header>
 
@@ -72,10 +77,18 @@ const operations: { id: ToolOperation; label: string }[] = [
   @media (prefers-reduced-motion: no-preference) {
     details[open] .nav-panel { animation: nav-panel-in .18s ease-out; }
   }
+  .theme-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-ink); cursor: pointer; transition: background-color .2s ease; }
+  .theme-toggle[hidden] { display: none; }
+  .theme-toggle:hover { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
+  /* Dunkel: Sonne zeigt den Wechsel ins Helle an; hell: Mond. */
+  .theme-icon-moon { display: none; }
+  :global(:root[data-theme="light"]) .theme-icon-sun { display: none; }
+  :global(:root[data-theme="light"]) .theme-icon-moon { display: block; }
   @keyframes nav-panel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
   @media (max-width: 767px) {
     .header-inner { flex-wrap: wrap; gap: 0; padding-top: .25rem; padding-bottom: .25rem; }
-    .tool-navigation { width: 100%; }
+    .tool-navigation { width: 100%; order: 2; }
+    .theme-toggle { order: 1; }
     .nav-groups { flex-wrap: wrap; justify-content: space-between; gap: 0; }
     .nav-dropdown { position: static; }
     summary { gap: .1rem; padding: .4rem .2rem; font-size: .75rem; letter-spacing: -.01em; }
@@ -85,6 +98,24 @@ const operations: { id: ToolOperation; label: string }[] = [
 </style>
 
 <script>
+  // Theme-Umschalter: Zustand aus data-theme (vom Head-Skript gesetzt) übernehmen.
+  // localStorage wird nur nach einem Klick geschrieben.
+  document.querySelectorAll<HTMLButtonElement>('.theme-toggle').forEach(toggle => {
+    const root = document.documentElement;
+    const sync = () => toggle.setAttribute('aria-pressed', String(root.dataset.theme === 'light'));
+    sync();
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      const light = root.dataset.theme !== 'light';
+      if (light) root.dataset.theme = 'light';
+      else delete root.dataset.theme;
+      document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', light ? 'light' : 'dark');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5fbfa' : '#070b0d');
+      try { localStorage.setItem('mi-theme', light ? 'light' : 'dark'); } catch { /* Speicher gesperrt: Wahl gilt nur für diese Seite. */ }
+      sync();
+    });
+  });
+
   document.querySelectorAll<HTMLElement>('.tool-navigation').forEach(nav => {
     const menus = [...nav.querySelectorAll<HTMLDetailsElement>('.nav-dropdown')];
     const closeOthers = (except?: HTMLDetailsElement) => menus.forEach(menu => { if (menu !== except) menu.open = false; });
