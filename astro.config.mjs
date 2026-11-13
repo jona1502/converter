@@ -11,6 +11,10 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    // npm run dev: API-Aufrufe an den lokalen Compose-Stack (nginx auf 8080, der an die Go-API weiterleitet).
+    server: {
+      proxy: { '/api': { target: 'http://127.0.0.1:8080' } },
+    },
   },
   security: {
     // Content-Security-Policy als <meta>-Tag im Build. connect-src 'self' begrenzt

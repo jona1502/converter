@@ -4,7 +4,7 @@ name: mi-converter
 x-settings: &settings
   CONVERTER_ENVIRONMENT: development
   CONVERTER_SECRET_KEY: ${CONVERTER_SECRET_KEY:-local-development-only-change-before-hosting-2026}
-  CONVERTER_ALLOWED_ORIGINS: ${CONVERTER_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+  CONVERTER_ALLOWED_ORIGINS: ${CONVERTER_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:4321,http://127.0.0.1:4321}
   CONVERTER_SESSION_COOKIE_SECURE: "false"
   CONVERTER_DATABASE_URL: postgres://converter:converter@db:5432/converter?sslmode=disable
   CONVERTER_REDIS_URL: redis://broker:6379/0
