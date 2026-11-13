@@ -85,7 +85,7 @@ func NewClient(url string) (*redis.Client, error) {
 	opts.DialTimeout = 2 * time.Second
 	opts.ReadTimeout = 2 * time.Second
 	opts.WriteTimeout = 2 * time.Second
-	opts.MaxRetries = 0
+	opts.MaxRetries = -1
 	return redis.NewClient(opts), nil
 }
 

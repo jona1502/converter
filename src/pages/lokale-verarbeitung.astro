@@ -1,26 +1,78 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Dateiverarbeitung" description="Upload, Serververarbeitung, temporäre Speicherung und Löschung Ihrer Dateien.">
+<BaseLayout title="Dateiverarbeitung" description="Upload nach ausdrücklichem Start, temporäre Serverspeicherung und befristete Downloads: So werden Ihre Dateien verarbeitet.">
   <article class="page-container-narrow">
-    <h1 class="page-title">Dateiverarbeitung</h1>
-    <p class="page-lead">Die Werkzeuge verarbeiten Ihre Dateien auf dem Server. Erst mit „Konvertieren“, „Komprimieren“ oder „Skalieren“ werden Dateien hochgeladen.</p>
-    <div class="prose-content mt-10">
-      <h2>Upload und Verarbeitung</h2>
-      <p>Die Dateiauswahl startet keinen Upload. Der Browser prüft bei Bildern zunächst Dateisignatur und Abmessungen. Nach Ihrem Start werden Datei und Einstellungen an die API dieser Website übertragen. Ein separater Prozess erzeugt die Ergebnisse; die Seite fragt den tatsächlichen Status ab.</p>
-      <h2>Temporäre Speicherung und Löschung</h2>
-      <p>Originale und Ergebnisse liegen temporär im privaten Dateispeicher auf dem Server. Die Ablaufzeit wird beim Auftrag angezeigt. Nach Ablauf ist der Download gesperrt und die Dateien werden automatisch entfernt. Mit „Entfernen“ oder „Zurücksetzen“ fordern Sie die Löschung früher an und sperren den Auftrag.</p>
-      <p>Bei Verbindungsverlust kann ein abgebrochener Upload noch kurzzeitig auf dem Server liegen und wird automatisch bereinigt. Bewahren Sie Ihre Originaldatei auf. Heruntergeladene Ergebnisse bleiben auf Ihrem Gerät.</p>
-      <h2>Anonyme Sitzung</h2>
-      <p>Ein technisch notwendiges Sitzungscookie ordnet Aufträge Ihrem Browser zu. Es ist nicht durch Seitenskripte lesbar. Schreibende Anfragen werden zusätzlich durch ein CSRF-Token geschützt. Dateien und Tokens werden nicht in Local Storage oder IndexedDB gespeichert.</p>
-      <h2>Bilder und Metadaten</h2>
-      <p>Bilder werden neu kodiert. EXIF-Daten einschließlich GPS-Position und Farbprofile werden entfernt oder verändert. Die Bildausrichtung wird berücksichtigt. Animierte Bilder werden abgelehnt. Prüfen Sie wichtige Farben und Metadaten im Ergebnis.</p>
-      <h2>PDF-Dateien</h2>
-      <p>PDFs werden neu geschrieben; digitale Signaturen werden ungültig. Verschlüsselte PDFs werden abgelehnt. Text und Vektoren bleiben erhalten, bestimmte Bilder bleiben unverändert. Eine kleinere Datei ist nicht garantiert; auch größere Ergebnisse sind möglich.</p>
-      <h2>Grenzen und Verbindungen</h2>
-      <p>Die Verarbeitung braucht eine Serververbindung und unterliegt Datei-, Zeit-, Speicher- und Auftragsgrenzen. Ausgabeformate werden vom Server abgefragt. Skripte dürfen nur Verbindungen zum Origin dieser Website aufbauen. Es gibt keinen automatischen Wechsel zur lokalen Verarbeitung.</p>
-      <h2>Angaben vor Veröffentlichung</h2>
-      <p>Diese Seite beschreibt die technische Verarbeitung. Betreiberangaben, Impressum und vollständige rechtliche Datenschutzhinweise müssen vor öffentlicher Veröffentlichung ergänzt werden.</p>
+    <header>
+      <p class="page-eyebrow mb-2">Nutzung und Daten</p>
+      <h1 class="page-title">Dateiverarbeitung</h1>
+      <p class="page-lead">Die Werkzeuge verarbeiten Ihre Dateien auf dem Server. Hier erfahren Sie, wann der Upload beginnt, wie lange Ergebnisse verfügbar sind und was sich an Dateien ändern kann.</p>
+    </header>
+
+    <dl class="processing-facts card mt-6">
+      <div><dt>Upload</dt><dd>Nach Ihrem Start</dd></div>
+      <div><dt>Verarbeitung</dt><dd>Auf dem Server</dd></div>
+      <div><dt>Downloads</dt><dd>Zeitlich befristet</dd></div>
+    </dl>
+
+    <div class="processing-sections">
+      <section aria-labelledby="upload">
+        <h2 id="upload" class="section-title">Upload und Verarbeitung</h2>
+        <p>Die Dateiauswahl startet keinen Upload. Der Browser prüft bei Bildern zunächst Dateisignatur und Abmessungen. Erst mit „Konvertieren“, „Komprimieren“ oder „Skalieren“ werden Datei und Einstellungen an den Server dieser Website übertragen.</p>
+        <p>Die Seite zeigt den Status des Auftrags und bietet fertige Ergebnisse zum Download an. Die Verarbeitung benötigt eine Serververbindung. Es gibt keinen automatischen Wechsel zur lokalen Verarbeitung.</p>
+      </section>
+
+      <section aria-labelledby="speicherung">
+        <h2 id="speicherung" class="section-title">Temporäre Speicherung und Löschung</h2>
+        <p>Originale und Ergebnisse liegen temporär im privaten Dateispeicher auf dem Server. Die Ablaufzeit wird beim Auftrag angezeigt. Nach Ablauf sind neue Downloads gesperrt; die automatische Bereinigung entfernt anschließend die Dateien.</p>
+        <p>Mit „Entfernen“ oder „Zurücksetzen“ fordern Sie die frühere Löschung an. Bei Serverausfällen kann sich die Bereinigung verzögern und wird nach dem Wiederanlauf fortgesetzt.</p>
+        <p>Das Schließen der Seite garantiert keine sofortige Löschung. Bei Uploadabbruch oder Verbindungsverlust können Dateien bis zur automatischen Bereinigung auf dem Server verbleiben. Bewahren Sie Ihre Originaldatei auf; heruntergeladene Ergebnisse bleiben auf Ihrem Gerät.</p>
+      </section>
+
+      <div class="processing-file-notes">
+        <section class="card" aria-labelledby="bilder">
+          <h2 id="bilder" class="section-title">Bilder und Metadaten</h2>
+          <p>Bilder werden neu kodiert. Metadaten wie EXIF-Daten einschließlich GPS-Position und Farbprofile können entfernt oder verändert werden. Eine vollständige Entfernung von Metadaten ist nicht gewährleistet.</p>
+          <p>Die Bildausrichtung wird berücksichtigt; animierte Bilder werden abgelehnt. Prüfen Sie wichtige Farben und Metadaten im Ergebnis.</p>
+        </section>
+        <section class="card" aria-labelledby="pdf">
+          <h2 id="pdf" class="section-title">PDF-Dateien</h2>
+          <p>PDFs werden neu geschrieben. Digitale Signaturen können ungültig werden; der Erhalt von PDF/A ist nicht garantiert. Verschlüsselte PDFs werden abgelehnt.</p>
+          <p>Text und Vektoren bleiben erhalten; bestimmte Bilder bleiben unverändert. Eine kleinere Datei ist nicht garantiert. Vergleichen Sie die tatsächlichen Größen der drei Varianten.</p>
+        </section>
+      </div>
+
+      <section aria-labelledby="sitzung">
+        <h2 id="sitzung" class="section-title">Sitzung und Verbindungen</h2>
+        <p>Ein technisch notwendiges Sitzungscookie ordnet Aufträge Ihrem Browser zu. Es ist nicht durch Seitenskripte lesbar. Schreibende Anfragen sind zusätzlich gegen fremde Anfragen geschützt.</p>
+        <p>Dateien und Tokens werden nicht in Local Storage oder IndexedDB gespeichert. Skripte dürfen nur Verbindungen zur Herkunftsadresse dieser Website aufbauen.</p>
+      </section>
+
+      <section aria-labelledby="grenzen">
+        <h2 id="grenzen" class="section-title">Grenzen und Fehler</h2>
+        <p>Datei-, Zeit-, Speicher- und Auftragsgrenzen schützen die Verarbeitung. Die Werkzeuge zeigen die vom Server gelieferten Grenzen und verfügbaren Ausgabeformate an.</p>
+        <p>Bei einer fehlgeschlagenen Verarbeitung erscheint der Fehler bei der betreffenden Datei oder PDF-Variante. Bereits fertige Ergebnisse können bis zu ihrem Ablauf heruntergeladen werden. Ein Serverausfall ermöglicht keine lokale Ersatzverarbeitung.</p>
+      </section>
+
+      <section class="notice notice-warn" aria-labelledby="veroeffentlichung">
+        <h2 id="veroeffentlichung" class="notice-title">Angaben vor Veröffentlichung</h2>
+        <p>Diese Seite beschreibt die technische Verarbeitung. Betreiberangaben, Impressum und vollständige rechtliche Datenschutzhinweise müssen vor öffentlicher Veröffentlichung ergänzt werden.</p>
+      </section>
     </div>
+    <p class="mt-8"><a href="/" class="link">Zu den Werkzeugen</a></p>
   </article>
 </BaseLayout>
+
+<style>
+  .processing-facts { display: grid; gap: 1rem; }
+  .processing-facts dt { color: var(--color-muted); font-size: .875rem; }
+  .processing-facts dd { margin: .25rem 0 0; font-weight: 600; }
+  .processing-sections { display: grid; gap: 2rem; margin-top: 2rem; }
+  .processing-sections p { margin-top: .75rem; }
+  .processing-file-notes { display: grid; gap: 1rem; }
+  .processing-file-notes > section { min-width: 0; }
+  @media (min-width: 640px) {
+    .processing-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .processing-file-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

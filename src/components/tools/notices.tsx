@@ -4,10 +4,10 @@ import type { SupportState } from './useImageBatch';
 export function ImageProcessingNotice() {
   return (
     <div className="notice notice-info text-sm">
-      <p className="notice-title">Hinweis zu Metadaten</p>
+      <p className="notice-title">Metadaten und Animation</p>
       <p className="mt-1">
         Jedes Bild wird neu kodiert. Dabei werden Metadaten wie EXIF-Daten (einschließlich einer GPS-Position) und
-        eingebettete Farbprofile entfernt oder verändert. Animierte Bilder werden nicht unterstützt und abgelehnt.{' '}
+        eingebettete Farbprofile entfernt oder verändert. Eine vollständige Entfernung von Metadaten ist nicht gewährleistet. Animierte Bilder werden nicht unterstützt und abgelehnt.{' '}
         <a href="/lokale-verarbeitung" className="link">
           Mehr zur Dateiverarbeitung
         </a>
@@ -18,7 +18,12 @@ export function ImageProcessingNotice() {
 
 /** Hinweis, wenn der Browser die nötigen Funktionen nicht bietet. Gibt null zurück, wenn alles verfügbar ist. */
 export function BrowserSupportNotice({ support }: { support: SupportState }) {
-  if (support.status !== 'unsupported') return <p className="notice notice-info">Erst nach ausdrücklichem Start werden Ihre Dateien auf den Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Entfernen oder Zurücksetzen fordert die frühere Löschung an.</p>;
+  if (support.status !== 'unsupported') return (
+    <div className="notice notice-info">
+      <p className="notice-title">Upload und Speicherung</p>
+      <p className="mt-1">Erst nach ausdrücklichem Start werden Ihre Dateien auf den Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Entfernen oder Zurücksetzen fordert die frühere Löschung an.</p>
+    </div>
+  );
   return (
     <div className="notice notice-error" role="alert">
       <p className="notice-title">Der Verarbeitungsserver ist nicht verfügbar.</p>

@@ -65,7 +65,7 @@ export function DropZone({
 
   return (
     <div
-      className="drop-zone"
+      className="drop-zone min-w-0 items-stretch gap-4 py-6 text-left sm:py-6"
       data-dragging={dragging ? 'true' : undefined}
       data-disabled={disabled ? 'true' : undefined}
       onDragEnter={(event) => {
@@ -91,11 +91,12 @@ export function DropZone({
         if (!disabled) deliver(event.dataTransfer.files);
       }}
     >
-      <svg className="size-10 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-      </svg>
-      <p className="text-xl font-semibold tracking-tight">{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
-      <p className="hint">oder</p>
+      <div className="flex min-w-0 items-center gap-3">
+        <svg className="size-8 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        </svg>
+        <p className="text-lg font-semibold">{dragging ? 'Zum Hinzufügen loslassen' : title}</p>
+      </div>
       <label htmlFor={inputId} className="sr-only">
         {buttonLabel} (Dateifeld)
       </label>
@@ -118,7 +119,7 @@ export function DropZone({
       <button
         ref={buttonRef}
         type="button"
-        className="btn btn-primary"
+        className="btn btn-secondary self-start"
         disabled={disabled}
         aria-describedby={children ? hintId : undefined}
         onClick={() => inputRef.current?.click()}
@@ -126,7 +127,7 @@ export function DropZone({
         {buttonLabel}
       </button>
       {children && (
-        <div id={hintId} className="hint max-w-prose">
+        <div id={hintId} className="hint flex max-w-prose flex-col gap-1 border-t border-border pt-3">
           {children}
         </div>
       )}
