@@ -127,6 +127,11 @@ func (s *Local) Path(key string) (string, error) {
 	return filepath.Join(s.root, filepath.FromSlash(key)), nil
 }
 
+// testHookBeforeMkdir wird nur in Tests gesetzt (export_test.go), um ein
+// paralleles Delete zwischen Prüfung und Anlegen eines Verzeichnisses
+// deterministisch nachzustellen.
+var testHookBeforeMkdir func(dir string)
+
 // ensureParent legt fehlende Elternverzeichnisse mit 0700 an und sichert
 // jeden neuen Eintrag per fsync des übergeordneten Verzeichnisses.
 func (s *Local) ensureParent(path string) error {
@@ -149,6 +154,9 @@ func (s *Local) ensureParent(path string) error {
 	}
 	for i := len(missing) - 1; i >= 0; i-- {
 		dir := missing[i]
+		if testHookBeforeMkdir != nil {
+			testHookBeforeMkdir(dir)
+		}
 		if err := os.Mkdir(dir, DirMode); err != nil && !errors.Is(err, fs.ErrExist) {
 			return fmt.Errorf("storage: Verzeichnis anlegen: %w", err)
 		}
@@ -176,15 +184,21 @@ type Writer struct {
 	path string
 }
 
-// retryOnVanishedDir wiederholt op, falls ein paralleles Delete ein gerade
-// angelegtes, noch leeres Elternverzeichnis wieder entfernt hat.
+// vanishedDirAttempts begrenzt die Wiederholungen, wenn parallele Deletes leere
+// Elternverzeichnisse entfernen.
+const vanishedDirAttempts = 10
+
+// retryOnVanishedDir wiederholt ensureParent und op, falls ein paralleles
+// Delete ein noch leeres Elternverzeichnis entfernt hat: entweder bevor op die
+// Datei anlegt oder während ensureParent die Verzeichniskette aufbaut (dann
+// meldet Mkdir ENOENT für das verschwundene übergeordnete Verzeichnis).
 func (s *Local) retryOnVanishedDir(path string, op func() error) error {
 	var err error
-	for range 3 {
-		if err = s.ensureParent(path); err != nil {
-			return err
+	for range vanishedDirAttempts {
+		if err = s.ensureParent(path); err == nil {
+			err = op()
 		}
-		if err = op(); !errors.Is(err, fs.ErrNotExist) {
+		if !errors.Is(err, fs.ErrNotExist) {
 			return err
 		}
 	}
