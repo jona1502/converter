@@ -2,6 +2,8 @@ package jobs_test
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"miconverter/server/internal/jobs"
@@ -102,6 +104,22 @@ func TestDetectAudioFormatKeepsOtherTypesApart(t *testing.T) {
 	for _, head := range [][]byte{[]byte("RIFF\x24\x00\x00\x00WAVEfmt "), []byte("fLaC"), []byte("OggS\x00\x02"), []byte("ID3\x04\x00\x00\x00\x00\x00\x0a")} {
 		if got := jobs.DetectImageFormat(head); got != "" {
 			t.Errorf("Audio %q als Bild %q erkannt", head[:4], got)
+		}
+	}
+}
+
+// Echte, mit soundfile/libsndfile erzeugte Dateien (0,1 s Sinus; MP3 von
+// LAME als MPEG-2.5 bei 8 kHz, Opus bei 48 kHz).
+func TestDetectAudioFormatRealFiles(t *testing.T) {
+	for file, want := range map[string]string{
+		"tone.wav": "wav", "tone.flac": "flac", "tone.ogg": "ogg", "tone.opus": "ogg", "tone.mp3": "mp3",
+	} {
+		data, err := os.ReadFile(filepath.Join("testdata", "audio", file))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := jobs.DetectAudioFormat(data[:min(len(data), jobs.SniffBytes)]); got != want {
+			t.Errorf("%s: %q, erwartet %q", file, got, want)
 		}
 	}
 }
