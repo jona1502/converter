@@ -26,3 +26,9 @@ test('Serververarbeitung und Veröffentlichungsvoraussetzungen bleiben ohne Java
   await context.close();
 });
 
+test('Dateiverarbeitung erklärt Audio: Tags und Cover gehen verloren, kein M4A/AAC', async ({ page }) => {
+  await page.goto('/lokale-verarbeitung');
+  const audio = page.getByRole('region', { name: 'Audiodateien' });
+  await expect(audio).toContainText('eingebettete Cover gehen dabei verloren');
+  await expect(audio).toContainText('nicht aber M4A oder AAC');
+});

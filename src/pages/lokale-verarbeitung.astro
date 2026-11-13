@@ -18,7 +18,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="processing-sections">
       <section aria-labelledby="upload">
         <h2 id="upload" class="section-title">Upload und Verarbeitung</h2>
-        <p>Die Dateiauswahl startet keinen Upload. Der Browser prüft bei Bildern zunächst Dateisignatur und Abmessungen. Erst mit „Konvertieren“, „Komprimieren“ oder „Skalieren“ werden Datei und Einstellungen an den Server dieser Website übertragen.</p>
+        <p>Die Dateiauswahl startet keinen Upload. Der Browser prüft bei Bildern zunächst Dateisignatur und Abmessungen, bei Audiodateien Dateisignatur und Größe. Erst mit „Konvertieren“, „Komprimieren“ oder „Skalieren“ werden Datei und Einstellungen an den Server dieser Website übertragen.</p>
         <p>Die Seite zeigt den Status des Auftrags und bietet fertige Ergebnisse zum Download an. Die Verarbeitung benötigt eine Serververbindung. Es gibt keinen automatischen Wechsel zur lokalen Verarbeitung.</p>
       </section>
 
@@ -39,6 +39,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <h2 id="pdf" class="section-title">PDF-Dateien</h2>
           <p>PDFs werden neu geschrieben. Digitale Signaturen können ungültig werden; der Erhalt von PDF/A ist nicht garantiert. Verschlüsselte PDFs werden abgelehnt.</p>
           <p>Text und Vektoren bleiben erhalten; bestimmte Bilder bleiben unverändert. Eine kleinere Datei ist nicht garantiert. Vergleichen Sie die tatsächlichen Größen der drei Varianten.</p>
+        </section>
+        <section class="card" aria-labelledby="audio">
+          <h2 id="audio" class="section-title">Audiodateien</h2>
+          <p>Audiodateien werden neu kodiert. Tags und Metadaten wie Titel, Interpret und Album sowie eingebettete Cover gehen dabei verloren. Die Abtastrate bleibt erhalten; MP3 und OGG sind verlustbehaftet.</p>
+          <p>Unterstützt werden MP3, WAV, FLAC und OGG, nicht aber M4A oder AAC. Dauer, Kanäle und Abtastrate prüft erst der Server; zu lange Dateien werden abgelehnt.</p>
         </section>
       </div>
 
