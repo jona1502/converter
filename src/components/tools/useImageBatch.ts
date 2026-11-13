@@ -197,8 +197,8 @@ export function useImageBatch(tool: Tool = 'image-convert') {
   }, [releaseAll, update]);
 
   const processAll = useCallback(
-    async (options: ProcessOptions | ((entry: BatchEntry) => ProcessOptions), suffix: SuffixInput = ''): Promise<RunSummary> => {
-      const targets = entriesRef.current.filter(isProcessable);
+    async (options: ProcessOptions | ((entry: BatchEntry) => ProcessOptions), suffix: SuffixInput = '', include: (entry: BatchEntry) => boolean = () => true): Promise<RunSummary> => {
+      const targets = entriesRef.current.filter(entry => isProcessable(entry) && include(entry));
       if (support.status !== 'ready' || processingRef.current || !targets.length) return {total: 0, done: 0, failed: 0};
       const resolved = targets.map(entry => typeof options === 'function' ? options(entry) : options);
       const names=makeUniqueFileNames(targets.map((entry,index)=>buildOutputFileName(entry.name,resolved[index]!.format,typeof suffix==='function'?suffix(entry,resolved[index]!):suffix)));
