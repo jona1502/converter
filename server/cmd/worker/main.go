@@ -44,7 +44,7 @@ func run() int {
 		logger.Error("storage unavailable")
 		return 1
 	}
-	rt := jobs.NewRuntime(pool, jobs.RuntimeConfig{ImageMaxOutputBytes: cfg.ImageMaxOutputBytes, PDFMaxResultsTotalBytes: cfg.PdfMaxResultsTotalBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, ImageTimeout: cfg.ImageTimeout, PDFTimeout: cfg.PdfTimeout})
+	rt := jobs.NewRuntime(pool, jobs.RuntimeConfig{ImageMaxOutputBytes: cfg.ImageMaxOutputBytes, PDFMaxResultsTotalBytes: cfg.PdfMaxResultsTotalBytes, AudioMaxOutputBytes: cfg.AudioMaxOutputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, ImageTimeout: cfg.ImageTimeout, PDFTimeout: cfg.PdfTimeout, AudioTimeout: cfg.AudioTimeout})
 	runner := converter.NewRunner()
 	processor := converter.NewProcessor(runner, cfg)
 	worker := jobs.NewWorker(rt, st, processor, jobs.WorkerConfig{Logger: logger})
