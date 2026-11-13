@@ -263,3 +263,50 @@ def test_output_limit(tmp_path: Path, limits: Limits, output_format: str) -> Non
         )
     assert exc.value.code == "result-too-large"
     assert target.stat().st_size <= 500
+
+
+@pytest.mark.parametrize(
+    ("data", "code"),
+    [
+        (b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00" + b"\x00" * 30, "decode-failed"),
+        (b"fLaC" + b"\x00" * 60, "decode-failed"),
+        (b"OggS" + b"\x00" * 60, "decode-failed"),
+        (b"ID3\x04\x00\x00\x00\x00\x00\x00" + b"\x00" * 200, "decode-failed"),
+        (b"\xff\xfb\x90\x00" + b"\x00" * 10, "decode-failed"),
+        (b"%PDF-1.7\n" + b"\x00" * 100, "decode-failed"),
+    ],
+    ids=["wav-header", "flac-header", "ogg-page", "id3-only", "mp3-frame", "pdf"],
+)
+def test_broken_and_fake_headers(tmp_path: Path, limits: Limits, data: bytes, code: str) -> None:
+    (tmp_path / "input").write_bytes(data)
+    target = target_file(tmp_path / "output")
+    with pytest.raises(ProcessingError) as exc:
+        convert(tmp_path / "input", target, options(), limits)
+    assert exc.value.code in {code, "unsupported-type"}
+    assert target.stat().st_size == 0
+
+
+def test_truncated_flac_fails_or_is_shorter(tmp_path: Path, limits: Limits) -> None:
+    write_input(tmp_path / "input", "flac", seconds=1)
+    data = (tmp_path / "input").read_bytes()
+    (tmp_path / "input").write_bytes(data[: len(data) // 2])
+    try:
+        details, _ = run(tmp_path, limits)
+    except ProcessingError as exc:
+        assert exc.code == "decode-failed"
+    else:
+        assert details["durationSeconds"] < 1
+
+
+def test_other_libsndfile_formats_are_rejected(tmp_path: Path, limits: Limits) -> None:
+    sf.write(tmp_path / "input", sine(1), RATE, format="AIFF", subtype="PCM_16")
+    with pytest.raises(ProcessingError) as exc:
+        run(tmp_path, limits)
+    assert exc.value.code == "unsupported-type"
+
+
+def test_empty_audio_is_rejected(tmp_path: Path, limits: Limits) -> None:
+    sf.write(tmp_path / "input", np.zeros((0, 1)), RATE, format="WAV", subtype="PCM_16")
+    with pytest.raises(ProcessingError) as exc:
+        run(tmp_path, limits)
+    assert exc.value.code == "decode-failed"
