@@ -9,6 +9,7 @@ import pytest
 
 from converter.errors import ProtocolError
 from converter.options import (
+    AudioOptions,
     ImageOptions,
     PdfOptions,
     ResizeDimensions,
@@ -153,3 +154,33 @@ def test_json_numbers_keep_their_type() -> None:
     # Ganzzahlen sind als Prozent/Qualität zulässig.
     options = parse_options({**IMAGE, "quality": 1})
     assert isinstance(options, ImageOptions) and options.quality == 1.0
+
+
+# --- Audio ----------------------------------------------------------------------
+
+
+def test_audio_option_defaults() -> None:
+    parsed = parse_options({"tool": "audio-convert", "format": "mp3"})
+    assert parsed == AudioOptions(format="mp3", quality=0.8, channels="original")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"tool": "audio-convert"},
+        {"tool": "audio-convert", "format": "m4a"},
+        {"tool": "audio-convert", "format": "MP3"},
+        {"tool": "audio-convert", "format": "original"},
+        {"tool": "audio-convert", "format": "mp3", "quality": 1.5},
+        {"tool": "audio-convert", "format": "mp3", "quality": "0.5"},
+        {"tool": "audio-convert", "format": "mp3", "quality": None},
+        {"tool": "audio-convert", "format": "mp3", "channels": "stereo"},
+        {"tool": "audio-convert", "format": "mp3", "channels": None},
+        {"tool": "audio-convert", "format": "mp3", "sampleRate": 44100},
+        {"tool": "audio-convert", "format": "mp3", "resize": {"mode": "none"}},
+    ],
+)
+def test_invalid_audio_options(value: object) -> None:
+    with pytest.raises(ProtocolError) as exc:
+        parse_options(value)
+    assert exc.value.code == "invalid-options"

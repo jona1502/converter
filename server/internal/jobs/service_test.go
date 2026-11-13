@@ -23,6 +23,7 @@ func defaultLimits() jobs.Limits {
 	return jobs.Limits{
 		ImageMaxInputBytes:   52_428_800,
 		PDFMaxInputBytes:     100_000_000,
+		AudioMaxInputBytes:   104_857_600,
 		StorageBudgetBytes:   5_000_000_000,
 		SessionMaxActiveJobs: 3,
 		GlobalMaxActiveJobs:  50,
@@ -110,7 +111,8 @@ func TestAdmitAndReleaseRestoreBudget(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if r.Bytes != 100_000_000 || r.SpoolKey != storage.SpoolKey(r.ID) {
+	// Audio ist mit 100 MiB die größte Eingabe und bestimmt die Reservierung.
+	if r.Bytes != 104_857_600 || r.SpoolKey != storage.SpoolKey(r.ID) {
 		t.Fatalf("Reservierung = %+v", r)
 	}
 	if b, n := e.reserved(t); b != r.Bytes || n != 1 {
@@ -210,11 +212,11 @@ func TestAdmitStorageFull(t *testing.T) {
 	if _, err := e.svc.Admit(e.ctx, e.session(t)); !errors.Is(err, jobs.ErrStorageFull) {
 		t.Fatalf("Budget: %v", err)
 	}
-	jobs.SetFreeBytes(e.svc, func() (uint64, error) { return 99_999_999, nil })
+	jobs.SetFreeBytes(e.svc, func() (uint64, error) { return 104_857_599, nil })
 	if _, err := e.svc.Admit(e.ctx, e.session(t)); !errors.Is(err, jobs.ErrStorageFull) {
 		t.Fatalf("Dateisystem: %v", err)
 	}
-	if b, n := e.reserved(t); b != 100_000_000 || n != 1 {
+	if b, n := e.reserved(t); b != 104_857_600 || n != 1 {
 		t.Fatalf("Fehlschläge haben reserviert: %d/%d", b, n)
 	}
 }
@@ -260,7 +262,7 @@ func TestParallelAdmitsRespectLimits(t *testing.T) {
 	if okSame > 3 || okAll != 7 {
 		t.Fatalf("gleiche Sitzung %d (≤3), gesamt %d (=7)", okSame, okAll)
 	}
-	if b, n := e.reserved(t); n != 7 || b != 7*100_000_000 {
+	if b, n := e.reserved(t); n != 7 || b != 7*104_857_600 {
 		t.Fatalf("Reservierungen %d, Bytes %d", n, b)
 	}
 }

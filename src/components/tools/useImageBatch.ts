@@ -74,7 +74,7 @@ export interface RunProgress {
 
 const PROCESSABLE: ReadonlySet<EntryStatus> = new Set(['ready', 'done', 'error']);
 
-export function isProcessable(entry: BatchEntry): boolean {
+export function isProcessable(entry: { readonly status: EntryStatus }): boolean {
   return PROCESSABLE.has(entry.status);
 }
 

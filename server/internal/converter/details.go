@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+
+	"miconverter/server/internal/apitypes"
 )
 
 // Struktur von details/analysis nach Vertrag §5. Der Parser darf keine
@@ -126,6 +128,39 @@ func ValidateImageDetails(raw []byte, limits Limits) (json.RawMessage, error) {
 		if *flags[i], err = o.boolean(k); err != nil {
 			return nil, detailsErr(err)
 		}
+	}
+	return json.Marshal(d)
+}
+
+var audioFormats = map[string]bool{"mp3": true, "wav": true, "flac": true, "ogg": true}
+
+// ValidateAudioDetails prüft details eines Audioergebnisses gegen die
+// Grenzen: Dauer bis zur Höchstdauer, Rate und Kanäle bis zu ihren Grenzen.
+func ValidateAudioDetails(raw []byte, limits Limits) (json.RawMessage, error) {
+	if len(raw) > MaxDetailsBytes {
+		return nil, detailsErr(errors.New("zu groß"))
+	}
+	o, err := parseObject(raw, []string{"format", "durationSeconds", "sampleRate", "channels", "qualityApplied"}, nil)
+	if err != nil {
+		return nil, detailsErr(err)
+	}
+	var d apitypes.AudioDetails
+	format, err := o.str("format", 8)
+	if err != nil || !audioFormats[format] {
+		return nil, detailsErr(errors.New("format"))
+	}
+	d.Format = apitypes.AudioFormat(format)
+	if d.DurationSeconds, err = o.number("durationSeconds", 0, float64(limits.AudioMaxDurationSeconds)); err != nil {
+		return nil, detailsErr(err)
+	}
+	if d.SampleRate, err = o.integer("sampleRate", 1, limits.AudioMaxSampleRate); err != nil {
+		return nil, detailsErr(err)
+	}
+	if d.Channels, err = o.integer("channels", 1, limits.AudioMaxChannels); err != nil {
+		return nil, detailsErr(err)
+	}
+	if d.QualityApplied, err = o.boolean("qualityApplied"); err != nil {
+		return nil, detailsErr(err)
 	}
 	return json.Marshal(d)
 }

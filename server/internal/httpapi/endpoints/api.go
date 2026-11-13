@@ -58,7 +58,7 @@ func (s sessions) CreateSession(ctx context.Context, h auth.TokenHash) (auth.Sto
 }
 
 func New(cfg *config.Config, pool *pgxpool.Pool, files *storage.Local, limiter *ratelimit.Limiter) (*API, error) {
-	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
+	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, AudioMaxInputBytes: cfg.AudioMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
 	if err != nil {
 		return nil, err
 	}
@@ -314,12 +314,22 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 		return httpapi.ServiceUnavailable()
 	}
 	inputs, outputs := report.ImageFormats()
-	out := apitypes.Capabilities{APIVersion: "1", Tools: []apitypes.Tool{"image-convert", "image-compress", "image-resize", "pdf-compress"}, Image: apitypes.ImageCapabilities{QualityFormats: []apitypes.OutputFormat{"jpeg", "webp"}, IcoSizes: []int{16, 32, 48, 64, 128, 256}, DefaultIcoSizes: []int{16, 32, 48, 256}, MaxFileBytes: a.cfg.ImageMaxInputBytes, MaxPixels: a.cfg.ImageMaxPixels, MaxEdge: a.cfg.ImageMaxEdge, MaxOutputBytes: a.cfg.ImageMaxOutputBytes}, Pdf: apitypes.PdfCapabilities{MaxFileBytes: a.cfg.PdfMaxInputBytes, MaxResultBytesTotal: a.cfg.PdfMaxResultsTotalBytes, MaxImagePixels: a.cfg.PdfImageMaxPixels}, Jobs: apitypes.JobCapabilities{TTLSeconds: int(a.cfg.JobTTL / time.Second), MaxActivePerSession: a.cfg.SessionMaxActiveJobs, MaxBatchFiles: 30, CreatePerMinute: a.cfg.SessionCreatesPerMinute}}
+	out := apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools(), Image: apitypes.ImageCapabilities{QualityFormats: []apitypes.OutputFormat{"jpeg", "webp"}, IcoSizes: []int{16, 32, 48, 64, 128, 256}, DefaultIcoSizes: []int{16, 32, 48, 256}, MaxFileBytes: a.cfg.ImageMaxInputBytes, MaxPixels: a.cfg.ImageMaxPixels, MaxEdge: a.cfg.ImageMaxEdge, MaxOutputBytes: a.cfg.ImageMaxOutputBytes}, Pdf: apitypes.PdfCapabilities{MaxFileBytes: a.cfg.PdfMaxInputBytes, MaxResultBytesTotal: a.cfg.PdfMaxResultsTotalBytes, MaxImagePixels: a.cfg.PdfImageMaxPixels}, Jobs: apitypes.JobCapabilities{TTLSeconds: int(a.cfg.JobTTL / time.Second), MaxActivePerSession: a.cfg.SessionMaxActiveJobs, MaxBatchFiles: 30, CreatePerMinute: a.cfg.SessionCreatesPerMinute}}
 	for _, f := range inputs {
 		out.Image.InputFormats = append(out.Image.InputFormats, apitypes.InputFormat(f))
 	}
 	for _, f := range outputs {
 		out.Image.OutputFormats = append(out.Image.OutputFormats, apitypes.OutputFormat(f))
+	}
+	out.Audio = apitypes.AudioCapabilities{QualityFormats: []apitypes.AudioFormat{apitypes.AudioMP3, apitypes.AudioOGG},
+		DefaultQuality: .8, MaxFileBytes: a.cfg.AudioMaxInputBytes, MaxDurationSeconds: int(a.cfg.AudioMaxDurationSeconds),
+		MaxChannels: int(a.cfg.AudioMaxChannels), MaxSampleRate: int(a.cfg.AudioMaxSampleRate), MaxOutputBytes: a.cfg.AudioMaxOutputBytes}
+	audioIn, audioOut := report.AudioFormats()
+	for _, f := range audioIn {
+		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
+	}
+	for _, f := range audioOut {
+		out.Audio.OutputFormats = append(out.Audio.OutputFormats, apitypes.AudioFormat(f))
 	}
 	for _, level := range []struct {
 		name      string
@@ -373,7 +383,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	r = r.WithContext(ctx)
 	_ = http.NewResponseController(w).SetReadDeadline(time.Now().Add(a.cfg.UploadMax))
 	defer http.NewResponseController(w).SetReadDeadline(time.Time{})
-	maximum := max(a.cfg.ImageMaxInputBytes, a.cfg.PdfMaxInputBytes) + 32768
+	maximum := a.cfg.MaxUploadInputBytes() + 32768
 	r.Body = http.MaxBytesReader(w, r.Body, maximum)
 	defer r.Body.Close()
 	media, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
@@ -431,8 +441,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		defer writer.Close()
 	}
 	limit := a.cfg.ImageMaxInputBytes
-	if opts.tool == "pdf-compress" {
+	switch opts.tool {
+	case "pdf-compress":
 		limit = a.cfg.PdfMaxInputBytes
+	case "audio-convert":
+		limit = a.cfg.AudioMaxInputBytes
 	}
 	hash := sha256.New()
 	var sink io.Writer = hash
@@ -481,11 +494,18 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 		format := "pdf"
-		if opts.tool == "pdf-compress" {
+		switch opts.tool {
+		case "pdf-compress":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
 			}
-		} else {
+		case "audio-convert":
+			// Dauer, Kanäle und Abtastrate prüft der Worker (soundfile).
+			format = jobs.DetectAudioFormat(head)
+			if format == "" {
+				return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Audioformat nicht unterstützt.")
+			}
+		default:
 			format = jobs.DetectImageFormat(head)
 			if format == "" {
 				return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Dateityp nicht unterstützt.")
@@ -502,7 +522,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		if output == "original" {
 			output = format
 		}
-		if opts.tool != "pdf-compress" {
+		if opts.tool == "audio-convert" {
+			if _, ok := jobs.AudioMIME[output]; !ok {
+				return invalidOptions()
+			}
+		} else if opts.tool != "pdf-compress" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}

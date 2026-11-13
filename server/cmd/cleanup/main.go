@@ -37,7 +37,7 @@ func run() int {
 		logger.Error("storage unavailable")
 		return 1
 	}
-	cleaner := jobs.NewCleaner(pool, st, jobs.CleanupConfig{UploadMax: cfg.UploadMax, Runtime: jobs.RuntimeConfig{ImageTimeout: cfg.ImageTimeout, PDFTimeout: cfg.PdfTimeout}})
+	cleaner := jobs.NewCleaner(pool, st, jobs.CleanupConfig{UploadMax: cfg.UploadMax, Runtime: jobs.RuntimeConfig{ImageTimeout: cfg.ImageTimeout, PDFTimeout: cfg.PdfTimeout, AudioTimeout: cfg.AudioTimeout}})
 	ticker := time.NewTicker(cfg.CleanupInterval)
 	defer ticker.Stop()
 	for {

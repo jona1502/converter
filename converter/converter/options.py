@@ -1,4 +1,4 @@
-"""Auftragsoptionen (Vertrag §4 „Optionen Bild“ / „Optionen PDF“).
+"""Auftragsoptionen (Vertrag §4 „Optionen Bild“ / „Optionen PDF“ / „Optionen Audio“).
 
 Gleiche Regeln wie ``backend/app/schemas/options.py``, aber als kleine
 dataclasses ohne pydantic: unbekannte Felder, falsche Typen, nicht endliche
@@ -23,6 +23,13 @@ FORMAT_OPTIONS: Final = (*OUTPUT_FORMATS, "original")
 ICO_SIZES: Final = (16, 32, 48, 64, 128, 256)
 DEFAULT_ICO_SIZES: Final = (16, 32, 48, 256)
 PDF_LEVELS: Final = ("high", "balanced", "small")
+AUDIO_TOOL: Final = "audio-convert"
+AUDIO_FORMATS: Final = ("mp3", "wav", "flac", "ogg")
+# Nur bei diesen Zielformaten wirkt quality (libsndfile compression_level).
+AUDIO_QUALITY_FORMATS: Final = ("mp3", "ogg")
+AUDIO_CHANNELS: Final = ("original", "mono")
+# 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
+DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
 DEFAULT_BACKGROUND: Final = "#ffffff"
 # Obergrenze nur gegen absurde Werte; die fachliche Grenze prüft die Pipeline.
@@ -85,7 +92,15 @@ class PdfOptions:
     tool: str = PDF_TOOL
 
 
-JobOptions = ImageOptions | PdfOptions
+@dataclass(frozen=True, slots=True)
+class AudioOptions:
+    format: str
+    quality: float = DEFAULT_AUDIO_QUALITY
+    channels: str = "original"
+    tool: str = AUDIO_TOOL
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -197,6 +212,31 @@ def _pdf(value: dict[str, object]) -> PdfOptions:
     return PdfOptions(levels=tuple(items))
 
 
+def _audio(value: dict[str, object]) -> AudioOptions:
+    raw = v.obj(
+        value,
+        required=("tool", "format"),
+        optional=("quality", "channels"),
+        code=CODE,
+        where="options",
+    )
+    output = raw["format"]
+    if type(output) is not str or output not in AUDIO_FORMATS:
+        raise v.fail(CODE, "format: unknown")
+    quality = DEFAULT_AUDIO_QUALITY
+    if "quality" in raw:
+        # Wie bei Bildern: bei WAV/FLAC zulässig, aber ohne Wirkung.
+        quality = v.number(raw["quality"], code=CODE, where="quality")
+        if not 0 <= quality <= 1:
+            raise v.fail(CODE, "quality: out of range")
+    channels = "original"
+    if "channels" in raw:
+        channels = v.string(raw["channels"], code=CODE, where="channels", max_length=16)
+        if channels not in AUDIO_CHANNELS:
+            raise v.fail(CODE, "channels: unknown")
+    return AudioOptions(format=output, quality=quality, channels=channels)
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -206,4 +246,6 @@ def parse_options(value: object) -> JobOptions:
         return _image(value)
     if tool == PDF_TOOL:
         return _pdf(value)
+    if tool == AUDIO_TOOL:
+        return _audio(value)
     raise v.fail(CODE, "tool: unknown")

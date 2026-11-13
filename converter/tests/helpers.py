@@ -27,6 +27,11 @@ DEFAULT_LIMITS: dict[str, int] = {
     "pdfMaxInputBytes": 100_000_000,
     "pdfMaxResultsTotalBytes": 300_000_000,
     "pdfImageMaxPixels": 40_000_000,
+    "audioMaxInputBytes": 104_857_600,
+    "audioMaxDurationSeconds": 1800,
+    "audioMaxChannels": 8,
+    "audioMaxSampleRate": 192_000,
+    "audioMaxOutputBytes": 419_430_400,
 }
 
 

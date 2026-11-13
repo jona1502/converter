@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 )
 
 // Kleine strikte JSON-Hilfen. encoding/json allein genügt nicht: es ordnet
@@ -106,6 +107,19 @@ func (o object) integer(key string, minimum, maximum int64) (int64, error) {
 	}
 	var n int64
 	if err := json.Unmarshal(raw, &n); err != nil || n < minimum || n > maximum {
+		return 0, fmt.Errorf("%w: %s", errJSON, key)
+	}
+	return n, nil
+}
+
+// number akzeptiert eine endliche JSON-Zahl (keine Strings, kein null).
+func (o object) number(key string, minimum, maximum float64) (float64, error) {
+	raw := bytes.TrimSpace(o[key])
+	if len(raw) == 0 || isNull(raw) || raw[0] == '"' {
+		return 0, fmt.Errorf("%w: %s", errJSON, key)
+	}
+	var n float64
+	if err := json.Unmarshal(raw, &n); err != nil || math.IsNaN(n) || n < minimum || n > maximum {
 		return 0, fmt.Errorf("%w: %s", errJSON, key)
 	}
 	return n, nil

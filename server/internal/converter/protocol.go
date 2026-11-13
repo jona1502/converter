@@ -45,6 +45,7 @@ var resultCodes = map[string]bool{
 	"parse-failed": true, "not-pdf": true, "file-too-large": true, "result-too-large": true,
 	"memory-limit": true, "dimensions-too-large": true, "animated-unsupported": true,
 	"unsupported-type": true, "original-format-unsupported": true, "invalid-options": true,
+	"duration-too-long": true, "unsupported-audio": true,
 }
 
 // internalFatal sind interne Codes, die nie in der API erscheinen.
@@ -67,6 +68,11 @@ type Limits struct {
 	PdfMaxInputBytes        int64 `json:"pdfMaxInputBytes"`
 	PdfMaxResultsTotalBytes int64 `json:"pdfMaxResultsTotalBytes"`
 	PdfImageMaxPixels       int64 `json:"pdfImageMaxPixels"`
+	AudioMaxInputBytes      int64 `json:"audioMaxInputBytes"`
+	AudioMaxDurationSeconds int64 `json:"audioMaxDurationSeconds"`
+	AudioMaxChannels        int64 `json:"audioMaxChannels"`
+	AudioMaxSampleRate      int64 `json:"audioMaxSampleRate"`
+	AudioMaxOutputBytes     int64 `json:"audioMaxOutputBytes"`
 }
 
 // DefaultLimits entspricht den Startwerten aus Vertrag §6.
@@ -79,6 +85,11 @@ func DefaultLimits() Limits {
 		PdfMaxInputBytes:        100_000_000,
 		PdfMaxResultsTotalBytes: 300_000_000,
 		PdfImageMaxPixels:       40_000_000,
+		AudioMaxInputBytes:      104_857_600,
+		AudioMaxDurationSeconds: 1800,
+		AudioMaxChannels:        8,
+		AudioMaxSampleRate:      192_000,
+		AudioMaxOutputBytes:     419_430_400,
 	}
 }
 
@@ -86,6 +97,8 @@ func (l Limits) valid() bool {
 	for _, v := range []int64{
 		l.ImageMaxInputBytes, l.ImageMaxPixels, l.ImageMaxEdge, l.ImageMaxOutputBytes,
 		l.PdfMaxInputBytes, l.PdfMaxResultsTotalBytes, l.PdfImageMaxPixels,
+		l.AudioMaxInputBytes, l.AudioMaxDurationSeconds, l.AudioMaxChannels,
+		l.AudioMaxSampleRate, l.AudioMaxOutputBytes,
 	} {
 		if v < 1 || v > maxJSONInt {
 			return false
@@ -97,12 +110,12 @@ func (l Limits) valid() bool {
 // ResultTarget ist eine von Go vorab leer angelegte Ergebnisdatei.
 type ResultTarget struct {
 	ID    string // kanonische UUID in Kleinbuchstaben
-	Level string // "" bei Bildern, sonst high|balanced|small
+	Level string // "" bei Bildern und Audio, sonst high|balanced|small
 	Path  string // absoluter Pfad, von Go erzeugt (O_EXCL, 0600)
 }
 
-// Request ist ein Konvertierungsauftrag. Bild: genau ein Ergebnis ohne
-// Level. PDF: Ergebnisse in Verarbeitungsreihenfolge = options.levels.
+// Request ist ein Konvertierungsauftrag. Bild und Audio: genau ein Ergebnis
+// ohne Level. PDF: Ergebnisse in Verarbeitungsreihenfolge = options.levels.
 type Request struct {
 	Source  string          // absoluter Pfad der Eingabe
 	Options json.RawMessage // bereits validierte Optionen (Vertrag §4)
@@ -118,6 +131,14 @@ type Request struct {
 }
 
 func (r Request) isPDF() bool { return len(r.Results) > 0 && r.Results[0].Level != "" }
+
+// isAudio: options.tool ist audio-convert (Optionen sind bereits geprüft).
+func (r Request) isAudio() bool {
+	var head struct {
+		Tool string `json:"tool"`
+	}
+	return json.Unmarshal(r.Options, &head) == nil && head.Tool == "audio-convert"
+}
 
 type wireResult struct {
 	ID    string  `json:"id"`
@@ -160,7 +181,10 @@ func (r Request) encode() ([]byte, error) {
 	}
 	pdf := r.isPDF()
 	if !pdf && len(r.Results) != 1 {
-		return nil, invalid("Bild hat genau ein Ergebnis")
+		return nil, invalid("Bild/Audio hat genau ein Ergebnis")
+	}
+	if pdf && r.isAudio() {
+		return nil, invalid("Audio ohne Stufe")
 	}
 	ids, paths, levels := map[string]bool{}, map[string]bool{r.Source: true}, map[string]bool{}
 	wire := make([]wireResult, 0, len(r.Results))

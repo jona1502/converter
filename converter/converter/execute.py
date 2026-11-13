@@ -3,6 +3,7 @@
 Nur nach ``sandbox.isolate`` importieren (siehe ``cli``). Verhalten wie
 ``backend/app/worker/child.py``: Bild = ein Ergebnis; PDF = Analyse, danach
 jede Stufe aus dem Original, Teilfehler betreffen nur die jeweilige Stufe.
+Audio = ein Ergebnis wie bei Bildern.
 """
 
 from __future__ import annotations
@@ -11,7 +12,8 @@ import time
 from pathlib import Path
 
 from converter.errors import ProcessingError
-from converter.options import ImageOptions, PdfOptions
+from converter.options import AudioOptions, ImageOptions, PdfOptions
+from converter.processing.audio import pipeline as audio
 from converter.processing.files import discard
 from converter.processing.images.pipeline import convert
 from converter.processing.pdf.pipeline import analyze, compress
@@ -37,6 +39,17 @@ def run_image(request: Request, options: ImageOptions, writer: EventWriter) -> N
     writer.progress_encode()
     try:
         details = convert(Path(request.source), Path(target.path), options, request.limits)
+    except Exception as exc:
+        _failure(writer, target, exc, "encode-failed")
+        return
+    writer.result(target.id, details)
+
+
+def run_audio(request: Request, options: AudioOptions, writer: EventWriter) -> None:
+    (target,) = request.results
+    writer.progress_encode()
+    try:
+        details = audio.convert(Path(request.source), Path(target.path), options, request.limits)
     except Exception as exc:
         _failure(writer, target, exc, "encode-failed")
         return
@@ -80,5 +93,7 @@ def execute(request: Request, writer: EventWriter) -> None:
     options = request.options
     if isinstance(options, ImageOptions):
         run_image(request, options, writer)
+    elif isinstance(options, AudioOptions):
+        run_audio(request, options, writer)
     else:
         run_pdf(request, options, writer)
