@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AudioConverter from '../../components/tools/AudioConverter';
+---
+<BaseLayout
+  title="Audio konvertieren"
+  description="Audiodateien (MP3, WAV, FLAC, OGG) auf dem Server in MP3, WAV, FLAC oder OGG umwandeln, wahlweise in Mono. Verarbeitung auf dem Server nach ausdrücklichem Start."
+>
+  <div class="page-container">
+    <h1 class="page-title">Audio konvertieren</h1>
+    <p class="page-lead">
+      Wandeln Sie MP3, WAV, FLAC und OGG ineinander um. Die Abtastrate bleibt erhalten; Tags und Cover
+      werden nicht übernommen.
+    </p>
+
+    <div class="page-section">
+      {/* client:load: Das Werkzeug ist der Hauptinhalt der Seite und soll sofort bedienbar sein. */}
+      <AudioConverter client:load />
+    </div>
+  </div>
+</BaseLayout>
