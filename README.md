@@ -4,6 +4,8 @@ Deutschsprachige Astro/React-Website mit Go-Backend für Bildkonvertierung, Komp
 
 ## Lokal starten
 
+**Entwicklung:** `npm run dev` baut und startet den Compose-Stack (`npm run stack:up`) und danach Astro dev auf **http://localhost:4321**. Astro leitet `/api` an den Stack auf Port 8080 weiter; Origin `localhost:4321` ist dafür in `compose.yaml` erlaubt. Nur Frontend ohne Stack: `npm run dev:web`. Stack stoppen: `npm run stack:down` (Volumes bleiben), Logs: `npm run stack:logs`.
+
 Voraussetzung: Docker mit Compose und laufender Linux-Container-Engine. Im Projektverzeichnis:
 
 ```sh
