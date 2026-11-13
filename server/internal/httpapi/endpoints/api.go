@@ -373,7 +373,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	r = r.WithContext(ctx)
 	_ = http.NewResponseController(w).SetReadDeadline(time.Now().Add(a.cfg.UploadMax))
 	defer http.NewResponseController(w).SetReadDeadline(time.Time{})
-	maximum := max(a.cfg.ImageMaxInputBytes, a.cfg.PdfMaxInputBytes) + 32768
+	maximum := a.cfg.MaxUploadInputBytes() + 32768
 	r.Body = http.MaxBytesReader(w, r.Body, maximum)
 	defer r.Body.Close()
 	media, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
@@ -431,8 +431,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		defer writer.Close()
 	}
 	limit := a.cfg.ImageMaxInputBytes
-	if opts.tool == "pdf-compress" {
+	switch opts.tool {
+	case "pdf-compress":
 		limit = a.cfg.PdfMaxInputBytes
+	case "audio-convert":
+		limit = a.cfg.AudioMaxInputBytes
 	}
 	hash := sha256.New()
 	var sink io.Writer = hash
@@ -481,11 +484,18 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 		format := "pdf"
-		if opts.tool == "pdf-compress" {
+		switch opts.tool {
+		case "pdf-compress":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
 			}
-		} else {
+		case "audio-convert":
+			// Dauer, Kanäle und Abtastrate prüft der Worker (soundfile).
+			format = jobs.DetectAudioFormat(head)
+			if format == "" {
+				return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Audioformat nicht unterstützt.")
+			}
+		default:
 			format = jobs.DetectImageFormat(head)
 			if format == "" {
 				return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Dateityp nicht unterstützt.")
@@ -502,7 +512,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		if output == "original" {
 			output = format
 		}
-		if opts.tool != "pdf-compress" {
+		if opts.tool == "audio-convert" {
+			if _, ok := jobs.AudioMIME[output]; !ok {
+				return invalidOptions()
+			}
+		} else if opts.tool != "pdf-compress" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}
