@@ -104,9 +104,18 @@
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
   --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.05), 0 16px 40px rgb(0 0 0 / 0.1);
   --shadow-panel: 0 12px 40px rgb(0 0 0 / 0.14);
+
+  --mi-card-edge: rgb(15 118 110 / 0.55);
+  --mi-card-gradient: linear-gradient(145deg, #ffffff, #f7fbfa);
 }
 
 @layer base {
+  /* Gestaltungswerte ohne Utility-Bedarf (Kartenkante, Kartenverlauf, aktive Navigation).
+     Rein dekorativ; die helle Variante steht im Block :root[data-theme="light"]. */
+  :root {
+    --mi-card-edge: rgb(94 234 212 / 0.5);
+    --mi-card-gradient: linear-gradient(145deg, rgb(255 255 255 / 0.043), rgb(255 255 255 / 0.02));
+  }
   html {
     @apply bg-canvas text-ink font-sans antialiased;
     color-scheme: dark;
@@ -176,11 +185,11 @@
     .btn-icon              quadratischer Button für Symbole (aria-label nötig)
 
   Karten
-    .card                  weiße Fläche mit weichem Schatten und Innenabstand
-    .card-muted            ruhige Fläche mit feiner Linie (z. B. Optionsbereich)
+    .card                  Fläche mit Haarlinie, Akzentkante oben und dezentem Verlauf
+    .card-muted            ruhige Fläche mit Haarlinie, ohne Akzentkante (z. B. Optionsbereich)
     .card-link             gesamte Karte als Link (auf <a>), Hover/Fokus-Zustand
     .card-title            Kartenüberschrift
-    .card-icon             runde Symbolfläche in einer Karte
+    .card-icon             Symbolfläche in einer Karte
 
   Formulare
     .field / .field-row / .label / .hint / .field-error
@@ -378,19 +387,26 @@
   }
 
   /* Karten */
+  /* Nach .mi-card: Haarlinie, 2px-Akzentkante oben, Radius 14px, dezenter Verlauf. */
+  .card,
+  .card-link {
+    @apply rounded-card border border-border bg-surface;
+    border-top: 2px solid var(--mi-card-edge);
+    background-image: var(--mi-card-gradient);
+  }
   .card {
-    @apply rounded-card bg-surface p-5 sm:p-7;
-    box-shadow: var(--shadow-card);
+    @apply p-5 sm:p-6;
   }
   .card-muted {
-    @apply rounded-card border border-border bg-surface p-5 sm:p-7;
+    @apply rounded-card border border-border bg-surface-muted p-5 sm:p-6;
   }
   .card-link {
-    @apply relative block rounded-card bg-surface p-6 text-ink no-underline sm:p-8;
-    box-shadow: var(--shadow-card);
+    @apply relative block p-6 text-ink no-underline;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
   }
   .card-link:hover {
+    @apply border-border-strong;
+    border-top-color: var(--color-accent);
     box-shadow: var(--shadow-lift);
   }
   @media (prefers-reduced-motion: no-preference) {
@@ -407,7 +423,7 @@
     letter-spacing: -0.022em;
   }
   .card-icon {
-    @apply flex size-12 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent;
+    @apply flex size-11 shrink-0 items-center justify-center rounded-control border border-border bg-accent-soft text-accent;
   }
 
   /* Formulare */
