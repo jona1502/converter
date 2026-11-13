@@ -597,8 +597,8 @@
     @apply border-border bg-surface-muted;
   }
   .file-list {
-    @apply flex flex-col divide-y divide-border overflow-hidden rounded-card bg-surface;
-    box-shadow: var(--shadow-card);
+    @apply flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-surface;
+    background-image: var(--mi-card-gradient);
   }
   .file-row {
     @apply flex min-w-0 flex-col gap-3 px-4 py-4 sm:px-5;
@@ -611,7 +611,7 @@
     @apply truncate font-semibold;
   }
   .file-result {
-    @apply flex flex-col gap-3 rounded-control bg-surface-muted p-4;
+    @apply flex flex-col gap-3 rounded-control border border-border bg-surface-muted p-4;
   }
   .meta-list {
     @apply grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[max-content_minmax(0,1fr)];
