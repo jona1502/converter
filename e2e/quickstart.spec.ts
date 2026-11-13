@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 // Startseite: Dateien ablegen, Typ lokal erkennen, Aktion wählen, Werkzeug mit der Datei öffnen.
+// Direkte Ausgabeauswahl ersetzt jetzt die frühere Aktionswahl; zusätzliche Werkzeuge bleiben erreichbar.
 // API-Doubles ersetzen den Server; geprüft werden Ablauf und Datenschutz, keine echte Verarbeitung.
 
 const PNG = Buffer.from(
@@ -62,7 +63,9 @@ async function open(page: Page, { width = 1440, theme = 'dark' as 'dark' | 'ligh
   await page.setViewportSize({ width, height: 900 });
   await page.route('**/api/v1/capabilities', (route) => route.fulfill({ json: capabilities }));
   await page.route('**/api/v1/session', (route) => route.fulfill({ json: { csrfToken: 'quickstart-test' } }));
-  await page.route('**/api/v1/jobs', (route) => { uploads.push(route.request().method()); return route.fulfill({ status: 500 }); });
+  await page.route('**/api/v1/jobs', (route) => { const body = route.request().postData()!; uploads.push(body);
+    const format = body.match(/"format":"([^"]+)"/)?.[1] ?? 'pdf';
+    return route.fulfill({ json: { id: `quick-${uploads.length}`, state: 'succeeded', expiresAt: new Date(Date.now() + 3600000).toISOString(), results: [{ downloadUrl: `/api/v1/jobs/quick-${uploads.length}/result`, size: 12, mime: `application/${format}`, details: { format } }] } }); });
   await page.route('**/api/v1/jobs/*', (route) => route.fulfill({ status: 204 }));
   await page.goto('/');
   await expect(picker(page)).toBeEnabled();
@@ -82,147 +85,176 @@ const cspViolations = async (page: Page) => {
   return page.context().browser()?.browserType().name() === 'webkit' ? events.filter((event) => !/^style-src-attr: inline; (?:|https?:\/\/[^/]+\/_astro\/client\.[\w-]+\.js):\d+; $/.test(event)) : events;
 };
 
+const rows = (page: Page) => page.locator('.file-row:visible');
+const output = (page: Page, index = 0) => rows(page).nth(index).getByLabel('Ausgabe');
+const remove = (page: Page, index = 0) => rows(page).nth(index).getByRole('button', { name: /entfernen/i });
+const heading = (page: Page) => page.getByRole('heading', { level: 1, name: 'Dateien umwandeln', exact: true });
+const back = (page: Page) => action(page, '← Zur Dateiliste');
+
 test('Auswahl zeigt Titel, eine Dropzone und höchstens eine Textlinkliste statt Karten', async ({ page }) => {
   await open(page);
-  await expect(page.getByRole('heading', { level: 1, name: 'Dateien umwandeln', exact: true })).toBeVisible();
+  await expect(heading(page)).toBeVisible();
   await expect(picker(page)).toHaveAccessibleDescription(/Bilder, PDF und Audio.*hochgeladen wird erst/s);
   await expect(page.locator('.drop-zone')).toHaveCount(1);
-  const links = page.getByRole('navigation', { name: 'Werkzeuge im Überblick' }).getByRole('link');
-  await expect(links).toHaveText(['Bilder konvertieren', 'Bilder komprimieren', 'Bilder skalieren', 'PDF komprimieren', 'Audio konvertieren']);
+  await expect(page.getByRole('navigation', { name: 'Werkzeuge im Überblick' }).getByRole('link')).toHaveText(['Bilder konvertieren', 'Bilder komprimieren', 'Bilder skalieren', 'PDF komprimieren', 'Audio konvertieren']);
   await expect(page.locator('.card, .card-link, .tool-card')).toHaveCount(0);
   const accept = await page.locator('input[type=file]').getAttribute('accept');
   for (const part of ['.png', '.pdf', 'application/pdf', '.mp3', '.flac']) expect(accept).toContain(part);
+  await choose(page, png());
+  await expect(rows(page)).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Was soll passieren?' })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
 });
 
-test('Bild: Aktionen erscheinen, Komprimieren öffnet das Werkzeug mit der Datei ohne Upload', async ({ page }) => {
+test('Bild: direkte Ausgabe und sekundäres Komprimieren ohne Upload', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, png());
-  await expect(page.getByRole('heading', { level: 1, name: 'Was soll passieren?' })).toBeFocused();
-  await expect(page.getByRole('listitem').filter({ hasText: 'beispiel.png (Bild)' })).toBeVisible();
-  await expect(page.getByRole('main')).toContainText('noch nichts hochgeladen');
-  await expect(action(page, 'Konvertieren')).toBeVisible();
-  await expect(action(page, 'Komprimieren')).toBeVisible();
-  await expect(action(page, 'Skalieren')).toBeVisible();
-  await expect(action(page, 'Andere Dateien')).toBeVisible();
+  await expect(heading(page)).toBeFocused();
+  await expect(rows(page)).toContainText('PNG');
+  await expect(output(page).locator('option')).toHaveText(['JPEG', 'PNG', 'WebP', 'BMP', 'ICO']);
+  await output(page).selectOption('webp');
   await action(page, 'Komprimieren').click();
-  await expect(page).toHaveURL(/\/#bilder-komprimieren$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Bilder komprimieren' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '← Andere Dateien' })).toBeVisible();
-  const row = page.locator('.file-row');
-  await expect(row).toHaveCount(1);
-  await expect(row).toContainText('beispiel.png');
+  await expect(page).toHaveURL(/#bilder-komprimieren$/);
+  await expect(page.getByRole('heading', { name: 'Bilder komprimieren', exact: true })).toBeVisible();
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page)).toContainText('beispiel.png');
   // Dieselbe Vorprüfung wie bei der eigenen Dropzone: danach ist die Datei bereit.
   await expect(action(page, 'Komprimieren')).toBeEnabled();
+  await back(page).click();
+  await expect(output(page)).toHaveValue('webp');
   expect(uploads).toEqual([]);
   expect(await storageWrites(page)).toEqual([]);
 });
 
-test('Bild: Konvertieren und Skalieren öffnen ihr Werkzeug mit der Datei', async ({ page }) => {
+test('Bild: direkte Konvertierung hält Ergebnis und Skalieren erhält Auswahl', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, png());
+  await output(page).selectOption('webp');
   await action(page, 'Konvertieren').click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Bilder konvertieren' })).toBeVisible();
-  await expect(page.locator('.file-row')).toContainText('beispiel.png');
-  await expect(page.getByLabel('Zielformat')).toBeVisible();
-  await page.getByRole('button', { name: '← Andere Dateien' }).click();
-  await choose(page, png('zweites.png'));
+  await expect(rows(page).getByRole('link', { name: /Download/ })).toHaveAttribute('download', 'beispiel.webp');
+  expect(uploads).toHaveLength(1);
+  expect(uploads[0]).toContain('"format":"webp"');
+  expect(uploads[0]).toContain('"tool":"image-convert"');
   await action(page, 'Skalieren').click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Bilder skalieren' })).toBeVisible();
-  await expect(page.locator('.file-row')).toContainText('zweites.png');
-  expect(uploads).toEqual([]);
+  await expect(page.getByRole('heading', { name: 'Bilder skalieren', exact: true })).toBeVisible();
+  await expect(rows(page)).toContainText('beispiel.png');
+  await back(page).click();
+  await expect(output(page)).toHaveValue('webp');
+  await expect(rows(page).getByRole('link', { name: /Download/ })).toBeVisible();
+  expect(uploads).toHaveLength(1);
 });
 
-test('PDF: nur Komprimieren, das Werkzeug zeigt die Datei, kein Upload vor dem Start', async ({ page }) => {
+test('PDF: nur Komprimieren, Werkzeug übernimmt Datei ohne vorzeitigen Upload', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, pdf());
-  await expect(page.getByRole('main')).toContainText('PDF');
-  await expect(action(page, 'Komprimieren')).toBeVisible();
-  await expect(action(page, 'Konvertieren')).toHaveCount(0);
+  await expect(rows(page)).toContainText('PDF');
+  await expect(output(page)).toHaveCount(0);
+  await expect(action(page, 'Konvertieren')).toBeDisabled();
   await expect(action(page, 'Skalieren')).toHaveCount(0);
-  await action(page, 'Komprimieren').click();
-  await expect(page).toHaveURL(/\/#pdf-komprimieren$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'PDF komprimieren' })).toBeVisible();
+  await action(page, 'PDF komprimieren').click();
+  await expect(page).toHaveURL(/#pdf-komprimieren$/);
+  await expect(page.getByRole('heading', { name: 'PDF komprimieren', exact: true })).toBeVisible();
   await expect(page.getByText('Ausgewählte PDF')).toBeVisible();
-  await expect(page.getByText('beispiel.pdf', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
+  await expect(page.getByText('beispiel.pdf', { exact: true }).filter({ visible: true })).toBeVisible();
+  await expect(action(page, 'Komprimieren')).toBeEnabled();
   expect(uploads).toEqual([]);
 });
 
-test('Audio: nur Konvertieren, das Werkzeug zeigt die Datei, kein Upload vor dem Start', async ({ page }) => {
+test('Audio: WAV bietet direkte Ziele und MP3 erreicht tatsächlichen Auftrag', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, wav());
-  await expect(page.getByRole('main')).toContainText('Audio');
-  await expect(action(page, 'Konvertieren')).toBeVisible();
+  await expect(rows(page)).toContainText('Audio');
+  await expect(output(page).locator('option')).toHaveText(['MP3', 'WAV', 'FLAC', 'OGG']);
   await expect(action(page, 'Komprimieren')).toHaveCount(0);
-  await action(page, 'Konvertieren').click();
-  await expect(page).toHaveURL(/\/#audio-konvertieren$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Audio konvertieren' })).toBeVisible();
-  await expect(page.locator('.file-row')).toContainText('ton.wav');
-  await expect(page.getByRole('button', { name: 'Konvertieren', exact: true })).toBeEnabled();
+  await output(page).selectOption('mp3');
   expect(uploads).toEqual([]);
+  await action(page, 'Konvertieren').click();
+  await expect(rows(page).getByRole('link', { name: /Download/ })).toHaveAttribute('download', 'ton.mp3');
+  expect(uploads).toHaveLength(1);
+  expect(uploads[0]).toContain('"format":"mp3"');
+  expect(uploads[0]).toContain('"tool":"audio-convert"');
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test('Typ folgt der Signatur, nicht der Endung', async ({ page }) => {
   await open(page);
-  await choose(page, { ...png('foto.pdf') });
+  await choose(page, png('foto.pdf'));
+  await expect(rows(page)).toContainText('PNG');
+  await expect(output(page)).toBeEnabled();
   await expect(action(page, 'Skalieren')).toBeVisible();
+  await expect(action(page, 'PDF komprimieren')).toHaveCount(0);
 });
 
-test('Unbekannter Typ: verständliche Meldung, keine Aktion außer Andere Dateien', async ({ page }) => {
+test('Unbekannter Typ bleibt sichtbar und blockiert gültigen Nachbarn nicht', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, text());
-  await expect(page.getByRole('heading', { level: 1, name: 'Dateityp nicht erkannt' })).toBeVisible();
-  await expect(page.getByRole('main')).toContainText('Unterstützt werden Bilder, PDF und Audio');
-  await expect(page.getByRole('status').filter({ hasText: 'notiz.txt' })).toBeVisible();
-  for (const name of ['Konvertieren', 'Komprimieren', 'Skalieren']) await expect(action(page, name)).toHaveCount(0);
-  await action(page, 'Andere Dateien').click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Dateien umwandeln' })).toBeVisible();
+  await expect(rows(page)).toContainText('nicht unterstützt');
+  await expect(rows(page)).toContainText('notiz.txt');
+  await expect(output(page)).toHaveCount(0);
+  await expect(action(page, 'Konvertieren')).toBeDisabled();
+  await choose(page, png());
+  await expect(rows(page)).toHaveCount(2);
+  await expect(output(page, 1)).toBeEnabled();
+  await expect(action(page, 'Konvertieren')).toBeEnabled();
+  await remove(page).click();
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page)).toContainText('beispiel.png');
   expect(uploads).toEqual([]);
 });
 
-test('Gemischte Typen: Aktionen je Gruppe, das Werkzeug erhält nur die Dateien der Gruppe', async ({ page }) => {
+test('Gemischte Typen behalten Optionen und sekundäre PDF-Rückkehr bewahrt Liste', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, [png(), pdf(), text()]);
-  await expect(page.getByRole('main')).toContainText('verschiedenen Typen');
-  await expect(page.getByRole('region', { name: /Bild, 1 Datei/ })).toBeVisible();
-  await expect(page.getByRole('region', { name: /PDF, 1 Datei/ })).toBeVisible();
-  await expect(page.getByRole('main')).toContainText('1 Datei nicht erkannt und nicht übernommen');
-  await page.getByRole('region', { name: /PDF, 1 Datei/ }).getByRole('button', { name: 'Komprimieren' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'PDF komprimieren' })).toBeVisible();
-  await expect(page.getByText('beispiel.pdf', { exact: true })).toBeVisible();
-  await expect(page.getByText('beispiel.png')).toHaveCount(0);
+  await expect(rows(page)).toHaveCount(3);
+  await output(page).selectOption('webp');
+  await expect(output(page, 1)).toHaveCount(0);
+  await expect(output(page, 2)).toHaveCount(0);
+  await expect(rows(page).nth(2)).toContainText('nicht unterstützt');
+  await rows(page).nth(1).getByRole('button', { name: 'PDF komprimieren' }).click();
+  await expect(page.getByText('Ausgewählte PDF')).toBeVisible();
+  await expect(page.getByText('beispiel.png', { exact: true })).not.toBeVisible();
+  await back(page).click();
+  await expect(rows(page)).toHaveCount(3);
+  await expect(output(page)).toHaveValue('webp');
   expect(uploads).toEqual([]);
+  await action(page, 'Konvertieren').click();
+  await expect(rows(page).nth(0).getByRole('link', { name: /Download/ })).toBeVisible();
+  await expect(rows(page)).toHaveCount(3);
+  expect(uploads).toHaveLength(1);
 });
 
-test('Andere Dateien setzt aus Auswahl und Werkzeug zurück und gibt den Fokus an die Dropzone', async ({ page }) => {
+test('Ergänzen bewahrt Auswahl, letzte Entfernung fokussiert ursprüngliche Dropzone', async ({ page }) => {
   await open(page);
   await choose(page, png());
-  await action(page, 'Andere Dateien').click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Dateien umwandeln' })).toBeVisible();
+  await output(page).selectOption('webp');
+  await choose(page, png('zweites.png'));
+  await expect(action(page, 'Weitere Dateien hinzufügen')).toBeVisible();
+  await expect(output(page)).toHaveValue('webp');
+  await remove(page, 1).click();
+  await expect(rows(page)).toHaveCount(1);
+  await expect(output(page)).toHaveValue('webp');
+  await remove(page).click();
+  await expect(rows(page)).toHaveCount(0);
   await expect(picker(page)).toBeFocused();
-  await choose(page, png());
-  await action(page, 'Komprimieren').click();
-  await expect(page.locator('.file-row')).toHaveCount(1);
-  await page.getByRole('button', { name: '← Andere Dateien' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Dateien umwandeln' })).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(picker(page)).toBeFocused();
-  await expect(page.locator('.file-row')).toHaveCount(0);
+  await expect(page.locator('.drop-zone')).toHaveCount(1);
 });
 
-test('Browser-Zurück führt vom Werkzeug zur Auswahl, Vor zurück zum Werkzeug', async ({ page }) => {
+test('Browser-Zurück und Vor bewahren sekundäres Werkzeug und persistente Dateiliste', async ({ page }) => {
   await open(page);
   await choose(page, png());
+  await output(page).selectOption('webp');
   await action(page, 'Komprimieren').click();
   await expect(page).toHaveURL(/#bilder-komprimieren$/);
   await page.goBack();
-  await expect(page.getByRole('heading', { level: 1, name: 'Was soll passieren?' })).toBeVisible();
+  await expect(heading(page)).toBeVisible();
+  await expect(output(page)).toHaveValue('webp');
+  await expect(page).toHaveURL(/\/$/);
   await page.goForward();
-  await expect(page.getByRole('heading', { level: 1, name: 'Bilder komprimieren' })).toBeVisible();
-  await expect(page.locator('.file-row')).toContainText('beispiel.png');
+  await expect(page.getByRole('heading', { name: 'Bilder komprimieren', exact: true })).toBeVisible();
+  await expect(rows(page)).toContainText('beispiel.png');
 });
 
-test('Ablegen per Drag and Drop erkennt die Datei wie die Auswahl', async ({ page }) => {
+test('Ablegen per Drag and Drop ergänzt dieselbe Liste wie die Auswahl ohne Upload', async ({ page }) => {
   const { uploads } = await open(page);
   const data = await page.evaluateHandle((bytes) => {
     const transfer = new DataTransfer();
@@ -230,40 +262,57 @@ test('Ablegen per Drag and Drop erkennt die Datei wie die Auswahl', async ({ pag
     return transfer;
   }, [...PNG]);
   await page.locator('.drop-zone').dispatchEvent('drop', { dataTransfer: data });
-  await expect(page.getByRole('listitem').filter({ hasText: 'abgelegt.png (Bild)' })).toBeVisible();
-  await expect(action(page, 'Komprimieren')).toBeVisible();
+  await expect(rows(page)).toContainText('abgelegt.png');
+  await expect(rows(page)).toContainText('PNG');
+  await expect(output(page)).toBeEnabled();
+  await choose(page, png());
+  await expect(rows(page)).toHaveCount(2);
+  await expect(output(page, 1).locator('option')).toHaveText(await output(page).locator('option').allTextContents());
+  await expect(page).toHaveURL(/\/$/);
   expect(uploads).toEqual([]);
 });
 
-test('Tastatur: Auswahl öffnen, Aktion wählen, zurück zur Dropzone', async ({ page }) => {
+test('Tastatur: Auswahl, Ausgabe, Start und Entfernen funktionieren ohne Maus', async ({ page }) => {
   const { uploads } = await open(page);
   await picker(page).focus();
-  await expect(picker(page)).toBeFocused();
   const chooser = page.waitForEvent('filechooser');
   await page.keyboard.press('Enter');
   await (await chooser).setFiles(png());
-  await expect(page.getByRole('heading', { level: 1, name: 'Was soll passieren?' })).toBeFocused();
-  await action(page, 'Konvertieren').focus();
+  await expect(heading(page)).toBeFocused();
+  await expect(output(page)).toBeEnabled();
+  await output(page).focus();
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Tab');
-  await expect(action(page, 'Komprimieren')).toBeFocused();
+  await expect(output(page)).toHaveValue('png');
+  await expect(remove(page)).toBeFocused();
+  await action(page, 'Konvertieren').focus();
+  expect(uploads).toEqual([]);
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { level: 1, name: 'Bilder komprimieren' })).toBeFocused();
-  await page.getByRole('button', { name: '← Andere Dateien' }).focus();
+  await expect(rows(page).getByRole('status')).toHaveText('Fertig');
+  await expect(rows(page).getByRole('link', { name: /Download/ })).toBeVisible();
+  await remove(page).focus();
   await page.keyboard.press('Space');
   await expect(picker(page)).toBeFocused();
-  expect(uploads).toEqual([]);
+  expect(uploads).toHaveLength(1);
 });
 
 test('Datenschutz: nichts in Web Storage, IndexedDB oder Cache, keine fremden Hosts', async ({ page }) => {
-  await open(page);
+  const { uploads } = await open(page);
   const hosts: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
     if (!['data:', 'blob:'].includes(url.protocol) && url.origin !== new URL(page.url()).origin) hosts.push(request.url());
   });
   await choose(page, [png(), pdf()]);
-  await action(page, 'Komprimieren').first().click();
-  await expect(page.locator('.file-row')).toHaveCount(1);
+  await output(page).selectOption('webp');
+  await action(page, 'Komprimieren').click();
+  await expect(rows(page)).toHaveCount(1);
+  await back(page).click();
+  expect(uploads).toEqual([]);
+  await action(page, 'Konvertieren').click();
+  await expect(rows(page).nth(0).getByRole('link', { name: /Download/ })).toBeVisible();
+  expect(uploads).toHaveLength(1);
   expect(await storageWrites(page)).toEqual([]);
   expect(await page.evaluate(async () => (await indexedDB.databases()).length)).toBe(0);
   expect(await page.evaluate(async () => (await caches.keys()).length)).toBe(0);
@@ -274,16 +323,15 @@ test('Datenschutz: nichts in Web Storage, IndexedDB oder Cache, keine fremden Ho
 
 for (const theme of ['dark', 'light'] as const) {
   for (const width of [390, 1440]) {
-    test(`axe: Auswahl, Erkennung und Werkzeug ohne Verstöße (${theme}, ${width} px)`, async ({ page }) => {
+    test(`axe: Auswahl, direkte Ausgabe und Ergebnis ohne Verstöße (${theme}, ${width} px)`, async ({ page }) => {
       await open(page, { width, theme });
       if (theme === 'light') await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
       expect((await axe(page)).violations).toEqual([]);
-      await choose(page, [png(), pdf(), text()]);
-      await expect(page.getByRole('heading', { level: 1, name: 'Was soll passieren?' })).toBeVisible();
+      await choose(page, [png(`${'langer-name-'.repeat(12)}.png`), pdf(), text()]);
+      await expect(output(page)).toBeEnabled();
       expect((await axe(page)).violations).toEqual([]);
-      await page.getByRole('region', { name: /Bild, 1 Datei/ }).getByRole('button', { name: 'Komprimieren' }).click();
-      await expect(page.locator('.file-row')).toContainText('beispiel.png');
-      await expect(action(page, 'Komprimieren')).toBeEnabled();
+      await action(page, 'Konvertieren').click();
+      await expect(rows(page).nth(0).getByRole('link', { name: /Download/ })).toBeVisible();
       expect((await axe(page)).violations).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
     });

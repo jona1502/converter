@@ -200,15 +200,15 @@ export function useAudioBatch() {
   }, [releaseAll, update]);
 
   /** Verarbeitet alle verarbeitbaren Einträge; „-konvertiert“ nur, wenn das Format gleich bleibt. */
-  const processAll = useCallback(async (settings: AudioSettings): Promise<RunSummary> => {
-    const targets = entriesRef.current.filter(isProcessable);
+  const processAll = useCallback(async (settings: AudioSettings | ((entry: AudioEntry) => AudioSettings), include: (entry: AudioEntry) => boolean = () => true): Promise<RunSummary> => {
+    const targets = entriesRef.current.filter(entry => isProcessable(entry) && include(entry));
     if (support.status !== 'ready' || processingRef.current || !targets.length) return { total: 0, done: 0, failed: 0 };
     const current = limitsRef.current;
-    const serverOptions = buildAudioOptions(settings, current.qualityFormats);
-    const serialized = JSON.stringify(serverOptions);
-    const extension = AUDIO_FORMAT_INFO[settings.format].extension;
-    const names = makeUniqueFileNames(targets.map((entry) =>
-      buildFileName(entry.name, extension, entry.inputFormat === settings.format ? 'konvertiert' : '', 'audio')));
+    const resolved = targets.map(entry => typeof settings === 'function' ? settings(entry) : settings);
+    const names = makeUniqueFileNames(targets.map((entry, index) => {
+      const selected = resolved[index]!;
+      return buildFileName(entry.name, AUDIO_FORMAT_INFO[selected.format].extension, entry.inputFormat === selected.format ? 'konvertiert' : '', 'audio');
+    }));
     processingRef.current = true;
     setIsProcessing(true);
     setRunIds(targets.map((entry) => entry.id));
@@ -227,6 +227,9 @@ export function useAudioBatch() {
         const controller = new AbortController();
         controllersRef.current.set(entry.id, controller);
         try {
+          const selected = resolved[index]!;
+          const serverOptions = buildAudioOptions(selected, current.qualityFormats);
+          const serialized = JSON.stringify(serverOptions);
           patch(entry.id, { status: 'uploading' });
           const previous = keysRef.current.get(entry.id);
           const key = previous?.options === serialized ? previous.key : crypto.randomUUID();
@@ -253,7 +256,7 @@ export function useAudioBatch() {
             status: 'done',
             inputFormat: isAudioFormat(serverInput) ? serverInput : entry.inputFormat,
             result: {
-              format: isAudioFormat(details.format) ? details.format : settings.format,
+              format: isAudioFormat(details.format) ? details.format : selected.format,
               size: result.size,
               mime: result.mime,
               durationSeconds: number(details.durationSeconds),
