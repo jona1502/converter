@@ -228,11 +228,13 @@
     @apply text-base font-semibold text-muted;
     letter-spacing: -0.01em;
   }
-  .page-title {
+  /* Titel nach .mi-hero, Einleitung nach .mi-lead-airy. */
+  .page-title,
+  .hero-title {
     @apply font-semibold text-balance;
-    font-size: clamp(2.125rem, 1.55rem + 2.6vw, 3.5rem);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
     line-height: 1.07;
-    letter-spacing: -0.028em;
+    letter-spacing: -0.01em;
   }
   .page-lead {
     @apply mt-4 max-w-2xl text-muted text-pretty;
@@ -243,23 +245,18 @@
   .hero {
     @apply mx-auto flex max-w-4xl flex-col items-center pt-4 pb-4 text-center sm:pt-10;
   }
-  .hero-title {
-    @apply font-semibold text-balance;
-    font-size: clamp(2.5rem, 1.45rem + 4.6vw, 4.75rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-  }
   .hero-lead {
     @apply mx-auto mt-5 max-w-2xl text-muted text-pretty;
     font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
     line-height: 1.38;
     letter-spacing: -0.018em;
   }
+  /* Abschnittsüberschrift nach .mi-display-md. */
   .section-title {
     @apply font-semibold;
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-    line-height: 1.15;
-    letter-spacing: -0.024em;
+    font-size: clamp(1.625rem, 3vw, 2.125rem);
+    line-height: 1.2;
+    letter-spacing: -0.012em;
   }
   .section-kicker {
     @apply text-sm font-semibold text-muted;
@@ -285,9 +282,9 @@
   }
   .prose-content h2 {
     @apply mt-12 font-semibold;
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-    line-height: 1.15;
-    letter-spacing: -0.024em;
+    font-size: clamp(1.625rem, 3vw, 2.125rem);
+    line-height: 1.2;
+    letter-spacing: -0.012em;
   }
   .prose-content h3 {
     @apply mt-8 text-xl font-semibold;
