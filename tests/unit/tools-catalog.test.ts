@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { availableTools, availableToolsByAction } from '../../src/data/tools';
+import { availableTools, availableToolsByAction, getTool } from '../../src/data/tools';
 
 describe('Werkzeugkatalog nach Aktion', () => {
   const titlesOf = (id: string) =>
@@ -22,5 +22,18 @@ describe('Werkzeugkatalog nach Aktion', () => {
   it('enthält jedes verfügbare Werkzeug genau einmal', () => {
     const ids = availableToolsByAction.flatMap((group) => group.tools.map((tool) => tool.id));
     expect([...ids].sort()).toEqual(availableTools.map((tool) => tool.id).sort());
+  });
+});
+
+describe('Werkzeugtexte', () => {
+  it('hat zu jedem Werkzeug einen Satz als Einleitung', () => {
+    for (const tool of availableTools) {
+      expect(tool.lead, tool.id).toMatch(/^[^.!?]+[.]$/);
+    }
+  });
+
+  it('getTool liefert den Eintrag und wirft bei unbekannter Kennung', () => {
+    expect(getTool('pdf-komprimieren').href).toBe('/pdf/komprimieren');
+    expect(() => getTool('gibt-es-nicht')).toThrow();
   });
 });

@@ -28,6 +28,8 @@ export interface Tool {
   readonly title: string;
   /** Ein Satz, was das Werkzeug tut. */
   readonly description: string;
+  /** Ein Satz unter der Seitenüberschrift, auf der Werkzeugseite und in der Startseite gleich. */
+  readonly lead: string;
   /** Pfad der Werkzeugseite (ohne abschließenden Schrägstrich). */
   readonly href: `/${string}`;
   readonly category: ToolCategory;
@@ -56,6 +58,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'pdf-komprimieren',
     title: 'PDF komprimieren',
     description: 'Drei Qualitätsstufen auf dem Server berechnen und tatsächliche Dateigrößen vergleichen.',
+    lead: 'Lassen Sie drei Varianten Ihrer PDF berechnen und die tatsächlichen Dateigrößen vergleichen; auch größere Ergebnisse sind möglich.',
     href: '/pdf/komprimieren',
     category: 'pdf',
     operation: 'komprimieren',
@@ -66,6 +69,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'bilder-konvertieren',
     title: 'Bilder konvertieren',
     description: 'JPEG, PNG, WebP, BMP und ICO erzeugen.',
+    lead: 'Wandeln Sie Bilder in JPEG, PNG, WebP, BMP oder ICO um; die Ausgabeformate richten sich nach den Funktionen des Servers.',
     href: '/bilder/konvertieren',
     category: 'bilder',
     operation: 'konvertieren',
@@ -76,6 +80,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'bilder-komprimieren',
     title: 'Bilder komprimieren',
     description: 'Dateigröße von Bildern über Qualität und Abmessungen verringern.',
+    lead: 'Wählen Sie Format, Qualität und bei Bedarf kleinere Abmessungen und vergleichen Sie die tatsächlichen Dateigrößen; eine kleinere Datei ist nicht garantiert.',
     href: '/bilder/komprimieren',
     category: 'bilder',
     operation: 'komprimieren',
@@ -86,6 +91,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'bilder-skalieren',
     title: 'Bilder skalieren',
     description: 'Bilder auf eine neue Breite oder Höhe bringen oder prozentual verkleinern bzw. vergrößern.',
+    lead: 'Ändern Sie die Abmessungen Ihrer Bilder in Prozent oder Pixeln; das Seitenverhältnis bleibt auf Wunsch erhalten, eine Vergrößerung müssen Sie ausdrücklich erlauben.',
     href: '/bilder/skalieren',
     category: 'bilder',
     operation: 'skalieren',
@@ -96,6 +102,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'audio-konvertieren',
     title: 'Audio konvertieren',
     description: 'MP3, WAV, FLAC und OGG ineinander umwandeln, auf Wunsch in Mono.',
+    lead: 'Wandeln Sie MP3, WAV, FLAC und OGG ineinander um; die Abtastrate bleibt erhalten, Tags und Cover werden nicht übernommen.',
     href: '/audio/konvertieren',
     category: 'audio',
     operation: 'konvertieren',
@@ -125,3 +132,10 @@ export const availableToolsByAction: readonly { action: ToolActionInfo; tools: r
       availableTools.filter((tool) => tool.action === action.id && tool.category === category.id),
     ),
   })).filter((group) => group.tools.length > 0);
+
+/** Katalogeintrag zur Kennung; wirft bei unbekannter Kennung, damit Tippfehler beim Bauen auffallen. */
+export function getTool(id: string): Tool {
+  const tool = TOOLS.find((entry) => entry.id === id);
+  if (!tool) throw new Error(`Unbekanntes Werkzeug: ${id}`);
+  return tool;
+}
