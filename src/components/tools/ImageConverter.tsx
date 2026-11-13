@@ -12,6 +12,7 @@ import { acceptAttribute, formatList, INPUT_FORMATS, pickDefaultFormat } from '.
 import { BrowserSupportNotice, ImageProcessingNotice } from './notices';
 import { BackgroundColor, FormatSelect, QualitySlider, IcoSizes } from './options';
 import { useImageBatch, type BatchEntry } from './useImageBatch';
+import { useInitialFiles, type ToolProps } from './useInitialFiles';
 import { ToolWorkspace } from './ToolWorkspace';
 
 /** Bevorzugte Zielformate in dieser Reihenfolge (erstes kodierbares wird Standard). */
@@ -30,7 +31,7 @@ function plural(count: number, singular: string, pluralForm: string): string {
   return `${count} ${count === 1 ? singular : pluralForm}`;
 }
 
-export default function ImageConverter() {
+export default function ImageConverter({ initialFiles }: ToolProps) {
   const batch = useImageBatch();
   const { support, counts, isProcessing } = batch;
   const encode = support.status === 'ready' ? support.encode : null;
@@ -109,6 +110,8 @@ export default function ImageConverter() {
     },
     [announce, batch],
   );
+
+  useInitialFiles(support.status === 'ready', initialFiles, handleFiles);
 
   const handleProcess = useCallback(async () => {
     if (!options) return;
