@@ -361,12 +361,16 @@
   .btn-ghost[aria-disabled="true"] {
     @apply border-transparent bg-transparent;
   }
+  /* Nach .mi-btn-sm. */
   .btn-sm {
-    @apply min-h-9 px-4 py-1.5 text-sm;
-    letter-spacing: -0.01em;
+    @apply min-h-9 text-sm;
+    padding: 7px 15px;
+    line-height: 1.29;
+    letter-spacing: -0.016em;
   }
   .btn-lg {
-    @apply min-h-12 px-7 py-3 text-lg;
+    @apply min-h-12 text-lg;
+    padding: 13px 28px;
   }
   .btn-icon {
     @apply aspect-square;
