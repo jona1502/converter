@@ -24,6 +24,10 @@
     success/warning/danger auf surface ................. 10.8 / 11.3 / 6.8 | 5.1 / 5.2 / 5.4 : 1
     focus auf canvas/surface (Nicht-Text, ≥ 3) ......... 13.4 / 12.8 | 5.2 / 5.5 : 1
     border-control auf surface/canvas (≥ 3) ............ 5.9 / 6.2 | 3.5 / 3.4 : 1
+    Kartenverlauf (hellste Stelle): ink/muted/accent ... 16.5 / 8.6 / 11.7 | 18.9 / 6.5 / 5.2 : 1
+    border-control auf Kartenverlauf (Ablagebereich) ... 5.4 | 3.4 : 1
+    muted (Navigation inaktiv) auf canvas .............. 9.9 | 6.5 : 1
+    ink / muted auf Pill-Fläche der Navigation ......... 15.9 / 8.3 | 16.2 / 5.6 : 1
   muted wird nie auf fill gesetzt. border/border-strong sind halbtransparente Haarlinien, rein
   dekorativ (Trennlinien, Kartenränder) und nicht für die Erkennbarkeit von Bedienelementen
   gedacht; dafür gibt es border-control.
