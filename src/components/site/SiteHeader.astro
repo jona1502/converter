@@ -44,10 +44,15 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
   .brand img { flex: none; border-radius: .45rem; }
   .brand:hover { color: var(--color-ink); }
   .tool-picker { position: relative; min-width: 0; }
-  summary { display: flex; align-items: center; justify-content: space-between; gap: .25rem; min-height: 2.75rem; padding: .5rem .65rem; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); font-size: .875rem; font-weight: 600; cursor: pointer; list-style: none; }
+  summary { display: flex; align-items: center; justify-content: space-between; gap: .25rem; min-height: 2.75rem; padding: .5rem .65rem; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); color: var(--color-ink); font-size: .875rem; font-weight: 500; letter-spacing: -.01em; cursor: pointer; list-style: none; }
   summary::-webkit-details-marker { display: none; }
-  summary:hover { background: var(--color-surface-muted); }
+  /* Muhr-Pill: Überfahren und geöffneter Zustand mit derselben Fläche wie aktive Navigationseinträge. */
+  summary:hover, details[open] summary { background: var(--mi-nav-active); }
+  summary svg { color: var(--color-muted); }
   details[open] summary svg { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: no-preference) {
+    summary svg { transition: transform .25s ease; }
+  }
   .tool-navigation { position: absolute; right: 0; top: calc(100% + .5rem); width: min(22rem, calc(100vw - 2rem)); padding: .75rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-panel); }
   /* Einträge wie die Muhr-Navigation: gedämpft, beim Überfahren und als aktive Seite eine Pill (Radius 8px). */
   .tool-navigation a { display: flex; align-items: center; min-height: 2.75rem; padding: .625rem .75rem; border-radius: 8px; color: var(--color-muted); font-size: .875rem; line-height: 1.4; font-weight: 500; letter-spacing: -.01em; text-decoration: none; overflow-wrap: anywhere; }
