@@ -48,7 +48,7 @@ async function open(page: Page, { width = 1440, theme = 'dark' as 'dark' | 'ligh
   await page.addInitScript((value) => {
     if (value === 'light') localStorage.setItem('mi-theme', 'light');
     const audit = { storage: [] as string[], csp: [] as string[] };
-    document.addEventListener('securitypolicyviolation', (event) => audit.csp.push(`${event.violatedDirective} ${event.blockedURI}`));
+    document.addEventListener('securitypolicyviolation', (event) => audit.csp.push(`${event.violatedDirective}: ${event.blockedURI}; ${event.sourceFile}:${event.lineNumber}; ${event.sample}`));
     Object.assign(window, { __audit: audit });
     const set = Storage.prototype.setItem;
     Storage.prototype.setItem = function (key, item) { if (key !== 'mi-theme') audit.storage.push(`storage:${key}`); return set.call(this, key, item); };
@@ -74,7 +74,13 @@ const choose = (page: Page, files: Parameters<ReturnType<Page['locator']>['setIn
 const action = (page: Page, name: string) => page.getByRole('main').getByRole('button', { name, exact: true });
 const axe = (page: Page) => new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
 const storageWrites = (page: Page) => page.evaluate(() => (window as unknown as { __audit: { storage: string[] } }).__audit.storage);
-const cspViolations = (page: Page) => page.evaluate(() => (window as unknown as { __audit: { csp: string[] } }).__audit.csp);
+// WebKit meldet für jedes eingefügte native <select> eine style-src-attr-Verletzung (interne UA-Styles,
+// siehe privacy.spec.ts). Rendert React das Werkzeug, ordnet WebKit sie dem React-DOM-Bundle zu.
+// Nur dieses Ereignis wird in WebKit ausgenommen; Chromium und Firefox prüfen denselben Fluss streng.
+const cspViolations = async (page: Page) => {
+  const events = await page.evaluate(() => (window as unknown as { __audit: { csp: string[] } }).__audit.csp);
+  return page.context().browser()?.browserType().name() === 'webkit' ? events.filter((event) => !/^style-src-attr: inline; (?:|https?:\/\/[^/]+\/_astro\/client\.[\w-]+\.js):\d+; $/.test(event)) : events;
+};
 
 test('Auswahl zeigt Titel, eine Dropzone und höchstens eine Textlinkliste statt Karten', async ({ page }) => {
   await open(page);
