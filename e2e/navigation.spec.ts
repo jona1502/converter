@@ -5,6 +5,7 @@ const tools = [
   { label: 'Bilder komprimieren', path: '/bilder/komprimieren' },
   { label: 'Bilder skalieren', path: '/bilder/skalieren' },
   { label: 'PDF komprimieren', path: '/pdf/komprimieren' },
+  { label: 'Audio konvertieren', path: '/audio/konvertieren' },
 ] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
@@ -13,7 +14,7 @@ async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 }
 
-test('Desktop zeigt vier direkte Werkzeuge und Information in der schmalen Seitennavigation', async ({ page }) => {
+test('Desktop zeigt alle direkten Werkzeuge und Information in der schmalen Seitennavigation', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   for (const tool of tools) {
