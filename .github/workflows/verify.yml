@@ -16,8 +16,17 @@ jobs:
     name: Go checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Modul-, Build- und govulncheck-Cache des go-Containers als Hostpfad.
+      CONVERTER_TEST_GOCACHE: ${{ github.workspace }}/../gocache
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/../gocache
+          key: go-${{ runner.os }}-${{ hashFiles('server/go.sum', 'server/go.mod', 'server/compose.test.yaml') }}
+          restore-keys: go-${{ runner.os }}-
+      - run: mkdir -p "$CONVERTER_TEST_GOCACHE"
       - run: docker compose -f server/compose.test.yaml up -d --wait db valkey
       - name: gofmt, vet and race tests against isolated PostgreSQL and Valkey
         run: docker compose -f server/compose.test.yaml run --rm go sh -c 'test -z "$(gofmt -l .)" && go vet ./... && go test -race ./...'
@@ -26,6 +35,10 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker compose -f server/compose.test.yaml down
+      # Container schreibt als root; actions/cache muss alles lesen können.
+      - name: Make Go cache readable for actions/cache
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" "$CONVERTER_TEST_GOCACHE"
 
   codec:
     name: Codec checks
