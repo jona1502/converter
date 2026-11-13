@@ -46,12 +46,12 @@ const operations: { id: ToolOperation; label: string }[] = [
 </header>
 
 <style>
-  /* Schlanke, transluzente Leiste; ohne backdrop-filter-Unterstützung deckend. */
-  .site-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: var(--color-header-solid); }
+  /* Schlanke, halbtransparente Leiste mit Haarlinie unten; ohne backdrop-filter-Unterstützung deckend. */
+  .site-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--color-border); background: var(--color-header-solid); }
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .site-header { background: var(--color-header); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
   }
-  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.25rem; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4rem; }
   .brand { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; color: var(--color-ink); text-decoration: none; font-family: var(--font-display); font-size: 1.1875rem; font-weight: 600; letter-spacing: -.03em; white-space: nowrap; }
   .brand img { flex: none; border-radius: .45rem; }
   .brand:hover { color: var(--color-ink); }
@@ -80,9 +80,9 @@ const operations: { id: ToolOperation; label: string }[] = [
   @media (prefers-reduced-motion: no-preference) {
     details[open] .nav-panel { animation: nav-panel-in .18s ease-out; }
   }
-  .theme-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-ink); cursor: pointer; transition: background-color .2s ease; }
+  .theme-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: transparent; color: var(--color-ink); cursor: pointer; }
   .theme-toggle[hidden] { display: none; }
-  .theme-toggle:hover { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
+  .theme-toggle:hover { border-color: var(--color-border-strong); background: var(--mi-nav-active); }
   /* Dunkel: Sonne zeigt den Wechsel ins Helle an; hell: Mond. */
   .theme-icon-moon { display: none; }
   :global(:root[data-theme="light"]) .theme-icon-sun { display: none; }
