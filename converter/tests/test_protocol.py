@@ -277,6 +277,61 @@ def test_audio_request_needs_single_result(tmp_path: Path) -> None:
     assert {"duration-too-long", "unsupported-audio"} <= RESULT_CODES
 
 
+def test_cli_audio_job_completes(tmp_path: Path) -> None:
+    body, result_id, target = audio_request(tmp_path, channels="mono")
+    result = run_cli(["run"], encode(body))
+    assert result.returncode == 0, result.stderr
+    assert result.events == [
+        {"kind": "progress", "phase": "encode"},
+        {
+            "kind": "result",
+            "id": result_id,
+            "details": {
+                "format": "mp3",
+                "durationSeconds": result.events[1]["details"]["durationSeconds"],
+                "sampleRate": 44_100,
+                "channels": 1,
+                "qualityApplied": True,
+            },
+        },
+    ]
+    assert_clean(result.stdout, tmp_path)
+    info = sf.info(target)
+    assert (info.format, info.samplerate, info.channels) == ("MP3", 44_100, 1)
+
+
+@pytest.mark.parametrize(
+    ("mutate", "code"),
+    [
+        (lambda b, p: p.write_bytes(b"RIFF\x00\x00\x00\x00WAVEjunk"), "decode-failed"),
+        (lambda b, p: b["limits"].update(audioMaxOutputBytes=10), "result-too-large"),
+        (
+            lambda b, p: b["limits"].update(audioMaxChannels=1, audioMaxSampleRate=8000),
+            "unsupported-audio",
+        ),
+    ],
+    ids=["broken", "output", "rate"],
+)
+def test_cli_audio_error_codes(tmp_path: Path, mutate: Any, code: str) -> None:
+    body, result_id, target = audio_request(tmp_path)
+    mutate(body, tmp_path / "input")
+    result = run_cli(["run"], encode(body))
+    assert result.returncode == 0, result.stderr
+    assert result.events[-1] == {"kind": "error", "id": result_id, "code": code}
+    assert target.stat().st_size == 0
+    assert_clean(result.stdout, tmp_path)
+
+
+def test_cli_audio_duration_limit(tmp_path: Path) -> None:
+    body, result_id, target = audio_request(tmp_path)
+    t = np.arange(44_100 * 2) / 44_100
+    sf.write(tmp_path / "input", 0.5 * np.sin(2 * np.pi * 440 * t), 44_100, format="FLAC")
+    body["limits"]["audioMaxDurationSeconds"] = 1
+    result = run_cli(["run"], encode(body))
+    assert result.events[-1] == {"kind": "error", "id": result_id, "code": "duration-too-long"}
+    assert target.stat().st_size == 0
+
+
 def test_cli_pdf_three_variants(tmp_path: Path) -> None:
     body, results = pdf_request(tmp_path)
     result = run_cli(["run"], encode(body))
