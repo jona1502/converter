@@ -51,7 +51,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
   .nav-group { position: relative; }
   .nav-panel { margin: 0; padding: 0; list-style: none; }
   .nav-label { display: block; padding: .5rem .75rem 0; color: var(--color-muted); font-size: .8125rem; font-weight: 500; letter-spacing: -.005em; }
-  .nav-trigger { display: none; }
+  .main-nav .nav-trigger { display: none; }
   /* Einträge wie die Muhr-Navigation: gedämpft, beim Überfahren und als aktive Seite eine Pill (Radius 8px). */
   .nav-panel a, .nav-trigger, .menu-toggle { display: flex; align-items: center; min-height: 2.75rem; padding: .625rem .75rem; border-radius: 8px; color: var(--color-muted); font-size: .875rem; line-height: 1.4; font-weight: 500; letter-spacing: -.01em; text-decoration: none; overflow-wrap: anywhere; }
   .nav-trigger, .menu-toggle { gap: .35rem; border: 0; background: transparent; cursor: pointer; }
