@@ -181,6 +181,7 @@
     .page-title / .page-lead  Seitenüberschrift (h1) und Einleitungstext
     .hero / .hero-title / .hero-lead  zentrierter Einstieg der Startseite
     .section-title         Abschnittsüberschrift (h2)
+    .step-title            zusätzlich zu .section-title: nummerierte Schritte der Werkzeugoberfläche
     .section-kicker        kleine Gruppenüberschrift (h3)
     .prose-content         Fließtext mit Abständen für h2/h3/p/ul/ol/a/code
     .link                  Textlink in Akzentfarbe (unterstrichen)
@@ -272,6 +273,13 @@
     @apply font-semibold;
     font-size: clamp(1.625rem, 3vw, 2.125rem);
     line-height: 1.2;
+    letter-spacing: -0.012em;
+  }
+  /* Schrittüberschriften der Werkzeugoberfläche (ToolWorkspace): eine Stufe kleiner, damit sie
+     auch in der 22rem breiten Einstellungsspalte nicht dominieren. */
+  .step-title {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.25;
     letter-spacing: -0.012em;
   }
   /* Links im Fließtext bleiben unterstrichen (im Dark Mode reicht der Farbabstand allein nicht). */
