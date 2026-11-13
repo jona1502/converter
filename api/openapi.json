@@ -114,6 +114,50 @@
         "title": "AudioCapabilities",
         "type": "object"
       },
+      "AudioDetails": {
+        "additionalProperties": false,
+        "description": "details eines audio-convert-Ergebnisses (JobResultView.details).",
+        "properties": {
+          "channels": {
+            "minimum": 1,
+            "title": "Channels",
+            "type": "integer"
+          },
+          "durationSeconds": {
+            "minimum": 0,
+            "title": "Durationseconds",
+            "type": "number"
+          },
+          "format": {
+            "enum": [
+              "mp3",
+              "wav",
+              "flac",
+              "ogg"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "qualityApplied": {
+            "title": "Qualityapplied",
+            "type": "boolean"
+          },
+          "sampleRate": {
+            "minimum": 1,
+            "title": "Samplerate",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "format",
+          "durationSeconds",
+          "sampleRate",
+          "channels",
+          "qualityApplied"
+        ],
+        "title": "AudioDetails",
+        "type": "object"
+      },
       "AudioOptions": {
         "additionalProperties": false,
         "description": "Optionen für audio-convert. quality wirkt nur bei mp3/ogg.",

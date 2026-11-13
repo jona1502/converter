@@ -192,6 +192,16 @@ type Capabilities struct {
 	Jobs       JobCapabilities   `json:"jobs"`
 }
 
+// AudioDetails: details eines audio-convert-Ergebnisses (OpenAPI-Komponente
+// AudioDetails). channels ist die Kanalzahl des Ergebnisses.
+type AudioDetails struct {
+	Format          AudioFormat `json:"format"`
+	DurationSeconds float64     `json:"durationSeconds"`
+	SampleRate      int64       `json:"sampleRate"`
+	Channels        int64       `json:"channels"`
+	QualityApplied  bool        `json:"qualityApplied"`
+}
+
 // AudioCapabilities: capabilities.audio (OpenAPI-Komponente AudioCapabilities).
 // Formatlisten aus der Probe, alle übrigen Werte aus der Konfiguration.
 type AudioCapabilities struct {

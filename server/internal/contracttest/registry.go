@@ -55,6 +55,7 @@ func APITypes() *Types {
 		"PdfOptions":        reflect.TypeFor[apitypes.PdfOptions](),
 		"AudioOptions":      reflect.TypeFor[apitypes.AudioOptions](),
 		"AudioCapabilities": reflect.TypeFor[apitypes.AudioCapabilities](),
+		"AudioDetails":      reflect.TypeFor[apitypes.AudioDetails](),
 		"ResizeNone":        reflect.TypeFor[apitypes.ResizeNone](),
 		"ResizePercent":     reflect.TypeFor[apitypes.ResizePercent](),
 		"ResizeDimensions":  reflect.TypeFor[apitypes.ResizeDimensions](),
