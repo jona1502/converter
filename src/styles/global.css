@@ -583,12 +583,15 @@
   }
 
   /* Werkzeugoberfläche */
+  /* Ablagebereich: gestrichelter Bedienelement-Rand (>= 3:1), beim Ziehen Mint. */
   .drop-zone {
-    @apply flex flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-border-strong bg-surface px-4 py-10 text-center sm:px-8 sm:py-14;
+    @apply flex flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border-control bg-surface px-4 py-10 text-center sm:px-8 sm:py-14;
+    background-image: var(--mi-card-gradient);
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .drop-zone[data-dragging="true"] {
-    @apply border-solid border-accent-fill bg-accent-soft;
+    @apply border-solid border-accent bg-accent-soft;
+    background-image: none;
   }
   .drop-zone[data-disabled="true"] {
     @apply border-border bg-surface-muted;
