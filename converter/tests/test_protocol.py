@@ -11,8 +11,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pikepdf
 import pytest
+import soundfile as sf
 from PIL import Image
 
 from converter.errors import ProtocolError
@@ -251,6 +253,28 @@ def test_cli_missing_target_is_result_error(tmp_path: Path) -> None:
     result = run_cli(["run"], encode(body))
     assert result.events[-1] == {"kind": "error", "id": result_id, "code": "encode-failed"}
     assert not target.exists()
+
+
+def audio_request(tmp_path: Path, **options: Any) -> tuple[dict[str, Any], str, Path]:
+    source = tmp_path / "input"
+    t = np.arange(4410) / 44_100
+    sf.write(source, 0.5 * np.sin(2 * np.pi * 440 * t), 44_100, format="WAV", subtype="PCM_16")
+    result_id = new_id()
+    target = target_file(tmp_path / f"result-{result_id}")
+    body = request(
+        source, {"tool": "audio-convert", "format": "mp3", **options}, [(result_id, None, target)]
+    )
+    return body, result_id, target
+
+
+def test_audio_request_needs_single_result(tmp_path: Path) -> None:
+    body, _, _ = audio_request(tmp_path)
+    parsed = parse_request(encode(body))
+    assert parsed.limits.audio_max_duration_seconds == 1800
+    body["results"][0]["level"] = "high"
+    with pytest.raises(ProtocolError):
+        parse_request(encode(body))
+    assert {"duration-too-long", "unsupported-audio"} <= RESULT_CODES
 
 
 def test_cli_pdf_three_variants(tmp_path: Path) -> None:
