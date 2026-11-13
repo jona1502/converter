@@ -1,6 +1,6 @@
 import { useRef, type ReactNode } from 'react';
 import { formatBytes, formatSizeChange } from '../../lib/format';
-import type { InputFormat } from '../../lib/image';
+import type { ImageErrorCode, InputFormat } from '../../lib/image';
 import { imageErrorMessage } from './errorMessages';
 import { formatLabel } from './formats';
 import type { BatchEntry, EntryStatus } from './useImageBatch';
@@ -22,12 +22,45 @@ export function formatDimensions(width: number, height: number): string {
   return `${numberDe.format(width)} × ${numberDe.format(height)} px`;
 }
 
+/** Gemeinsame Felder eines Listeneintrags der Bild- und Audiowerkzeuge. */
+export interface FileEntry {
+  readonly id: string;
+  readonly name: string;
+  readonly size: number;
+  readonly status: EntryStatus;
+  /** Vorhanden, sobald ein Ergebnis vorliegt (für die Ablaufanzeige). */
+  readonly result?: unknown;
+  readonly resultUrl?: string;
+  readonly outputName?: string;
+  readonly error?: ImageErrorCode;
+  readonly serverError?: string;
+  readonly expiresAt?: string;
+}
+
+/** Werkzeugspezifische Darstellung in einer Dateizeile. */
+export interface EntryRenderers<E extends FileEntry> {
+  /** Text vor der Größe in der Zeile „Original:“, z. B. „PNG · 32 × 24 px · “. */
+  readonly originalPrefix: (entry: E) => string;
+  /** Ergebnisbereich bei status 'done'. */
+  readonly renderResult: (entry: E) => ReactNode;
+}
+
 export interface FileRowProps {
   readonly entry: BatchEntry;
   readonly onRemove: (id: string) => void;
   readonly removeButtonRef?: (element: HTMLButtonElement | null) => void;
   /** Zusätzliche Hinweise je Werkzeug unterhalb des Ergebnisses. */
   readonly extraNotes?: (entry: BatchEntry) => ReactNode;
+}
+
+/** Kasten „Original“ bzw. „Ergebnis“ mit Beschreibungsliste; children sind die dt/dd-Paare. */
+export function MetadataGroup({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div role="group" aria-label={label} className="flex min-w-0 flex-col gap-3 rounded-control border border-border bg-surface p-3">
+      <h4 className="text-base font-semibold">{label}</h4>
+      <dl className="meta-list">{children}</dl>
+    </div>
+  );
 }
 
 function ImageMetadata({ label, format, width, height, size }: {
@@ -38,30 +71,35 @@ function ImageMetadata({ label, format, width, height, size }: {
   size: number;
 }) {
   return (
-    <div role="group" aria-label={label} className="flex min-w-0 flex-col gap-3 rounded-control border border-border bg-surface p-3">
-      <h4 className="text-base font-semibold">{label}</h4>
-      <dl className="meta-list">
-        {format && <div><dt>Format</dt><dd>{formatLabel(format)}</dd></div>}
-        {width !== undefined && height !== undefined && <div><dt>Maße</dt><dd>{formatDimensions(width, height)}</dd></div>}
-        <div><dt>Größe</dt><dd>{formatBytes(size)}</dd></div>
-      </dl>
-    </div>
+    <MetadataGroup label={label}>
+      {format && <div><dt>Format</dt><dd>{formatLabel(format)}</dd></div>}
+      {width !== undefined && height !== undefined && <div><dt>Maße</dt><dd>{formatDimensions(width, height)}</dd></div>}
+      <div><dt>Größe</dt><dd>{formatBytes(size)}</dd></div>
+    </MetadataGroup>
   );
 }
 
-function ResultDetails({ entry }: { entry: BatchEntry }) {
-  const { result, resultUrl, outputName } = entry;
-  if (!result || !resultUrl || !outputName) return null;
-  const change = entry.size > 0 ? formatSizeChange(entry.size, result.size) : null;
-  const notes: string[] = [];
-  if (result.transparencyFlattened) notes.push('Transparente Bereiche wurden mit der Hintergrundfarbe gefüllt.');
-  if (result.upscaled) notes.push('Das Bild wurde vergrößert; dabei entstehen keine zusätzlichen Details.');
+export interface ResultSummaryProps {
+  readonly entry: FileEntry;
+  /** Ergebnisgröße in Bytes. */
+  readonly resultSize: number;
+  readonly original: ReactNode;
+  readonly result: ReactNode;
+  /** Zusätzliche Hinweise zum Ergebnis. */
+  readonly notes?: readonly string[];
+}
+
+/** Vergleich Original/Ergebnis mit Größenänderung, Dateiname, Hinweisen und Download. */
+export function ResultSummary({ entry, resultSize, original, result, notes = [] }: ResultSummaryProps) {
+  const { resultUrl, outputName } = entry;
+  if (!resultUrl || !outputName) return null;
+  const change = entry.size > 0 ? formatSizeChange(entry.size, resultSize) : null;
 
   return (
     <div className="file-result">
       <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-        <ImageMetadata label="Original" format={entry.probe?.format} width={entry.probe?.width} height={entry.probe?.height} size={entry.size} />
-        <ImageMetadata label="Ergebnis" format={result.format} width={result.width} height={result.height} size={result.size} />
+        {original}
+        {result}
       </div>
       <dl className="meta-list">
         {change && <div>
@@ -101,10 +139,43 @@ function ResultDetails({ entry }: { entry: BatchEntry }) {
   );
 }
 
-export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRowProps) {
+function ResultDetails({ entry }: { entry: BatchEntry }) {
+  const { result } = entry;
+  if (!result) return null;
+  const notes: string[] = [];
+  if (result.transparencyFlattened) notes.push('Transparente Bereiche wurden mit der Hintergrundfarbe gefüllt.');
+  if (result.upscaled) notes.push('Das Bild wurde vergrößert; dabei entstehen keine zusätzlichen Details.');
+  return (
+    <ResultSummary
+      entry={entry}
+      resultSize={result.size}
+      original={<ImageMetadata label="Original" format={entry.probe?.format} width={entry.probe?.width} height={entry.probe?.height} size={entry.size} />}
+      result={<ImageMetadata label="Ergebnis" format={result.format} width={result.width} height={result.height} size={result.size} />}
+      notes={notes}
+    />
+  );
+}
+
+function imageOriginalPrefix(entry: BatchEntry): string {
+  const { probe } = entry;
+  return probe ? `${formatLabel(probe.format)} · ${formatDimensions(probe.width, probe.height)} · ` : '';
+}
+
+function imageResult(entry: BatchEntry): ReactNode {
+  return <ResultDetails entry={entry} />;
+}
+
+export interface EntryRowProps<E extends FileEntry> extends EntryRenderers<E> {
+  readonly entry: E;
+  readonly onRemove: (id: string) => void;
+  readonly removeButtonRef?: (element: HTMLButtonElement | null) => void;
+  readonly extraNotes?: (entry: E) => ReactNode;
+}
+
+/** Dateizeile mit Status, Entfernen, Fehlern und werkzeugspezifischem Ergebnis. */
+export function EntryRow<E extends FileEntry>({ entry, onRemove, removeButtonRef, extraNotes, originalPrefix, renderResult }: EntryRowProps<E>) {
   const expired = Boolean(entry.result && entry.expiresAt && Date.parse(entry.expiresAt) <= Date.now());
   const status = expired ? { label: 'Abgelaufen', badge: 'badge-warn' } : STATUS[entry.status];
-  const { probe } = entry;
   return (
     <li className="file-row" data-status={entry.status}>
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -114,7 +185,7 @@ export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRo
           </h3>
           {entry.status !== 'done' && <p className="hint tabular-nums">
             <span className="font-medium">Original: </span>
-            {probe ? `${formatLabel(probe.format)} · ${formatDimensions(probe.width, probe.height)} · ` : ''}
+            {originalPrefix(entry)}
             {formatBytes(entry.size)}
           </p>}
         </div>
@@ -138,35 +209,41 @@ export function FileRow({ entry, onRemove, removeButtonRef, extraNotes }: FileRo
       {entry.serverError && <p className="field-error">{entry.serverError}</p>}
       {expired && entry.expiresAt && <p className="hint">Abgelaufen am <time dateTime={entry.expiresAt}>{new Date(entry.expiresAt).toLocaleString('de-DE')}</time>.</p>}
       {entry.status === 'processing' && <progress className="progress" aria-label={`${entry.name} wird verarbeitet`} />}
-      {entry.status === 'done' && !expired && <ResultDetails entry={entry} />}
+      {entry.status === 'done' && !expired && renderResult(entry)}
       {extraNotes?.(entry)}
     </li>
   );
 }
 
-export interface FileListProps {
-  readonly entries: readonly BatchEntry[];
+export function FileRow(props: FileRowProps) {
+  return <EntryRow {...props} originalPrefix={imageOriginalPrefix} renderResult={imageResult} />;
+}
+
+export interface EntryListProps<E extends FileEntry> extends EntryRenderers<E> {
+  readonly entries: readonly E[];
   readonly onRemove: (id: string) => void;
   /** Wird aufgerufen, wenn nach dem Entfernen keine Datei mehr übrig ist (z. B. Fokus auf Dateiauswahl). */
   readonly onEmptied?: () => void;
   /** Überschrift der Liste (für aria-labelledby). */
   readonly labelledBy?: string;
   readonly emptyText?: string;
-  readonly extraNotes?: (entry: BatchEntry) => ReactNode;
+  readonly extraNotes?: (entry: E) => ReactNode;
 }
 
 /**
  * Dateiliste mit Fokusführung: Nach dem Entfernen erhält der Entfernen-Button der nachfolgenden
  * (sonst der vorherigen) Datei den Fokus; ist die Liste leer, wird onEmptied aufgerufen.
  */
-export function FileList({
+export function EntryList<E extends FileEntry>({
   entries,
   onRemove,
   onEmptied,
   labelledBy,
   emptyText = 'Noch keine Dateien ausgewählt.',
   extraNotes,
-}: FileListProps) {
+  originalPrefix,
+  renderResult,
+}: EntryListProps<E>) {
   const buttons = useRef(new Map<string, HTMLButtonElement>());
 
   if (entries.length === 0) {
@@ -187,11 +264,13 @@ export function FileList({
   return (
     <ul className="file-list" aria-labelledby={labelledBy}>
       {entries.map((entry) => (
-        <FileRow
+        <EntryRow
           key={entry.id}
           entry={entry}
           onRemove={handleRemove}
           extraNotes={extraNotes}
+          originalPrefix={originalPrefix}
+          renderResult={renderResult}
           removeButtonRef={(element) => {
             if (element) buttons.current.set(entry.id, element);
             else buttons.current.delete(entry.id);
@@ -200,4 +279,11 @@ export function FileList({
       ))}
     </ul>
   );
+}
+
+export type FileListProps = Omit<EntryListProps<BatchEntry>, keyof EntryRenderers<BatchEntry>>;
+
+/** Dateiliste der Bildwerkzeuge (Format, Maße, Größe). */
+export function FileList(props: FileListProps) {
+  return <EntryList {...props} originalPrefix={imageOriginalPrefix} renderResult={imageResult} />;
 }
