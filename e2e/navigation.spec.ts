@@ -10,7 +10,7 @@ const tools = [
 const groups = ['Konvertieren', 'Komprimieren', 'Skalieren'] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
-function group(page: Page, name: string) { return navigation(page).getByRole('button', { name, exact: true }); }
+function group(page: Page, name: string) { return navigation(page).getByRole('button', { name: `${name}-Menü`, exact: true }); }
 function menuButton(page: Page) { return page.getByRole('button', { name: 'Menü', exact: true }); }
 function link(page: Page, label: string) { return navigation(page).getByRole('link', { name: label, exact: true }); }
 async function noOverflow(page: Page) {

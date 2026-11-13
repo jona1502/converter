@@ -60,7 +60,7 @@ for (const path of ['/', '/audio/konvertieren']) {
         };
         await scan();
         if (width < 768) await page.getByRole('button', { name: 'Menü', exact: true }).click();
-        else await nav.getByRole('button', { name: 'Konvertieren', exact: true }).click();
+        else await nav.getByRole('button', { name: 'Konvertieren-Menü', exact: true }).click();
         await expect(nav.getByRole('link', { name: 'Bilder konvertieren' })).toBeVisible();
         await scan();
       });
