@@ -188,7 +188,33 @@ type Capabilities struct {
 	Tools      []Tool            `json:"tools"`
 	Image      ImageCapabilities `json:"image"`
 	Pdf        PdfCapabilities   `json:"pdf"`
+	Audio      AudioCapabilities `json:"audio"`
 	Jobs       JobCapabilities   `json:"jobs"`
+}
+
+// AudioCapabilities: capabilities.audio (OpenAPI-Komponente AudioCapabilities).
+// Formatlisten aus der Probe, alle übrigen Werte aus der Konfiguration.
+type AudioCapabilities struct {
+	InputFormats       []AudioFormat `json:"inputFormats"`
+	OutputFormats      []AudioFormat `json:"outputFormats"`
+	QualityFormats     []AudioFormat `json:"qualityFormats"`
+	DefaultQuality     float64       `json:"defaultQuality"`
+	MaxFileBytes       int64         `json:"maxFileBytes"`
+	MaxDurationSeconds int           `json:"maxDurationSeconds"`
+	MaxChannels        int           `json:"maxChannels"`
+	MaxSampleRate      int           `json:"maxSampleRate"`
+	MaxOutputBytes     int64         `json:"maxOutputBytes"`
+}
+
+// MarshalJSON: Formatlisten sind nie null.
+func (a AudioCapabilities) MarshalJSON() ([]byte, error) {
+	type plain AudioCapabilities
+	for _, list := range []*[]AudioFormat{&a.InputFormats, &a.OutputFormats, &a.QualityFormats} {
+		if *list == nil {
+			*list = []AudioFormat{}
+		}
+	}
+	return json.Marshal(plain(a))
 }
 
 type ImageCapabilities struct {

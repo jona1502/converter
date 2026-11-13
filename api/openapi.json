@@ -32,6 +32,88 @@
         "title": "ApiErrorCode",
         "type": "string"
       },
+      "AudioCapabilities": {
+        "additionalProperties": false,
+        "description": "Inhalt von capabilities.audio (GET /api/v1/capabilities).",
+        "properties": {
+          "defaultQuality": {
+            "title": "Defaultquality",
+            "type": "number"
+          },
+          "inputFormats": {
+            "items": {
+              "enum": [
+                "mp3",
+                "wav",
+                "flac",
+                "ogg"
+              ],
+              "type": "string"
+            },
+            "title": "Inputformats",
+            "type": "array"
+          },
+          "maxChannels": {
+            "title": "Maxchannels",
+            "type": "integer"
+          },
+          "maxDurationSeconds": {
+            "title": "Maxdurationseconds",
+            "type": "integer"
+          },
+          "maxFileBytes": {
+            "title": "Maxfilebytes",
+            "type": "integer"
+          },
+          "maxOutputBytes": {
+            "title": "Maxoutputbytes",
+            "type": "integer"
+          },
+          "maxSampleRate": {
+            "title": "Maxsamplerate",
+            "type": "integer"
+          },
+          "outputFormats": {
+            "items": {
+              "enum": [
+                "mp3",
+                "wav",
+                "flac",
+                "ogg"
+              ],
+              "type": "string"
+            },
+            "title": "Outputformats",
+            "type": "array"
+          },
+          "qualityFormats": {
+            "items": {
+              "enum": [
+                "mp3",
+                "wav",
+                "flac",
+                "ogg"
+              ],
+              "type": "string"
+            },
+            "title": "Qualityformats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "inputFormats",
+          "outputFormats",
+          "qualityFormats",
+          "defaultQuality",
+          "maxFileBytes",
+          "maxDurationSeconds",
+          "maxChannels",
+          "maxSampleRate",
+          "maxOutputBytes"
+        ],
+        "title": "AudioCapabilities",
+        "type": "object"
+      },
       "AudioOptions": {
         "additionalProperties": false,
         "description": "Optionen für audio-convert. quality wirkt nur bei mp3/ogg.",
@@ -841,6 +923,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {

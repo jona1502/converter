@@ -160,6 +160,19 @@ func TestSerializedDTOsValidate(t *testing.T) {
 		t.Fatalf("Session: %v", err)
 	}
 
+	audio := mustJSON(t, apitypes.AudioCapabilities{
+		InputFormats: apitypes.AudioFormats(), OutputFormats: apitypes.AudioFormats(),
+		QualityFormats: []apitypes.AudioFormat{apitypes.AudioMP3, apitypes.AudioOGG}, DefaultQuality: .8,
+		MaxFileBytes: 104_857_600, MaxDurationSeconds: 1800, MaxChannels: 8, MaxSampleRate: 192_000,
+		MaxOutputBytes: 419_430_400,
+	})
+	if err := spec.ValidateComponent("AudioCapabilities", audio); err != nil {
+		t.Fatalf("AudioCapabilities: %v\n%s", err, audio)
+	}
+	if empty := mustJSON(t, apitypes.AudioCapabilities{}); !strings.Contains(string(empty), `"inputFormats":[]`) {
+		t.Fatalf("leere Formatliste nicht als [] serialisiert: %s", empty)
+	}
+
 	caps := mustJSON(t, apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools()})
 	schema, err = spec.ResponseSchema("/api/v1/capabilities", "GET", 200)
 	if err != nil {
