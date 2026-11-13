@@ -1,6 +1,6 @@
 /** Anzeige von Audiodetails: Dauer, Abtastrate und Kanäle. */
 
-const NBSP = ' ';
+const NBSP = ' ';
 const kilohertz = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
 
 /**

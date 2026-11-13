@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatChannels, formatDuration, formatDurationLimit, formatSampleRate } from '../../../src/lib/audio/display';
 
-const S = ' ';
+const S = ' ';
 
 describe('formatDuration', () => {
   it('zeigt mm:ss mit gerundeten Sekunden', () => {
