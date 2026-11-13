@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Laufzeitimage des privaten Konverters (Pillow/pikepdf) für den Go-Worker.
+# Laufzeitimage des privaten Konverters (Pillow/pikepdf/soundfile) für den Go-Worker.
 #   docker build -t mi-converter-converter:local converter
 # Tests im Linux-Container (inklusive Sandboxproben):
 #   docker build --target test -t mi-converter-converter-test:local converter
@@ -75,7 +75,8 @@ COPY --from=build /opt/venv /opt/venv
 COPY converter /opt/venv/lib/python3.13/site-packages/converter
 RUN chmod -R a-x,u=rwX,go=rX /opt/venv/lib/python3.13/site-packages/converter \
     && python -m compileall -q /opt/venv/lib/python3.13/site-packages/converter \
-    && python -I -c "import converter.cli"
+    && python -I -c "import converter.cli" \
+    && python -I -c "import soundfile as sf; assert {'MP3','WAV','FLAC','OGG'} <= set(sf.available_formats()), sf.__libsndfile_version__"
 USER 10001:10001
 WORKDIR /
 # Bewusst kein ENTRYPOINT/Server: der Go-Worker (G10) startet

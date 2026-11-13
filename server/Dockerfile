@@ -48,8 +48,11 @@ RUN groupadd --system --gid 10001 converter \
 COPY --from=codec-build /opt/venv /opt/venv
 COPY converter/converter /opt/venv/lib/python3.13/site-packages/converter
 COPY --from=build /out/worker /app/worker
+# libsndfile stammt aus dem soundfile-Wheel (keine Systempakete); MP3 muss
+# beim Bauen nachweislich enthalten sein (die Rundreise prüft die Probe).
 RUN chmod -R a-x,u=rwX,go=rX /opt/venv/lib/python3.13/site-packages/converter \
-    && python -I -c "import converter.cli"
+    && python -I -c "import converter.cli" \
+    && python -I -c "import soundfile as sf; assert {'MP3','WAV','FLAC','OGG'} <= set(sf.available_formats()), sf.__libsndfile_version__"
 USER 10001:10001
 WORKDIR /
 ENTRYPOINT ["/app/worker"]
