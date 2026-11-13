@@ -167,8 +167,8 @@
   Buttons (auf <button> oder <a>; disabled bzw. aria-disabled="true" sichtbar gedämpft.
   Für deaktivierbare Aktionen <button disabled> verwenden; aria-disabled auf <a> verhindert
   die Aktivierung nicht – dort zusätzlich href entfernen.)
-    .btn                   Basis als Pill (immer zusätzlich zu einer Variante verwenden)
-    .btn-primary           Hauptaktion (gefüllt, Blau)
+    .btn                   Basis, Radius 12px (immer zusätzlich zu einer Variante verwenden)
+    .btn-primary           Hauptaktion (Mint-Fläche, dunkler Text)
     .btn-secondary         Nebenaktion (graue Fläche)
     .btn-danger            destruktive Aktion (z. B. „Alle entfernen“)
     .btn-ghost             zurückhaltende Aktion ohne Fläche (z. B. „Entfernen“ in Listen)
@@ -308,9 +308,20 @@
   }
 
   /* Buttons (ohne Farbübergänge: axe misst sonst Zwischenfarben, z. B. beim Aktivieren nach „disabled“) */
+  /* Nach .mi-btn: Radius 12px, padding 11px 22px. Mindesthöhe 44px als Trefferfläche. */
   .btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-transparent px-5 py-2 text-[1.0625rem] font-normal leading-tight no-underline select-none;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-transparent text-[1.0625rem] font-normal no-underline select-none;
+    padding: 11px 22px;
+    line-height: 1.2;
     letter-spacing: -0.022em;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn {
+      transition: transform 0.15s ease;
+    }
+    .btn:not(:disabled, [aria-disabled="true"]):active {
+      transform: scale(0.97);
+    }
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
@@ -353,7 +364,8 @@
     @apply min-h-12 px-7 py-3 text-lg;
   }
   .btn-icon {
-    @apply aspect-square px-0 py-0;
+    @apply aspect-square;
+    padding: 0;
   }
 
   /* Karten */
