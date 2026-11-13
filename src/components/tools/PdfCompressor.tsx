@@ -81,16 +81,16 @@ export default function PdfCompressor() {
     </>}
     settings={<>
       <p>Alle drei Varianten werden mit einem Start berechnet.</p>
-      <p className="hint">Verschlüsselte PDFs werden nicht unterstützt.</p>
+      <p className="hint">Verschlüsselte PDFs werden abgelehnt. Digitale Signaturen können ungültig werden; der Erhalt von PDF/A ist nicht garantiert.</p>
       <dl className="flex flex-col gap-4">
         <div><dt className="font-semibold">Hohe Qualität</dt><dd className="hint">Schonende Komprimierung.</dd></div>
         <div><dt className="font-semibold">Ausgewogen</dt><dd className="hint">Kompromiss zwischen Qualität und Dateigröße.</dd></div>
-        <div><dt className="font-semibold">Kleine Datei</dt><dd className="hint">Stärkere Komprimierung für kleinere Dateien.</dd></div>
+        <div><dt className="font-semibold">Kleine Datei</dt><dd className="hint">Stärkere Komprimierung mit geringerer Bildqualität.</dd></div>
       </dl>
     </>}
     actionTitle="PDF komprimieren"
     action={<>
-      <p className="hint">Nach dem Start wird Ihre PDF auf dem Server verarbeitet. Ergebnisse sind befristet verfügbar.</p>
+      <p className="hint">Erst mit „Komprimieren“ wird Ihre PDF auf den Server hochgeladen. Datei und Ergebnisse werden temporär gespeichert. Downloads sind befristet verfügbar; Zurücksetzen fordert die frühere Löschung an. <a href="/lokale-verarbeitung" className="link">Mehr zur Dateiverarbeitung</a></p>
       <button className="btn btn-primary w-full" disabled={!ready||!file||busy} aria-describedby="pdf-start-hint" onClick={()=>void start()}>Komprimieren</button>
       <p id="pdf-start-hint" className="hint">{!ready?'Der Server wird vorbereitet.':busy?'Die Verarbeitung läuft. Sie können abbrechen oder zurücksetzen.':!file?'Wählen Sie zuerst eine PDF aus.':'Bereit: Analyse und drei Varianten starten.'}</p>
       {(file||busy)&&<div className="flex flex-wrap gap-3">

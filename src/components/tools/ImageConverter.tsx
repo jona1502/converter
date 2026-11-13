@@ -149,11 +149,11 @@ export default function ImageConverter() {
   let disabledReason: string | null = null;
   if (!hydrated) disabledReason = 'Die Seite wird geladen …';
   else if (support.status === 'unsupported') disabledReason = 'Der Server unterstützt dieses Werkzeug nicht.';
-  else if (!encode || !format) disabledReason = 'Es wird geprüft, welche Formate Der Server erzeugen kann.';
+  else if (!encode || !format) disabledReason = 'Es wird geprüft, welche Formate der Server erzeugen kann.';
   else if (isProcessing) disabledReason = 'Die Konvertierung läuft.';
   else if (counts.checking > 0) disabledReason = 'Die Dateien werden noch geprüft.';
   else if (counts.processable === 0) disabledReason = 'Fügen Sie zuerst mindestens ein verwendbares Bild hinzu.';
-  else if (!encode[format]) disabledReason = 'Das gewählte Format kann Der Server nicht erzeugen.';
+  else if (!encode[format]) disabledReason = 'Das gewählte Format kann der Server nicht erzeugen.';
 
   const dropDisabled = !hydrated || support.status === 'unsupported';
 
