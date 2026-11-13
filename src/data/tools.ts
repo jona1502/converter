@@ -6,6 +6,14 @@
 
 export type ToolCategory = 'bilder' | 'pdf' | 'audio';
 export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
+/** Aktion, nach der die Kopfzeile die Werkzeuge in Menüs gruppiert. */
+export type ToolAction = 'convert' | 'compress' | 'resize';
+
+export interface ToolActionInfo {
+  readonly id: ToolAction;
+  /** Menübeschriftung der Aktion. */
+  readonly title: string;
+}
 
 export interface ToolCategoryInfo {
   readonly id: ToolCategory;
@@ -24,6 +32,8 @@ export interface Tool {
   readonly href: `/${string}`;
   readonly category: ToolCategory;
   readonly operation: ToolOperation;
+  /** Menügruppe in der Kopfzeile. */
+  readonly action: ToolAction;
   /** Nur verfügbare Werkzeuge werden verlinkt. */
   readonly available: boolean;
 }
@@ -34,6 +44,13 @@ export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [
   { id: 'audio', title: 'Audio' },
 ];
 
+/** Reihenfolge der Menüs in der Kopfzeile. */
+export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
+  { id: 'convert', title: 'Konvertieren' },
+  { id: 'compress', title: 'Komprimieren' },
+  { id: 'resize', title: 'Skalieren' },
+];
+
 export const TOOLS: readonly Tool[] = [
   {
     id: 'pdf-komprimieren',
@@ -42,6 +59,7 @@ export const TOOLS: readonly Tool[] = [
     href: '/pdf/komprimieren',
     category: 'pdf',
     operation: 'komprimieren',
+    action: 'compress',
     available: true,
   },
   {
@@ -51,6 +69,7 @@ export const TOOLS: readonly Tool[] = [
     href: '/bilder/konvertieren',
     category: 'bilder',
     operation: 'konvertieren',
+    action: 'convert',
     available: true,
   },
   {
@@ -60,6 +79,7 @@ export const TOOLS: readonly Tool[] = [
     href: '/bilder/komprimieren',
     category: 'bilder',
     operation: 'komprimieren',
+    action: 'compress',
     available: true,
   },
   {
@@ -69,6 +89,7 @@ export const TOOLS: readonly Tool[] = [
     href: '/bilder/skalieren',
     category: 'bilder',
     operation: 'skalieren',
+    action: 'resize',
     available: true,
   },
   {
@@ -78,6 +99,7 @@ export const TOOLS: readonly Tool[] = [
     href: '/audio/konvertieren',
     category: 'audio',
     operation: 'konvertieren',
+    action: 'convert',
     available: true,
   },
 ];
@@ -90,4 +112,16 @@ export const availableToolsByCategory: readonly { category: ToolCategoryInfo; to
   TOOL_CATEGORIES.map((category) => ({
     category,
     tools: availableTools.filter((tool) => tool.category === category.id),
+  })).filter((group) => group.tools.length > 0);
+
+/**
+ * Freigeschaltete Werkzeuge nach Aktion (Menüs der Kopfzeile); Aktionen ohne verfügbares Werkzeug entfallen.
+ * Innerhalb einer Aktion gilt die Reihenfolge von `TOOL_CATEGORIES` (Bilder, PDF, Audio).
+ */
+export const availableToolsByAction: readonly { action: ToolActionInfo; tools: readonly Tool[] }[] =
+  TOOL_ACTIONS.map((action) => ({
+    action,
+    tools: TOOL_CATEGORIES.flatMap((category) =>
+      availableTools.filter((tool) => tool.action === action.id && tool.category === category.id),
+    ),
   })).filter((group) => group.tools.length > 0);

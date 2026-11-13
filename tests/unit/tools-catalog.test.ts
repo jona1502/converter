@@ -1,0 +1,26 @@
+import { describe, expect, it } from 'vitest';
+import { availableTools, availableToolsByAction } from '../../src/data/tools';
+
+describe('Werkzeugkatalog nach Aktion', () => {
+  const titlesOf = (id: string) =>
+    availableToolsByAction.find((group) => group.action.id === id)?.tools.map((tool) => tool.title);
+
+  it('gruppiert Konvertieren, Komprimieren und Skalieren in dieser Reihenfolge', () => {
+    expect(availableToolsByAction.map((group) => group.action.title)).toEqual([
+      'Konvertieren',
+      'Komprimieren',
+      'Skalieren',
+    ]);
+  });
+
+  it('ordnet Audio unter Konvertieren und PDF unter Komprimieren', () => {
+    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Audio konvertieren']);
+    expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
+    expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
+  });
+
+  it('enthält jedes verfügbare Werkzeug genau einmal', () => {
+    const ids = availableToolsByAction.flatMap((group) => group.tools.map((tool) => tool.id));
+    expect([...ids].sort()).toEqual(availableTools.map((tool) => tool.id).sort());
+  });
+});
