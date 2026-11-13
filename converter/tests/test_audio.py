@@ -1,0 +1,176 @@
+"""Audio-Pipeline: echte Rundreisen kleiner, generierter Sinusdateien.
+
+Alle Eingaben werden mit soundfile erzeugt und alle Ergebnisse unabhängig
+mit soundfile erneut dekodiert. Ergebnisdateien legt der Test wie der
+Go-Worker vorab an.
+"""
+
+from __future__ import annotations
+
+import io
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pytest
+import soundfile as sf
+
+from converter.limits import Limits
+from converter.options import AudioOptions, parse_options
+from converter.processing.audio.pipeline import convert
+from tests.helpers import target_file
+
+RATE = 44_100
+SECONDS = 0.3
+# soundfile-Format/Subtyp je Eingabeformat der Tests.
+WRITE = {
+    "mp3": ("MP3", "MPEG_LAYER_III"),
+    "wav": ("WAV", "PCM_16"),
+    "flac": ("FLAC", "PCM_16"),
+    "ogg": ("OGG", "VORBIS"),
+}
+CONTAINER = {"mp3": "MP3", "wav": "WAV", "flac": "FLAC", "ogg": "OGG"}
+
+
+def sine(channels: int = 2, rate: int = RATE, seconds: float = SECONDS) -> np.ndarray:
+    t = np.arange(int(rate * seconds)) / rate
+    columns = [0.5 * np.sin(2 * np.pi * 440 * (i + 1) * t) for i in range(channels)]
+    return np.stack(columns, axis=1)
+
+
+def write_input(
+    path: Path,
+    fmt: str,
+    channels: int = 2,
+    rate: int = RATE,
+    seconds: float = SECONDS,
+    subtype: str | None = None,
+) -> None:
+    container, default = WRITE[fmt]
+    sf.write(
+        path,
+        sine(channels, rate, seconds),
+        rate,
+        format=container,
+        subtype=subtype or default,
+    )
+
+
+def options(**updates: Any) -> AudioOptions:
+    parsed = parse_options({"tool": "audio-convert", "format": "wav", **updates})
+    assert isinstance(parsed, AudioOptions)
+    return parsed
+
+
+def run(tmp_path: Path, limits: Limits, **updates: Any) -> tuple[dict[str, Any], Path]:
+    target = target_file(tmp_path / "output")
+    details = convert(tmp_path / "input", target, options(**updates), limits)
+    return details, target
+
+
+# --- Rundreisen ---------------------------------------------------------------
+
+
+@pytest.mark.parametrize("input_format", ["mp3", "wav", "flac", "ogg"])
+@pytest.mark.parametrize("output_format", ["mp3", "wav", "flac", "ogg"])
+def test_format_matrix(
+    tmp_path: Path, limits: Limits, input_format: str, output_format: str
+) -> None:
+    write_input(tmp_path / "input", input_format)
+    details, target = run(tmp_path, limits, format=output_format)
+    info = sf.info(target)
+    assert info.format == CONTAINER[output_format]
+    assert (info.samplerate, info.channels) == (RATE, 2)
+    # Verlustbehaftete Codecs verschieben die Länge höchstens minimal.
+    assert abs(info.frames - RATE * SECONDS) < RATE * 0.06
+    data, _ = sf.read(target, always_2d=True)
+    # Signal überlebt (keine Stille, kein Übersteuern).
+    assert 0.3 < float(np.max(np.abs(data))) <= 1.0
+    assert details == {
+        "format": output_format,
+        "durationSeconds": details["durationSeconds"],
+        "sampleRate": RATE,
+        "channels": 2,
+        "qualityApplied": output_format in {"mp3", "ogg"},
+    }
+    assert abs(details["durationSeconds"] - SECONDS) < 0.06
+
+
+def test_mp3_support_is_real_round_trip() -> None:
+    """Das Wheel muss MP3 tatsächlich lesen und schreiben (nicht nur melden)."""
+    buffer = io.BytesIO()
+    sf.write(buffer, sine(1), RATE, format="MP3", subtype="MPEG_LAYER_III")
+    assert buffer.getvalue()[:3] == b"ID3" or buffer.getvalue()[0] == 0xFF
+    buffer.seek(0)
+    data, rate = sf.read(buffer, always_2d=True)
+    assert rate == RATE and data.shape[1] == 1 and data.shape[0] > RATE * 0.25
+
+
+def test_opus_input_is_decoded(tmp_path: Path, limits: Limits) -> None:
+    sf.write(tmp_path / "input", sine(2, 48_000), 48_000, format="OGG", subtype="OPUS")
+    details, target = run(tmp_path, limits, format="flac")
+    assert sf.info(target).format == "FLAC"
+    assert details["sampleRate"] == 48_000
+
+
+def test_mono_downmix_is_mean(tmp_path: Path, limits: Limits) -> None:
+    source = sine(2)
+    sf.write(tmp_path / "input", source, RATE, format="WAV", subtype="FLOAT")
+    details, target = run(tmp_path, limits, format="wav", channels="mono")
+    data, _ = sf.read(target, always_2d=True, dtype="float64")
+    assert data.shape[1] == 1 and details["channels"] == 1
+    assert np.allclose(data[:, 0], source.mean(axis=1), atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    ("source_subtype", "expected"),
+    [
+        ("PCM_16", "PCM_16"),
+        ("PCM_U8", "PCM_16"),
+        ("PCM_24", "PCM_24"),
+        ("PCM_32", "PCM_32"),
+        ("FLOAT", "FLOAT"),
+        ("DOUBLE", "PCM_16"),
+    ],
+)
+def test_wav_subtype_follows_source(
+    tmp_path: Path, limits: Limits, source_subtype: str, expected: str
+) -> None:
+    sf.write(tmp_path / "input", sine(1), RATE, format="WAV", subtype=source_subtype)
+    run(tmp_path, limits, format="wav")
+    assert sf.info(tmp_path / "output").subtype == expected
+
+
+def test_flac_keeps_24_bit(tmp_path: Path, limits: Limits) -> None:
+    sf.write(tmp_path / "input", sine(1), RATE, format="WAV", subtype="PCM_24")
+    run(tmp_path, limits, format="flac")
+    assert sf.info(tmp_path / "output").subtype == "PCM_24"
+
+
+def test_24_bit_samples_survive_losslessly(tmp_path: Path, limits: Limits) -> None:
+    sf.write(tmp_path / "input", sine(2), RATE, format="FLAC", subtype="PCM_24")
+    run(tmp_path, limits, format="wav")
+    original, _ = sf.read(tmp_path / "input", dtype="int32")
+    converted, _ = sf.read(tmp_path / "output", dtype="int32")
+    assert np.array_equal(original, converted)
+
+
+def test_clipping_instead_of_wraparound(tmp_path: Path, limits: Limits) -> None:
+    loud = np.full((4410, 1), 1.5)
+    loud[::2] = -1.5
+    # DOUBLE-Quelle ergibt PCM_16; ohne Begrenzung liefe 1,5 über.
+    sf.write(tmp_path / "input", loud, RATE, format="WAV", subtype="DOUBLE")
+    run(tmp_path, limits, format="wav")
+    data, _ = sf.read(tmp_path / "output", dtype="int16", always_2d=True)
+    assert data[0, 0] == -32768 and data[1, 0] == 32767
+
+
+@pytest.mark.parametrize("output_format", ["mp3", "ogg"])
+def test_quality_changes_size(tmp_path: Path, limits: Limits, output_format: str) -> None:
+    write_input(tmp_path / "input", "wav", seconds=2)
+    sizes = []
+    for quality in (0.0, 1.0):
+        target = target_file(tmp_path / f"out-{quality}")
+        convert(tmp_path / "input", target, options(format=output_format, quality=quality), limits)
+        sizes.append(target.stat().st_size)
+    assert sizes[0] < sizes[1]
