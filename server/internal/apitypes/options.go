@@ -28,8 +28,15 @@ type PdfOptions struct {
 	Levels validation.Optional[[]PdfLevel] `json:"levels,omitzero" strict:"notnull"`
 }
 
-// JobOptions: ImageOptions oder PdfOptions, unterschieden über "tool".
-// Value ist *ImageOptions oder *PdfOptions.
+type AudioOptions struct {
+	Tool     Tool                               `json:"tool"`
+	Format   AudioFormat                        `json:"format"`
+	Quality  validation.Optional[float64]       `json:"quality,omitzero" strict:"notnull"`
+	Channels validation.Optional[AudioChannels] `json:"channels,omitzero" strict:"notnull"`
+}
+
+// JobOptions: ImageOptions, PdfOptions oder AudioOptions, unterschieden über
+// "tool". Value ist *ImageOptions, *PdfOptions oder *AudioOptions.
 type JobOptions struct {
 	Value any
 }
@@ -42,6 +49,8 @@ func (JobOptions) UnionVariant(tag string) any {
 		return new(ImageOptions)
 	case ToolPDFCompress:
 		return new(PdfOptions)
+	case ToolAudioConvert:
+		return new(AudioOptions)
 	}
 	return nil
 }
@@ -63,6 +72,12 @@ func (o JobOptions) Image() (*ImageOptions, bool) {
 // Pdf liefert die PDF-Optionen, falls gesetzt.
 func (o JobOptions) Pdf() (*PdfOptions, bool) {
 	v, ok := o.Value.(*PdfOptions)
+	return v, ok
+}
+
+// Audio liefert die Audiooptionen, falls gesetzt.
+func (o JobOptions) Audio() (*AudioOptions, bool) {
+	v, ok := o.Value.(*AudioOptions)
 	return v, ok
 }
 

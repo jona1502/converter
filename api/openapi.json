@@ -32,6 +32,49 @@
         "title": "ApiErrorCode",
         "type": "string"
       },
+      "AudioOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für audio-convert. quality wirkt nur bei mp3/ogg.",
+        "properties": {
+          "channels": {
+            "default": "original",
+            "enum": [
+              "original",
+              "mono"
+            ],
+            "title": "Channels",
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "mp3",
+              "wav",
+              "flac",
+              "ogg"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "quality": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Quality",
+            "type": "number"
+          },
+          "tool": {
+            "const": "audio-convert",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "format"
+        ],
+        "title": "AudioOptions",
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "properties": {
@@ -218,7 +261,11 @@
           "bmp",
           "ico",
           "avif",
-          "pdf"
+          "pdf",
+          "mp3",
+          "wav",
+          "flac",
+          "ogg"
         ],
         "title": "InputFormat",
         "type": "string"
@@ -294,6 +341,7 @@
       "JobOptions": {
         "discriminator": {
           "mapping": {
+            "audio-convert": "#/components/schemas/AudioOptions",
             "image-compress": "#/components/schemas/ImageOptions",
             "image-convert": "#/components/schemas/ImageOptions",
             "image-resize": "#/components/schemas/ImageOptions",
@@ -307,6 +355,9 @@
           },
           {
             "$ref": "#/components/schemas/PdfOptions"
+          },
+          {
+            "$ref": "#/components/schemas/AudioOptions"
           }
         ]
       },
@@ -772,7 +823,8 @@
           "image-convert",
           "image-compress",
           "image-resize",
-          "pdf-compress"
+          "pdf-compress",
+          "audio-convert"
         ],
         "title": "Tool",
         "type": "string"

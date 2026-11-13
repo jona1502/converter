@@ -85,13 +85,14 @@ const (
 	ToolImageCompress Tool = "image-compress"
 	ToolImageResize   Tool = "image-resize"
 	ToolPDFCompress   Tool = "pdf-compress"
+	ToolAudioConvert  Tool = "audio-convert"
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert}
 }
 
-// IsImage: alle Werkzeuge außer pdf-compress.
+// IsImage: image-convert, image-compress und image-resize.
 func (t Tool) IsImage() bool {
 	return t == ToolImageConvert || t == ToolImageCompress || t == ToolImageResize
 }
@@ -163,11 +164,38 @@ const (
 	InputICO  InputFormat = "ico"
 	InputAVIF InputFormat = "avif"
 	InputPDF  InputFormat = "pdf"
+	InputMP3  InputFormat = "mp3"
+	InputWAV  InputFormat = "wav"
+	InputFLAC InputFormat = "flac"
+	InputOGG  InputFormat = "ogg"
 )
 
 func InputFormats() []InputFormat {
-	return []InputFormat{InputJPEG, InputPNG, InputWebP, InputGIF, InputBMP, InputICO, InputAVIF, InputPDF}
+	return []InputFormat{InputJPEG, InputPNG, InputWebP, InputGIF, InputBMP, InputICO, InputAVIF, InputPDF,
+		InputMP3, InputWAV, InputFLAC, InputOGG}
 }
+
+// AudioFormat: Ein- und Ausgabeformate von audio-convert (Inline-Enum).
+type AudioFormat string
+
+const (
+	AudioMP3  AudioFormat = "mp3"
+	AudioWAV  AudioFormat = "wav"
+	AudioFLAC AudioFormat = "flac"
+	AudioOGG  AudioFormat = "ogg"
+)
+
+func AudioFormats() []AudioFormat { return []AudioFormat{AudioMP3, AudioWAV, AudioFLAC, AudioOGG} }
+
+// AudioChannels: Feld channels der Audiooptionen (Inline-Enum).
+type AudioChannels string
+
+const (
+	ChannelsOriginal AudioChannels = "original"
+	ChannelsMono     AudioChannels = "mono"
+)
+
+func AudioChannelModes() []AudioChannels { return []AudioChannels{ChannelsOriginal, ChannelsMono} }
 
 // OutputFormat: erzeugbare Bildformate (keine eigene OpenAPI-Komponente).
 type OutputFormat string

@@ -22,6 +22,8 @@ func APITypes() *Types {
 	Enum(ts, "InputFormat", apitypes.InputFormats())
 	// Inline-Enums ohne eigene Komponente.
 	Enum(ts, "", apitypes.ImageFormatOptions())
+	Enum(ts, "", apitypes.AudioFormats())
+	Enum(ts, "", apitypes.AudioChannelModes())
 	Enum(ts, "", apitypes.CheckStatuses())
 	Enum(ts, "", apitypes.ReadyStatuses())
 	Enum(ts, "", []apitypes.ResizeMode{
@@ -51,6 +53,7 @@ func APITypes() *Types {
 		"JobOptions":       reflect.TypeFor[apitypes.JobOptions](),
 		"ImageOptions":     reflect.TypeFor[apitypes.ImageOptions](),
 		"PdfOptions":       reflect.TypeFor[apitypes.PdfOptions](),
+		"AudioOptions":     reflect.TypeFor[apitypes.AudioOptions](),
 		"ResizeNone":       reflect.TypeFor[apitypes.ResizeNone](),
 		"ResizePercent":    reflect.TypeFor[apitypes.ResizePercent](),
 		"ResizeDimensions": reflect.TypeFor[apitypes.ResizeDimensions](),

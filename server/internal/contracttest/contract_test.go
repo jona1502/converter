@@ -178,6 +178,8 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"image-compress","format":"jpeg","background":"#00ff00","resize":{"mode":"maxEdge","maxEdge":100}}`,
 		`{"tool":"pdf-compress","levels":["small","high"]}`,
 		`{"tool":"pdf-compress"}`,
+		`{"tool":"audio-convert","format":"mp3","quality":0.5,"channels":"mono"}`,
+		`{"tool":"audio-convert","format":"flac"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -207,6 +209,9 @@ func TestValidatorRejectsViolations(t *testing.T) {
 		"exclusiveMinimum":        {"ResizeMaxEdge", `{"mode":"maxEdge","maxEdge":0}`},
 		"minItems":                {"PdfOptions", `{"tool":"pdf-compress","levels":[]}`},
 		"oneOf ohne Treffer":      {"JobOptions", `{"tool":"video"}`},
+		"Audioformat":             {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
+		"Audiokanäle":             {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
+		"Audio ohne Bildfelder":   {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
 		"const":                   {"LiveResponse", `{"status":"nein"}`},
 		"additionalProperties":    {"ReadyResponse", `{"status":"ok","checks":{"db":"vielleicht"}}`},
 		"ready status":            {"ReadyResponse", `{"status":"kaputt","checks":{}}`},
