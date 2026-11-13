@@ -268,12 +268,12 @@ func TestCrossFieldRules(t *testing.T) {
 		t.Errorf("zu kurze Löschfrist muss scheitern: %v", err)
 	}
 	mustLoad(t, map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_PHYSICAL_DELETE_MAX_SECONDS": "430"})
-	// Längeres Audio-Zeitlimit verlängert die nötige Löschfrist: 400 + 60 + 60 + 10.
-	_, err = Load(env(map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "400"}))
+	// Längeres Audio-Zeitlimit verlängert die nötige Löschfrist: 600 + 60 + 60 + 10.
+	_, err = Load(env(map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "600"}))
 	if err == nil || !strings.Contains(err.Error(), "PHYSICAL_DELETE_MAX_SECONDS") {
 		t.Errorf("Audio-Zeitlimit muss in die Löschfrist eingehen: %v", err)
 	}
-	mustLoad(t, map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "400", "CONVERTER_PHYSICAL_DELETE_MAX_SECONDS": "530"})
+	mustLoad(t, map[string]string{"CONVERTER_ENVIRONMENT": "test", "CONVERTER_AUDIO_TIMEOUT_SECONDS": "600", "CONVERTER_PHYSICAL_DELETE_MAX_SECONDS": "730"})
 	// Mindestlänge gilt auch außerhalb von production.
 	_, err = Load(env(map[string]string{"CONVERTER_ENVIRONMENT": "development", "CONVERTER_SECRET_KEY": "kurz"}))
 	if err == nil {
