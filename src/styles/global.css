@@ -33,7 +33,7 @@
     Kartenverlauf (hellste Stelle): ink/muted/accent ... 16.5 / 8.6 / 11.7 | 18.9 / 6.5 / 5.2 : 1
     border-control auf Kartenverlauf (Ablagebereich) ... 5.4 | 3.4 : 1
     muted (Navigation inaktiv) auf canvas/surface
-      (Seitenleiste / kompaktes Panel) ................. 9.9 / 9.4 | 6.5 / 6.8 : 1
+      (Kopfzeile / Dropdown-Karte) ................. 9.9 / 9.4 | 6.5 / 6.8 : 1
     ink / muted auf Pill-Fläche über canvas ............ 15.9 / 8.3 | 16.2 / 5.6 : 1
     ink / muted auf Pill-Fläche über surface ........... 14.8 / 7.7 | 17.0 / 5.8 : 1
   Pill-Fläche = --mi-nav-active (dunkel weiß 8 %, hell #070b0d 7 %) über der genannten Fläche.
@@ -183,7 +183,7 @@
   Gestaltungsklassen (für Astro-Seiten und React-Komponenten)
   -----------------------------------------------------------
   Layout
-    .page-container        zentrierter Inhaltsbereich mit Seitenrand (max. 72rem)
+    .page-container        zentrierter Inhaltsbereich mit Seitenrand (max. 56rem)
     .page-container-narrow schmaler Bereich für Fließtext (max. 48rem)
     .page-section          vertikaler Abstand zwischen Seitenabschnitten
     .page-eyebrow          kleine Zeile über einer Überschrift (z. B. Produktname)
@@ -240,7 +240,7 @@
 @layer components {
   /* Layout */
   .page-container {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-4xl px-4 sm:px-6;
   }
   .page-container-narrow {
     @apply mx-auto w-full max-w-3xl px-4 sm:px-6;
