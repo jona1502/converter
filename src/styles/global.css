@@ -132,41 +132,41 @@
     .page-container        zentrierter Inhaltsbereich mit Seitenrand (max. 56rem)
     .page-container-narrow schmaler Bereich für Fließtext (max. 48rem)
     .page-section          vertikaler Abstand zwischen Seitenabschnitten
-    .page-eyebrow          kleine Zeile über einer Überschrift (z. B. Produktname)
-    .page-title / .page-lead  Seitenüberschrift (h1) und Einleitungstext
-    .section-title         Abschnittsüberschrift (h2)
+    .page-eyebrow          kleine gesperrte Zeile über einer Überschrift
+    .page-title / .page-lead  Seitenüberschrift (h1, Großbuchstaben) und Einleitungstext
+    .section-title         Abschnittsüberschrift (h2, Großbuchstaben)
     .step-title            zusätzlich zu .section-title: nummerierte Schritte der Werkzeugoberfläche
     .section-kicker        kleine Gruppenüberschrift (h3)
     .prose-content         Fließtext mit Abständen für h2/h3/p/ul/ol/a/code
-    .link                  Textlink in Akzentfarbe (unterstrichen)
+    .link                  Textlink (unterstrichen)
     .link-standalone       zusätzlich für alleinstehende Links ohne Unterstreichung
     .skip-link             „Zum Inhalt springen“, nur bei Fokus sichtbar
 
   Buttons (auf <button> oder <a>; disabled bzw. aria-disabled="true" sichtbar gedämpft.
   Für deaktivierbare Aktionen <button disabled> verwenden; aria-disabled auf <a> verhindert
   die Aktivierung nicht – dort zusätzlich href entfernen.)
-    .btn                   Basis, Radius 12px (immer zusätzlich zu einer Variante verwenden)
-    .btn-primary           Hauptaktion (Mint-Fläche, dunkler Text)
-    .btn-secondary         Nebenaktion (transparent, Rand und Text in Akzentfarbe)
+    .btn                   Basis, eckig, Großbuchstaben (immer zusätzlich zu einer Variante)
+    .btn-primary           Hauptaktion (weiße Fläche, schwarzer Text)
+    .btn-secondary         Nebenaktion (Rahmen, beim Überfahren weiß gefüllt)
     .btn-danger            destruktive Aktion (z. B. „Alle entfernen“)
     .btn-ghost             zurückhaltende Aktion ohne Fläche (z. B. „Entfernen“ in Listen)
     .btn-sm / .btn-lg      kleinere/größere Variante
     .btn-icon              quadratischer Button für Symbole (aria-label nötig)
 
   Karten
-    .card                  Fläche mit Haarlinie, Akzentkante oben und dezentem Verlauf
-    .card-muted            ruhige Fläche mit Haarlinie, ohne Akzentkante (z. B. Optionsbereich)
-    .card-title            Kartenüberschrift
+    .card                  Fläche mit Haarlinie
+    .card-muted            ruhigere Fläche mit Haarlinie (z. B. Optionsbereich)
+    .card-title            Kartenüberschrift (Großbuchstaben)
 
   Formulare
     .field / .field-row / .label / .hint / .field-error
     .input / .select / .range / .checkbox / .radio / .color-input
     .fieldset / .legend
-    .choice-group          Auswahlgruppe als Segment-/Chipleiste (Labels mit Checkbox/Radio)
+    .choice-group          Auswahlgruppe als Segmentleiste (Labels mit Checkbox/Radio)
 
   Hinweise (role="status"/"alert" je nach Zweck selbst setzen)
     .notice + .notice-info | .notice-warn | .notice-error | .notice-success
-    .notice-title          fett gesetzte erste Zeile
+    .notice-title          hervorgehobene erste Zeile
 
   Badges
     .badge + .badge-neutral | .badge-accent | .badge-success | .badge-warn | .badge-danger
@@ -177,7 +177,7 @@
     .file-name             Dateiname, einzeilig abgeschnitten (vollen Namen per title anbieten)
     .file-result           Ergebnisbereich einer Zeile
     .meta-list             Beschreibungsliste (<dl>) mit Paaren in <div><dt/><dd/></div>
-    .progress              <progress>-Balken in Akzentfarbe (ohne value = unbestimmt)
+    .progress              <progress>-Balken (ohne value = unbestimmt)
     .variant-card / .variant-size  Ergebnisvariante (PDF) und deren Größenangabe
 */
 @layer components {
@@ -191,45 +191,53 @@
   .page-section {
     @apply mt-12 sm:mt-16;
   }
-  /* Überzeile (Eyebrow) wie .mi-caption der Referenz: klein, gedämpft. */
+  /* Überzeile wie die Abschnittslabels der Referenz: klein, gesperrt, Großbuchstaben. */
   .page-eyebrow,
   .section-kicker {
-    @apply text-sm font-medium text-muted;
-    line-height: 1.43;
-    letter-spacing: -0.016em;
+    @apply text-muted;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
   /* Titel nach .mi-hero, Einleitung nach .mi-lead-airy. */
   .page-title {
-    @apply font-semibold text-balance;
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
-    line-height: 1.07;
-    letter-spacing: -0.01em;
+    @apply text-balance;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 6.5vw, 5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
   }
   .page-lead {
-    @apply mt-4 max-w-2xl text-muted text-pretty;
-    font-size: clamp(1.125rem, 1.8vw, 1.5rem);
+    @apply mt-5 max-w-2xl text-muted text-pretty;
+    font-size: clamp(1.125rem, 1.8vw, 1.375rem);
     font-weight: 300;
     line-height: 1.5;
-    letter-spacing: -0.016em;
+    letter-spacing: -0.011em;
   }
   /* Abschnittsüberschrift nach .mi-display-md. */
   .section-title {
-    @apply font-semibold;
-    font-size: clamp(1.625rem, 3vw, 2.125rem);
-    line-height: 1.2;
-    letter-spacing: -0.012em;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
-  /* Schrittüberschriften der Werkzeugoberfläche (ToolWorkspace): eine Stufe kleiner, damit sie
-     auch in der 22rem breiten Einstellungsspalte nicht dominieren. */
+  /* Schrittüberschriften der Werkzeugoberfläche: eine Stufe kleiner, damit sie auch in der
+     22rem breiten Einstellungsspalte nicht dominieren. */
   .step-title {
-    font-size: clamp(1.25rem, 2vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.012em;
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: 0;
   }
-  /* Links im Fließtext bleiben unterstrichen (im Dark Mode reicht der Farbabstand allein nicht). */
+  /* Links im Fließtext bleiben unterstrichen (Weiß auf Weiß unterscheidet sich nur dadurch). */
   .link {
-    @apply text-accent underline decoration-1 underline-offset-[0.18em] hover:text-accent-hover hover:decoration-2;
-    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    @apply text-accent underline decoration-1 underline-offset-[0.2em] hover:text-accent-hover hover:decoration-2;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
   }
   .link:hover {
     text-decoration-color: currentColor;
@@ -245,14 +253,20 @@
     @apply mt-4;
   }
   .prose-content h2 {
-    @apply mt-12 font-semibold;
-    font-size: clamp(1.625rem, 3vw, 2.125rem);
-    line-height: 1.2;
-    letter-spacing: -0.012em;
+    @apply mt-14;
+    font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
   .prose-content h3 {
-    @apply mt-8 text-xl font-semibold;
-    letter-spacing: -0.02em;
+    @apply mt-8;
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
   .prose-content ul {
     @apply list-disc space-y-2 pl-6;
@@ -267,10 +281,13 @@
     @apply text-accent underline decoration-1 underline-offset-2 hover:text-accent-hover;
   }
   .prose-content code {
-    @apply rounded-md bg-fill px-1.5 py-0.5 font-mono text-[0.88em];
+    @apply bg-fill px-1.5 py-0.5 font-mono text-[0.88em];
   }
   .skip-link {
-    @apply absolute left-4 -top-40 z-50 rounded-full bg-ink px-5 py-2.5 font-medium text-canvas no-underline;
+    @apply absolute left-4 -top-40 z-50 bg-ink px-5 py-2.5 font-semibold text-canvas no-underline;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .skip-link:focus,
   .skip-link:focus-visible {
