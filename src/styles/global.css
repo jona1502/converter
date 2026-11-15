@@ -1,78 +1,68 @@
 @import "tailwindcss";
+/* Schriften liegen im Build (font-src 'self'); nur lateinische Teilmenge der Displayschrift. */
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource/barlow-condensed/latin-500.css";
+@import "@fontsource/barlow-condensed/latin-600.css";
+@import "@fontsource/barlow-condensed/latin-700.css";
 
 /*
-  Design-Tokens („MI converter“, Gestaltung angelehnt an muhrindustries.com: dunkle, ruhige
-  Flächen mit Mint-Akzent und Haarlinien). Farben, Radien und Schrift zentral definieren;
-  Komponenten verwenden ausschließlich diese Tokens (z. B. bg-surface, text-muted,
-  outline-focus). Dunkel ist Standard (@theme). Die helle Variante überschreibt dieselben
-  Variablen unter :root[data-theme="light"] (gesetzt vom Head-Skript in BaseLayout bzw. vom
-  Umschalter im Header). prefers-color-scheme wird nicht zur Auswahl verwendet; ohne
-  JavaScript bleibt das Design dunkel. Klassen müssen für das Theme nicht geändert werden.
-  Schrift: reiner System-Schriftstapel, es werden keine Schriftdateien geladen.
-  Aus der Dateiwerkstatt (PR #1) übernommen und unabhängig vom Theme: Abstandsskala
-  --space-workshop-*, Fokuskontur 3 px mit 3 px Abstand, Mindesthöhe 44 px für Buttons und
-  Segmentlabels, Symbolbuttons mindestens 44 px breit, Badges mindestens 14 px. Die Farben der
-  Dateiwerkstatt (Papier/Petrol) sind durch die Muhr-Werte unten ersetzt.
+  Design-Tokens („MI converter“, Gestaltung wie muhrindustries.com im SpaceX-Stil): reines
+  Schwarz, Weiß als einzige Akzentfarbe, Haarlinien, eckige Kanten, keine Schatten oder
+  Verläufe. Überschriften, Labels, Navigation und Buttons in Großbuchstaben mit Barlow
+  Condensed bzw. weit gesperrter Kleinschrift; Fließtext, Dateinamen und Meldungen bleiben in
+  normaler Schreibweise (Inter). Nur dunkles Erscheinungsbild. Komponenten verwenden
+  ausschließlich diese Tokens (z. B. bg-surface, text-muted, outline-focus).
+  Unabhängig vom Design: Abstandsskala --space-workshop-*, Fokuskontur 3 px mit 3 px Abstand,
+  Mindesthöhe 44 px für Buttons und Segmentlabels, Symbolbuttons mindestens 44 px breit.
+  Status (Erfolg/Warnung/Fehler) behält Farbe, weil sie Bedeutung trägt.
 
-  Kontraste (WCAG 2.x, rechnerisch geprüft) – dunkel | hell:
-    ink auf canvas/surface/surface-muted ............... 18.9 / 18.1 / 17.4 | 18.9 / 19.8 / 17.9 : 1
-    muted auf canvas/surface/surface-muted ............. 9.9 / 9.4 / 9.1 | 6.5 / 6.8 / 6.1 : 1
-    muted auf accent-/danger-/warning-/success-soft .... 7.6 / 8.6 / 8.1 / 8.2 | 5.9 / 5.9 / 6.2 / 6.1 : 1
-    accent (Links) auf canvas/surface/accent-soft ...... 13.4 / 12.8 / 10.3 | 5.2 / 5.5 / 4.8 : 1
-    accent-hover auf canvas/surface/accent-soft ........ 15.7 / 15.0 / 12.1 | 7.2 / 7.6 / 6.6 : 1
-    on-accent auf accent-fill / accent-fill-hover ...... 13.0 / 10.3 | 13.0 / 10.3 : 1
-    ink auf fill / fill-hover (Sekundär-Buttons) ....... 15.7 / 14.0 | 16.7 / 15.2 : 1
-    ink auf segment (gewählte Option) .................. 12.1 | 19.8 : 1
-    canvas auf ink (Skip-Link) ......................... 18.9 | 18.9 : 1
-    success/warning/danger auf *-soft .................. 9.4 / 9.7 / 6.2 | 4.6 / 4.8 / 4.7 : 1
-    success/warning/danger auf surface ................. 10.8 / 11.3 / 6.8 | 5.1 / 5.2 / 5.4 : 1
-    focus auf canvas/surface (Nicht-Text, ≥ 3) ......... 13.4 / 12.8 | 5.2 / 5.5 : 1
-    border-control auf surface/canvas (≥ 3) ............ 5.9 / 6.2 | 3.5 / 3.4 : 1
-    border-control auf surface-muted (Felder in den
-      Einstellungen, card-muted; ≥ 3) .................. 5.7 | 3.2 : 1
-    Kartenverlauf (hellste Stelle): ink/muted/accent ... 16.5 / 8.6 / 11.7 | 18.9 / 6.5 / 5.2 : 1
-    border-control auf Kartenverlauf (Ablagebereich) ... 5.4 | 3.4 : 1
-    muted (Navigation inaktiv) auf canvas/surface
-      (Kopfzeile / Dropdown-Karte) ................. 9.9 / 9.4 | 6.5 / 6.8 : 1
-    ink / muted auf Pill-Fläche über canvas ............ 15.9 / 8.3 | 16.2 / 5.6 : 1
-    ink / muted auf Pill-Fläche über surface ........... 14.8 / 7.7 | 17.0 / 5.8 : 1
-  Pill-Fläche = --mi-nav-active (dunkel weiß 8 %, hell #070b0d 7 %) über der genannten Fläche.
-  muted wird nie auf fill gesetzt. border/border-strong sind halbtransparente Haarlinien, rein
-  dekorativ (Trennlinien, Kartenränder) und nicht für die Erkennbarkeit von Bedienelementen
-  gedacht; dafür gibt es border-control.
+  Kontraste (WCAG 2.x, rechnerisch geprüft):
+    ink auf canvas/surface/surface-muted ............... 21.0 / 20.0 / 18.9 : 1
+    muted auf canvas/surface/surface-muted ............. 8.3 / 7.9 / 7.5 : 1
+    muted auf accent-/danger-/warning-/success-soft .... 7.3 / 7.0 / 7.0 / 6.8 : 1
+    accent (Links) = ink ............................... wie ink
+    on-accent auf accent-fill / accent-fill-hover ...... 21.0 / 14.2 : 1
+    ink auf fill / fill-hover (Sekundärflächen) ........ 18.1 / 15.9 : 1
+    ink auf segment (gewählte Option) .................. 14.4 : 1
+    success/warning/danger auf *-soft .................. 9.9 / 10.6 / 6.4 : 1
+    success/warning/danger auf surface ................. 11.5 / 12.0 / 7.2 : 1
+    focus auf canvas/surface (Nicht-Text, ≥ 3) ......... 21.0 / 20.0 : 1
+    border-control auf canvas/surface/surface-muted .... 6.2 / 6.0 / 5.6 : 1
+  border/border-strong sind halbtransparente Haarlinien, rein dekorativ; erkennbare Ränder von
+  Bedienelementen nutzen border-control.
 */
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-canvas: #070b0d;
-  --color-surface: #0b1214;
-  --color-surface-muted: #0e1719;
-  --color-fill: #152124;
-  --color-fill-hover: #1c2b2e;
-  --color-segment: #24363a;
-  --color-border: rgb(255 255 255 / 0.1);
-  --color-border-strong: rgb(255 255 255 / 0.18);
-  --color-border-control: #7f9490;
-  --color-ink: #f5fbfa;
-  --color-muted: #a9bbb7;
-  --color-accent: #5eead4;
-  --color-accent-hover: #99f6e4;
-  --color-accent-fill: #5eead4;
-  --color-accent-fill-hover: #2dd4bf;
-  --color-accent-soft: #0d2a27;
-  --color-on-accent: #06110f;
-  --color-focus: #5eead4;
+  --color-canvas: #000000;
+  --color-surface: #080808;
+  --color-surface-muted: #111111;
+  --color-fill: #161616;
+  --color-fill-hover: #222222;
+  --color-segment: #2a2a2a;
+  --color-border: rgb(255 255 255 / 0.12);
+  --color-border-strong: rgb(255 255 255 / 0.22);
+  --color-border-control: #8c8c8c;
+  --color-ink: #ffffff;
+  --color-muted: #a3a3a3;
+  --color-accent: #ffffff;
+  --color-accent-hover: #d4d4d4;
+  --color-accent-fill: #ffffff;
+  --color-accent-fill-hover: #d4d4d4;
+  --color-accent-soft: #141414;
+  --color-on-accent: #000000;
+  --color-focus: #ffffff;
   --color-success: #4ade80;
-  --color-success-soft: #0c2416;
+  --color-success-soft: #0a1f12;
   --color-warning: #fbbf24;
-  --color-warning-soft: #2a1f08;
+  --color-warning-soft: #1f1806;
   --color-danger: #f87171;
-  --color-danger-soft: #2d1315;
-  --color-header: rgb(7 11 13 / 0.8);
-  --color-header-solid: #070b0d;
-  --color-panel: rgb(11 18 20 / 0.9);
+  --color-danger-soft: #2a1012;
+  --color-header: rgb(0 0 0 / 0.85);
+  --color-header-solid: #000000;
+  --color-panel: rgb(8 8 8 / 0.95);
 
   --space-workshop-1: 0.25rem;
   --space-workshop-2: 0.5rem;
@@ -82,77 +72,33 @@
   --space-workshop-8: 2rem;
   --space-workshop-12: 3rem;
 
-  --radius-control: 12px;
-  --radius-card: 14px;
+  /* Eckig wie die Referenz; auch Tailwind-Utilities rounded-md/-lg folgen dem. */
+  --radius-control: 0px;
+  --radius-card: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
 
-  /* Auf dunklen Flächen tragen Haarlinien statt weicher Schatten. */
-  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
-  --shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 40px rgb(0 0 0 / 0.55);
-  --shadow-panel: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 48px rgb(0 0 0 / 0.6);
-}
-
-/* Helles Erscheinungsbild: dieselben Tokens, andere Werte. Nur per data-theme gewählt. */
-:root[data-theme="light"] {
-  color-scheme: light;
-  --color-canvas: #f5fbfa;
-  --color-surface: #ffffff;
-  --color-surface-muted: #eef5f4;
-  --color-fill: #e3eeec;
-  --color-fill-hover: #d6e5e2;
-  --color-segment: #ffffff;
-  --color-border: rgb(0 0 0 / 0.1);
-  --color-border-strong: rgb(0 0 0 / 0.2);
-  --color-border-control: #7a8c88;
-  --color-ink: #070b0d;
-  --color-muted: #4d5f5b;
-  --color-accent: #0f766e;
-  --color-accent-hover: #115e59;
-  --color-accent-fill: #5eead4;
-  --color-accent-fill-hover: #2dd4bf;
-  --color-accent-soft: #dcf5f0;
-  --color-on-accent: #06110f;
-  --color-focus: #0f766e;
-  --color-success: #1a7f37;
-  --color-success-soft: #e9f6ec;
-  --color-warning: #a15c00;
-  --color-warning-soft: #fdf4e3;
-  --color-danger: #d70015;
-  --color-danger-soft: #fdeceb;
-  --color-header: rgb(245 251 250 / 0.8);
-  --color-header-solid: #f5fbfa;
-  --color-panel: rgb(255 255 255 / 0.86);
-
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
-  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.05), 0 16px 40px rgb(0 0 0 / 0.1);
-  --shadow-panel: 0 12px 40px rgb(0 0 0 / 0.14);
-
-  --mi-card-edge: rgb(15 118 110 / 0.55);
-  --mi-card-gradient: linear-gradient(145deg, #ffffff, #f7fbfa);
-  --mi-nav-active: rgb(7 11 13 / 0.07);
+  /* Flach: keine Schatten, Abgrenzung nur über Haarlinien. */
+  --shadow-card: none;
+  --shadow-lift: none;
+  --shadow-panel: none;
 }
 
 @layer base {
-  /* Gestaltungswerte ohne Utility-Bedarf (Kartenkante, Kartenverlauf, aktive Navigation).
-     Rein dekorativ; die helle Variante steht im Block :root[data-theme="light"]. */
-  :root {
-    --mi-card-edge: rgb(94 234 212 / 0.5);
-    --mi-card-gradient: linear-gradient(145deg, rgb(255 255 255 / 0.043), rgb(255 255 255 / 0.02));
-    --mi-nav-active: rgb(255 255 255 / 0.08);
-  }
   html {
     @apply bg-canvas text-ink font-sans antialiased;
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Platz für die fixierte Kopfzeile beim Springen zu Ankern und Fokuszielen. */
+    /* Platz für die Kopfzeile beim Springen zu Ankern und Fokuszielen. */
     scroll-padding-top: 7rem;
     text-rendering: optimizeLegibility;
   }
   body {
     @apply bg-canvas;
     font-size: 1.0625rem;
-    line-height: 1.47;
-    letter-spacing: -0.022em;
+    line-height: 1.5;
+    letter-spacing: -0.011em;
   }
   h1,
   h2,
@@ -165,7 +111,7 @@
     @apply outline-3 outline-offset-3 outline-focus;
   }
   ::selection {
-    @apply bg-accent-soft text-ink;
+    @apply bg-ink text-canvas;
   }
   @media (prefers-reduced-motion: reduce) {
     *,
