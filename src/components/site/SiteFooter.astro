@@ -1,21 +1,96 @@
 ---
+import { availableToolsByCategory } from '../../data/tools';
 interface Props { siteName: string }
 const { siteName } = Astro.props;
 const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const year = new Date().getFullYear();
+
+/** Hauptseite des Betreibers; Unternehmens- und Rechtslinks zeigen dorthin. */
+const MI = 'https://muhrindustries.com';
+
+const columns: { title: string; links: { label: string; href: string }[] }[] = [
+  ...availableToolsByCategory.map(({ category, tools }) => ({
+    title: category.title,
+    links: tools.map(tool => ({ label: tool.title, href: tool.href })),
+  })),
+  {
+    title: 'Hinweise',
+    links: [{ label: 'Dateiverarbeitung', href: '/lokale-verarbeitung' }],
+  },
+  {
+    title: 'Muhr Industries',
+    links: [
+      { label: 'Über uns', href: `${MI}/about` },
+      { label: 'Leistungen', href: `${MI}/#leistungen` },
+      { label: 'Projekte', href: `${MI}/projects` },
+      { label: 'Kontakt', href: `${MI}/contact` },
+    ],
+  },
+];
+
+const legal = [
+  { label: 'Datenschutz', href: `${MI}/datenschutz` },
+  { label: 'Impressum', href: `${MI}/impressum` },
+];
 ---
 <footer class="site-footer">
-  <div class="page-container footer-inner">
-    <nav aria-label="Fußzeile">
-      <a href="/lokale-verarbeitung" class="footer-link" aria-current={current === '/lokale-verarbeitung' ? 'page' : undefined}>Dateiverarbeitung</a>
-    </nav>
-    <p>{siteName}</p>
+  <div class="page-container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/" class="footer-wordmark">
+          <img src="/favicon.svg" alt="" width="24" height="24" />
+          <span>{siteName}</span>
+        </a>
+        <p class="footer-tagline">Bilder, PDF und Audio umwandeln, komprimieren und skalieren. Ein Projekt von <a href={MI}>Muhr Industries</a>.</p>
+      </div>
+
+      <nav aria-label="Fußzeile" class="footer-nav">
+        {columns.map(column => (
+          <div class="footer-column">
+            <h2 class="footer-heading">{column.title}</h2>
+            <ul>
+              {column.links.map(link => (
+                <li><a href={link.href} class="footer-link" aria-current={current === link.href ? 'page' : undefined}>{link.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Copyright © {year} Muhr Industries. Alle Rechte vorbehalten.</p>
+      <nav aria-label="Rechtliches">
+        <ul class="footer-legal">
+          {legal.map(link => <li><a href={link.href} class="footer-link">{link.label}</a></li>)}
+        </ul>
+      </nav>
+    </div>
   </div>
 </footer>
 
 <style>
-  .site-footer { margin-top: auto; border-top: 1px solid var(--color-border); background: var(--color-canvas); color: var(--color-muted); font-size: .6875rem; font-weight: 500; letter-spacing: .16em; line-height: 1.55; text-transform: uppercase; }
-  .footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1.5rem; padding-top: 1rem; padding-bottom: 1rem; }
-  .footer-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-muted); text-decoration: none; }
+  /* Wie die Muhr-Fußzeile: schwarz, Haarlinien, Spaltenköpfe und Rechtszeile in gesperrter Kleinschrift. */
+  .site-footer { margin-top: auto; border-top: 1px solid var(--color-border); background: var(--color-canvas); color: var(--color-muted); font-size: .875rem; line-height: 1.55; }
+  .site-footer ul { margin: 0; padding: 0; list-style: none; }
+  .footer-top { display: grid; gap: 2rem; padding-top: 2.5rem; padding-bottom: 2rem; }
+  .footer-wordmark { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; color: var(--color-ink); text-decoration: none; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: .06em; line-height: 1; text-transform: uppercase; }
+  .footer-tagline { max-width: 22rem; margin: .5rem 0 0; }
+  .footer-tagline a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .footer-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; }
+  .footer-heading { margin: 0 0 .25rem; color: var(--color-ink); font-size: .6875rem; font-weight: 600; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
+  .footer-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-muted); text-decoration: none; overflow-wrap: anywhere; }
   .footer-link[aria-current] { color: var(--color-ink); font-weight: 600; }
   .footer-link:hover { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1.5rem; padding-top: .75rem; padding-bottom: .75rem; border-top: 1px solid var(--color-border); font-size: .6875rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+  .footer-bottom p { margin: 0; padding: .75rem 0; }
+  .footer-legal { display: flex; gap: 1.5rem; }
+
+  @media (min-width: 640px) {
+    .footer-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 900px) {
+    .footer-top { grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 3rem; }
+    .footer-nav { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+  }
 </style>
