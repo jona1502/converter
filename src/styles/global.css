@@ -368,23 +368,24 @@
   }
 
   /* Karten */
-  /* Nach .mi-card: Haarlinie, 2px-Akzentkante oben, Radius 14px, dezenter Verlauf. */
+  /* Nach .mi-card: Haarlinie, eckig, keine Fläche über dem Schwarz hinaus. */
   .card,
   .variant-card {
     @apply rounded-card border border-border bg-surface;
-    border-top: 2px solid var(--mi-card-edge);
-    background-image: var(--mi-card-gradient);
   }
   .card {
-    @apply p-5 sm:p-6;
+    @apply p-5 sm:p-8;
   }
   .card-muted {
     @apply rounded-card border border-border bg-surface-muted p-5 sm:p-6;
   }
   .card-title {
-    @apply text-xl font-semibold;
     font-family: var(--font-display);
-    letter-spacing: -0.022em;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
 
   /* Formulare */
