@@ -4,6 +4,9 @@ interface Props { siteName: string }
 const { siteName } = Astro.props;
 const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
+/** Hauptseite des Betreibers; Unternehmens- und Rechtslinks zeigen dorthin. */
+const MI = 'https://muhrindustries.com';
+
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
   ...availableToolsByCategory.map(({ category, tools }) => ({
     title: category.title,
@@ -12,6 +15,15 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: 'Hinweise',
     links: [{ label: 'Dateiverarbeitung', href: '/lokale-verarbeitung' }],
+  },
+  {
+    title: 'Muhr Industries',
+    links: [
+      { label: 'Über uns', href: `${MI}/about` },
+      { label: 'Leistungen', href: `${MI}/#leistungen` },
+      { label: 'Projekte', href: `${MI}/projects` },
+      { label: 'Kontakt', href: `${MI}/contact` },
+    ],
   },
 ];
 ---
@@ -23,7 +35,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
           <img src="/favicon.svg" alt="" width="24" height="24" />
           <span>{siteName}</span>
         </a>
-        <p class="footer-tagline">Bilder, PDF und Audio umwandeln, komprimieren und skalieren.</p>
+        <p class="footer-tagline">Bilder, PDF und Audio umwandeln, komprimieren und skalieren. Ein Projekt von <a href={MI}>Muhr Industries</a>.</p>
       </div>
 
       <nav aria-label="Fußzeile" class="footer-nav">
@@ -49,6 +61,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   .footer-top { display: grid; gap: 2rem; padding-top: 2.5rem; padding-bottom: 2rem; }
   .footer-wordmark { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; color: var(--color-ink); text-decoration: none; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: .06em; line-height: 1; text-transform: uppercase; }
   .footer-tagline { max-width: 22rem; margin: .5rem 0 0; }
+  .footer-tagline a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
   .footer-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; }
   .footer-heading { margin: 0 0 .25rem; color: var(--color-ink); font-size: .6875rem; font-weight: 600; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
   .footer-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-muted); text-decoration: none; overflow-wrap: anywhere; }
