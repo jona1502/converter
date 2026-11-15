@@ -554,22 +554,19 @@
   }
 
   /* Werkzeugoberfläche */
-  /* Ablagebereich: gestrichelter Bedienelement-Rand (>= 3:1), beim Ziehen Mint. */
+  /* Ablagebereich: gestrichelter Bedienelement-Rand (>= 3:1), beim Ziehen durchgezogen weiß. */
   .drop-zone {
-    @apply flex flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border-control bg-surface px-4 py-10 text-center sm:px-8 sm:py-14;
-    background-image: var(--mi-card-gradient);
+    @apply flex flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border-control bg-surface px-4 py-10 text-center sm:px-8 sm:py-16;
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .drop-zone[data-dragging="true"] {
-    @apply border-solid border-accent bg-accent-soft;
-    background-image: none;
+    @apply border-solid border-ink bg-fill;
   }
   .drop-zone[data-disabled="true"] {
     @apply border-border bg-surface-muted;
   }
   .file-list {
     @apply flex flex-col divide-y divide-border rounded-card border border-border bg-surface;
-    background-image: var(--mi-card-gradient);
   }
   .file-row {
     @apply flex min-w-0 flex-col gap-3 px-4 py-4 sm:px-5;
@@ -597,30 +594,31 @@
     @apply m-0 min-w-0 font-medium tabular-nums;
   }
   .progress {
-    @apply block h-1.5 w-full accent-accent;
+    @apply block h-1 w-full accent-accent;
   }
-  /* Bestimmter Fortschritt als schlanker, abgerundeter Balken; unbestimmter bleibt nativ animiert. */
+  /* Bestimmter Fortschritt als schmale, eckige Linie; unbestimmter bleibt nativ animiert. */
   .progress[value] {
-    @apply overflow-hidden rounded-full border-0 bg-fill;
+    @apply overflow-hidden border-0 bg-fill;
     appearance: none;
   }
   .progress[value]::-webkit-progress-bar {
-    @apply rounded-full bg-fill;
+    @apply bg-fill;
   }
   .progress[value]::-webkit-progress-value {
-    @apply rounded-full bg-accent;
+    @apply bg-accent;
   }
   .progress[value]::-moz-progress-bar {
-    @apply rounded-full bg-accent;
+    @apply bg-accent;
   }
   .variant-card {
     @apply flex flex-col gap-3 p-6;
   }
   .variant-size {
-    @apply font-semibold tabular-nums;
+    @apply tabular-nums;
     font-family: var(--font-display);
-    font-size: 2.25rem;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+    font-size: 2.75rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
   }
 }
