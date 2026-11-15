@@ -122,3 +122,24 @@ for (const path of ['/', '/lokale-verarbeitung', '/gibt-es-nicht']) {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }
+
+test('Fußzeile verlinkt alle Werkzeuge, Muhr Industries und Rechtliches', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.getByRole('contentinfo');
+  const nav = footer.getByRole('navigation', { name: 'Fußzeile' });
+  for (const [name, href] of [
+    ['Bilder konvertieren', '/bilder/konvertieren'],
+    ['Bilder komprimieren', '/bilder/komprimieren'],
+    ['Bilder skalieren', '/bilder/skalieren'],
+    ['PDF komprimieren', '/pdf/komprimieren'],
+    ['Audio konvertieren', '/audio/konvertieren'],
+    ['Dateiverarbeitung', '/lokale-verarbeitung'],
+    ['Kontakt', 'https://muhrindustries.com/contact'],
+  ] as const) {
+    await expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
+  }
+  const legal = footer.getByRole('navigation', { name: 'Rechtliches' });
+  await expect(legal.getByRole('link', { name: 'Impressum' })).toHaveAttribute('href', 'https://muhrindustries.com/impressum');
+  await expect(legal.getByRole('link', { name: 'Datenschutz' })).toHaveAttribute('href', 'https://muhrindustries.com/datenschutz');
+  await expect(footer).toContainText(`© ${new Date().getFullYear()} Muhr Industries`);
+});
