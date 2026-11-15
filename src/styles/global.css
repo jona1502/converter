@@ -493,29 +493,32 @@
   }
 
   /* Hinweise */
-  /* Ruhige Fläche mit Haarlinie in der Statusfarbe. */
+  /* Dunkle Fläche, Statusfarbe als Kante links. */
   .notice {
-    @apply rounded-control border px-4 py-3.5 text-[0.9375rem] sm:px-5;
-    letter-spacing: -0.012em;
-    line-height: 1.47;
+    @apply rounded-control border border-l-2 px-4 py-3.5 text-[0.9375rem] sm:px-5;
+    letter-spacing: -0.006em;
+    line-height: 1.5;
   }
   .notice-title {
     @apply font-semibold;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
   .notice-info {
-    @apply border-accent/30 bg-accent-soft text-ink;
+    @apply border-border border-l-ink bg-accent-soft text-ink;
   }
   .notice-warn {
-    @apply border-warning/30 bg-warning-soft text-ink;
+    @apply border-warning/25 border-l-warning bg-warning-soft text-ink;
   }
   .notice-error {
-    @apply border-danger/35 bg-danger-soft text-ink;
+    @apply border-danger/30 border-l-danger bg-danger-soft text-ink;
   }
   .notice-success {
-    @apply border-success/30 bg-success-soft text-ink;
+    @apply border-success/25 border-l-success bg-success-soft text-ink;
   }
   .notice-info .notice-title {
-    @apply text-accent;
+    @apply text-ink;
   }
   .notice-warn .notice-title {
     @apply text-warning;
