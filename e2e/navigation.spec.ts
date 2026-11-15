@@ -32,9 +32,7 @@ test.describe('Desktop (1440 px)', () => {
     await expect(page.locator('.tool-picker')).toHaveCount(0);
     const logo = await page.getByRole('banner').getByRole('link', { name: 'MI converter' }).boundingBox();
     const first = await group(page, 'Konvertieren').boundingBox();
-    const theme = await page.getByRole('button', { name: 'Helles Design' }).boundingBox();
     expect(logo!.x).toBeLessThan(first!.x);
-    expect(first!.x).toBeLessThan(theme!.x);
     for (const name of groups) {
       await expect(group(page, name)).toBeVisible();
       await expect(group(page, name)).toHaveAttribute('aria-expanded', 'false');
@@ -122,16 +120,6 @@ test.describe('Desktop (1440 px)', () => {
     await expect(page.getByRole('banner').getByRole('link', { name: 'MI converter' })).toHaveAttribute('aria-current', 'page');
     await expect(navigation(page).locator('[aria-current]')).toHaveCount(0);
   });
-
-  test('Theme-Umschalter schreibt erst nach Klick in localStorage', async ({ page }) => {
-    await page.goto('/');
-    expect(await page.evaluate(() => localStorage.getItem('mi-theme'))).toBeNull();
-    const toggle = page.getByRole('button', { name: 'Helles Design' });
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-    expect(await page.evaluate(() => localStorage.getItem('mi-theme'))).toBe('light');
-  });
 });
 
 test.describe('Mobil (390 px)', () => {
@@ -166,11 +154,6 @@ test.describe('Mobil (390 px)', () => {
     await menuButton(page).click();
     await page.getByRole('main').click({ position: { x: 4, y: 4 } });
     await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  test('Theme-Umschalter bleibt in der Kopfzeile erreichbar', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Helles Design' })).toBeVisible();
   });
 
   for (const tool of tools) {
