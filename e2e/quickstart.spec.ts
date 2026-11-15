@@ -44,22 +44,21 @@ const capabilities = {
 };
 
 /** Startet die Startseite mit API-Doubles und zählt alles, was den Server als Auftrag erreichen würde. */
-async function open(page: Page, { width = 1440, theme = 'dark' as 'dark' | 'light' } = {}) {
+async function open(page: Page, { width = 1440 } = {}) {
   const uploads: string[] = [];
-  await page.addInitScript((value) => {
-    if (value === 'light') localStorage.setItem('mi-theme', 'light');
+  await page.addInitScript(() => {
     const audit = { storage: [] as string[], csp: [] as string[] };
     document.addEventListener('securitypolicyviolation', (event) => audit.csp.push(`${event.violatedDirective}: ${event.blockedURI}; ${event.sourceFile}:${event.lineNumber}; ${event.sample}`));
     Object.assign(window, { __audit: audit });
     const set = Storage.prototype.setItem;
-    Storage.prototype.setItem = function (key, item) { if (key !== 'mi-theme') audit.storage.push(`storage:${key}`); return set.call(this, key, item); };
+    Storage.prototype.setItem = function (key, item) { audit.storage.push(`storage:${key}`); return set.call(this, key, item); };
     const idb = indexedDB.open.bind(indexedDB);
     indexedDB.open = (...args: Parameters<typeof indexedDB.open>) => { audit.storage.push('indexedDB'); return idb(...args); };
     if ('caches' in window) {
       const cacheOpen = caches.open.bind(caches);
       caches.open = (name) => { audit.storage.push('cache'); return cacheOpen(name); };
     }
-  }, theme);
+  });
   await page.setViewportSize({ width, height: 900 });
   await page.route('**/api/v1/capabilities', (route) => route.fulfill({ json: capabilities }));
   await page.route('**/api/v1/session', (route) => route.fulfill({ json: { csrfToken: 'quickstart-test' } }));
@@ -321,11 +320,10 @@ test('Datenschutz: nichts in Web Storage, IndexedDB oder Cache, keine fremden Ho
   expect(await cspViolations(page)).toEqual([]);
 });
 
-for (const theme of ['dark', 'light'] as const) {
+{
   for (const width of [390, 1440]) {
-    test(`axe: Auswahl, direkte Ausgabe und Ergebnis ohne Verstöße (${theme}, ${width} px)`, async ({ page }) => {
-      await open(page, { width, theme });
-      if (theme === 'light') await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    test(`axe: Auswahl, direkte Ausgabe und Ergebnis ohne Verstöße (${width} px)`, async ({ page }) => {
+      await open(page, { width });
       expect((await axe(page)).violations).toEqual([]);
       await choose(page, [png(`${'langer-name-'.repeat(12)}.png`), pdf(), text()]);
       await expect(output(page)).toBeEnabled();
