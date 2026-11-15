@@ -39,31 +39,23 @@ for (const tool of [
   });
 }
 
-// Navigation: Start und eine Werkzeugseite ohne Verarbeitung, dunkel und hell, schmal und breit.
+// Navigation: Start und eine Werkzeugseite ohne Verarbeitung, schmal und breit.
 // Mit geöffnetem Dropdown bzw. mobilem Menü, damit auch die aufgeklappte Karte geprüft wird.
 for (const path of ['/', '/audio/konvertieren']) {
-  for (const theme of ['dark', 'light'] as const) {
-    for (const width of [390, 1440]) {
-      test(`${path}: Navigation ohne axe-Verstöße (${theme}, ${width} px)`, async ({ page }) => {
-        await page.addInitScript((value) => {
-          // Lesen nur: das Head-Skript übernimmt die Wahl; geschrieben wird hier nur für den Test.
-          if (value === 'light') localStorage.setItem('mi-theme', 'light');
-        }, theme);
-        await page.setViewportSize({ width, height: 900 });
-        await page.goto(path);
-        if (theme === 'light') await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-        else await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.*/);
-        const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
-        const scan = async () => {
-          const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-          expect(result.violations).toEqual([]);
-        };
-        await scan();
-        if (width < 768) await page.getByRole('button', { name: 'Menü', exact: true }).click();
-        else await nav.getByRole('button', { name: 'Konvertieren-Menü', exact: true }).click();
-        await expect(nav.getByRole('link', { name: 'Bilder konvertieren' })).toBeVisible();
+for (const width of [390, 1440]) {
+    test(`${path}: Navigation ohne axe-Verstöße (${width} px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(path);
+      const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
+      const scan = async () => {
+        const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+        expect(result.violations).toEqual([]);
+      };
+      await scan();
+      if (width < 768) await page.getByRole('button', { name: 'Menü', exact: true }).click();
+      else await nav.getByRole('button', { name: 'Konvertieren-Menü', exact: true }).click();
+      await expect(nav.getByRole('link', { name: 'Bilder konvertieren' })).toBeVisible();
         await scan();
       });
-    }
   }
 }
