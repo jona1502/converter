@@ -295,19 +295,22 @@
   }
 
   /* Buttons (ohne Farbübergänge: axe misst sonst Zwischenfarben, z. B. beim Aktivieren nach „disabled“) */
-  /* Nach .mi-btn: Radius 12px, padding 11px 22px. Mindesthöhe 44px als Trefferfläche. */
+  /* Nach .mi-btn: eckig, Großbuchstaben, gesperrt, Mindesthöhe 48px. */
   .btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-transparent text-[1.0625rem] font-normal no-underline select-none;
-    padding: 11px 22px;
-    line-height: 1.2;
-    letter-spacing: -0.022em;
+    @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-control border border-transparent no-underline select-none;
+    padding: 13px 24px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   @media (prefers-reduced-motion: no-preference) {
     .btn {
       transition: transform 0.15s ease;
     }
     .btn:not(:disabled, [aria-disabled="true"]):active {
-      transform: scale(0.97);
+      transform: translateY(1px);
     }
   }
   .btn:disabled,
@@ -319,17 +322,17 @@
   }
   .btn-primary:disabled,
   .btn-primary[aria-disabled="true"] {
-    @apply border-transparent bg-surface-muted;
+    @apply border-border-strong bg-transparent;
   }
-  /* Nach .mi-btn-secondary: transparent, 1px Rand und Text in Akzentfarbe. */
+  /* Nach .mi-btn-secondary: Rahmen, Text weiß; beim Überfahren weiß gefüllt. */
   .btn-secondary {
-    @apply border-accent bg-transparent text-accent;
+    @apply border-border-control bg-transparent text-ink;
   }
   .btn-danger {
     @apply border-danger bg-transparent text-danger;
   }
   .btn-ghost {
-    @apply bg-transparent text-accent;
+    @apply bg-transparent text-ink;
   }
   /* Hover nur für aktive Buttons, damit deaktivierte Buttons lesbar bleiben. */
   .btn-primary:not(:disabled, [aria-disabled="true"]) {
@@ -342,22 +345,22 @@
     @apply hover:bg-danger-soft;
   }
   .btn-ghost:not(:disabled, [aria-disabled="true"]) {
-    @apply hover:bg-accent-soft;
+    @apply hover:bg-fill;
   }
   .btn-ghost:disabled,
   .btn-ghost[aria-disabled="true"] {
     @apply border-transparent bg-transparent;
   }
-  /* Nach .mi-btn-sm. */
   .btn-sm {
-    @apply min-h-11 text-sm;
-    padding: 7px 15px;
-    line-height: 1.29;
-    letter-spacing: -0.016em;
+    @apply min-h-11;
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
   }
   .btn-lg {
-    @apply min-h-12 text-lg;
-    padding: 13px 28px;
+    @apply min-h-14;
+    padding: 16px 32px;
+    font-size: 0.875rem;
   }
   .btn-icon {
     @apply aspect-square min-w-11;
