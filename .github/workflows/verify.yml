@@ -1,7 +1,7 @@
 name: Verify converter
 on:
-  push:
-    branches: [main]
+  # Push auf main prüft deploy.yml über workflow_call vor dem Build.
+  workflow_call:
   pull_request:
   workflow_dispatch:
 permissions:
