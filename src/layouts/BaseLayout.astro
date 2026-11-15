@@ -2,16 +2,6 @@
 import '../styles/global.css';
 import SiteHeader from '../components/site/SiteHeader.astro';
 import SiteFooter from '../components/site/SiteFooter.astro';
-import { createHash } from 'node:crypto';
-
-/*
-  Setzt das gespeicherte Theme vor dem ersten Paint. Liest nur; geschrieben wird
-  ausschließlich nach Klick auf den Umschalter im Header. Ohne JavaScript bleibt es dunkel.
-  Steht als erstes Element im body (siehe unten). is:inline-Skripte hasht Astro nicht selbst; der Hash wird daher hier berechnet und in die
-  CSP eingetragen, damit das Skript ohne 'unsafe-inline' läuft.
-*/
-const THEME_SCRIPT = "try{if(localStorage.getItem('mi-theme')==='light'){var d=document;d.documentElement.dataset.theme='light';d.querySelector('meta[name=\"color-scheme\"]').setAttribute('content','light');d.querySelector('meta[name=\"theme-color\"]').setAttribute('content','#f5fbfa')}}catch(e){}";
-Astro.csp?.insertScriptHash(`sha256-${createHash('sha256').update(THEME_SCRIPT).digest('base64')}`);
 
 const SITE_NAME = 'MI converter';
 
@@ -33,7 +23,7 @@ const fullTitle = `${title} – ${SITE_NAME}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#070b0d" />
+    <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark" />
     <meta name="referrer" content="no-referrer" />
     {noindex && <meta name="robots" content="noindex" />}
@@ -41,8 +31,6 @@ const fullTitle = `${title} – ${SITE_NAME}`;
     <title>{fullTitle}</title>
   </head>
   <body class="flex min-h-dvh flex-col">
-    {/* Erstes Element im body: läuft vor dem ersten Paint, aber nach dem CSP-Meta-Tag, das Astro ans Ende von <head> setzt. */}
-    <script is:inline set:html={THEME_SCRIPT} />
     <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
     <SiteHeader siteName={SITE_NAME} />
     <main id="inhalt" tabindex="-1" class="flex-1 pb-12 pt-6 outline-none sm:pb-16 sm:pt-8">
