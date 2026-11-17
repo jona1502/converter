@@ -100,7 +100,12 @@ class AudioOptions:
     tool: str = AUDIO_TOOL
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions
+@dataclass(frozen=True, slots=True)
+class MarkdownOptions:
+    tool: str = "markdown-pdf"
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -248,4 +253,7 @@ def parse_options(value: object) -> JobOptions:
         return _pdf(value)
     if tool == AUDIO_TOOL:
         return _audio(value)
+    if tool == "markdown-pdf":
+        v.obj(value, required=("tool",), code=CODE, where="options")
+        return MarkdownOptions()
     raise v.fail(CODE, "tool: unknown")

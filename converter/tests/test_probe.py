@@ -23,6 +23,7 @@ def test_cli_probe_reports_all_required_formats() -> None:
         "inputFormats": ["jpeg", "png", "webp", "gif", "bmp", "ico", "avif"],
         "outputFormats": ["jpeg", "png", "webp", "bmp", "ico"],
         "pdf": True,
+        "markdown": {"available": True},
         "audio": {
             "inputFormats": ["mp3", "wav", "flac", "ogg"],
             "outputFormats": ["mp3", "wav", "flac", "ogg"],

@@ -12,10 +12,11 @@ import time
 from pathlib import Path
 
 from converter.errors import ProcessingError
-from converter.options import AudioOptions, ImageOptions, PdfOptions
+from converter.options import AudioOptions, ImageOptions, MarkdownOptions, PdfOptions
 from converter.processing.audio import pipeline as audio
 from converter.processing.files import discard
 from converter.processing.images.pipeline import convert
+from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
 from converter.protocol import EventWriter, Request, ResultTarget
 
@@ -95,5 +96,14 @@ def execute(request: Request, writer: EventWriter) -> None:
         run_image(request, options, writer)
     elif isinstance(options, AudioOptions):
         run_audio(request, options, writer)
+    elif isinstance(options, MarkdownOptions):
+        (target,) = request.results
+        writer.progress_encode()
+        try:
+            details = markdown.convert(Path(request.source), Path(target.path), request.limits)
+        except Exception as exc:
+            _failure(writer, target, exc, "encode-failed")
+            return
+        writer.result(target.id, details)
     else:
         run_pdf(request, options, writer)

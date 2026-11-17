@@ -20,8 +20,10 @@ import PIL
 import soundfile as sf
 from PIL import Image
 
+from converter.limits import Limits
 from converter.processing.audio import pipeline as audio
 from converter.processing.images.pipeline import INPUTS, OUTPUTS, flatten, save_options
+from converter.processing.markdown.pipeline import render_pdf
 from converter.protocol import PROTOCOL_VERSION
 
 SIDE = 32
@@ -159,12 +161,22 @@ def probe_audio_output(name: str) -> bool:
         return False
 
 
+def probe_markdown() -> bool:
+    try:
+        data, count = render_pdf("# Grüße\n\nMarkdown **PDF**", Limits())
+        with pikepdf.Pdf.open(io.BytesIO(data), attempt_recovery=False) as pdf:
+            return count == len(pdf.pages) == 1 and bool(pdf.pages[0].Resources.Font)
+    except Exception:
+        return False
+
+
 def run_probe() -> dict[str, Any]:
     return {
         "protocolVersion": PROTOCOL_VERSION,
         "inputFormats": [name for name in INPUTS if probe_input(name)],
         "outputFormats": [name for name in OUTPUTS if probe_output(name)],
         "pdf": probe_pdf(),
+        "markdown": {"available": probe_markdown()},
         "audio": {
             "inputFormats": [name for name in audio.INPUTS if probe_audio_input(name)],
             "outputFormats": [name for name in audio.OUTPUTS if probe_audio_output(name)],

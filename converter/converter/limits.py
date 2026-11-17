@@ -29,6 +29,9 @@ class Limits:
     audio_max_channels: int = 8
     audio_max_sample_rate: int = 192_000
     audio_max_output_bytes: int = 419_430_400
+    markdown_max_input_bytes: int = 2_097_152
+    markdown_max_output_bytes: int = 20_971_520
+    markdown_max_pages: int = 300
 
 
 def _camel(name: str) -> str:
@@ -41,12 +44,16 @@ FIELDS: Final = {_camel(item.name): item.name for item in fields(Limits)}
 
 
 def parse_limits(value: object) -> Limits:
-    raw = v.obj(value, required=FIELDS, code=CODE, where="limits")
+    optional = {name for name in FIELDS if name.startswith("markdown")}
+    raw = v.obj(
+        value, required=FIELDS.keys() - optional, optional=optional, code=CODE, where="limits"
+    )
     return Limits(
         **{
             attribute: v.integer(
                 raw[name], code=CODE, where=f"limits.{name}", minimum=1, maximum=MAX_LIMIT
             )
             for name, attribute in FIELDS.items()
+            if name in raw
         }
     )

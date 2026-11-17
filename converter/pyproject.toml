@@ -6,12 +6,15 @@ requires-python = ">=3.13,<3.14"
 # Laufzeit ausschließlich Pillow und pikepdf, exakt die Versionen aus
 # backend/uv.lock (gleiche geprüften Codecs und Lizenzen), dazu soundfile
 # (Wheel mit gebündeltem libsndfile inklusive MP3) und numpy für Audio.
+# Markdown wird mit markdown-it-py geparst und direkt mit ReportLab erzeugt.
 # Kein FastAPI, SQLAlchemy, Celery, Redis, pydantic, ffmpeg oder PyAV.
 dependencies = [
     "pillow==13.0.0",
     "pikepdf==10.17.0",
     "soundfile==0.14.0",
     "numpy==2.5.4",
+    "markdown-it-py==4.0.0",
+    "reportlab==4.4.4",
 ]
 
 [dependency-groups]
@@ -20,6 +23,7 @@ dev = [
     "pypdfium2==5.14.0",  # nur unabhängiger Testrenderer, nie im Laufzeitimage
     "pytest==9.1.1",
     "ruff==0.17.1",
+    "types-reportlab==4.4.4.20250926",
 ]
 
 # Kein installierbares Paket: uv verwaltet nur die Umgebung. Im Image liegt
