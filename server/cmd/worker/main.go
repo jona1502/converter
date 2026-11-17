@@ -47,7 +47,7 @@ func run() int {
 	rt := jobs.NewRuntime(pool, jobs.RuntimeConfig{ImageMaxOutputBytes: cfg.ImageMaxOutputBytes, PDFMaxResultsTotalBytes: cfg.PdfMaxResultsTotalBytes, AudioMaxOutputBytes: cfg.AudioMaxOutputBytes, MarkdownMaxOutputBytes: cfg.MarkdownMaxOutputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, ImageTimeout: cfg.ImageTimeout, PDFTimeout: cfg.PdfTimeout, AudioTimeout: cfg.AudioTimeout, MarkdownTimeout: cfg.MarkdownTimeout})
 	runner := converter.NewRunner()
 	processor := converter.NewProcessor(runner, cfg)
-	worker := jobs.NewWorker(rt, st, processor, jobs.WorkerConfig{Logger: logger})
+	worker := jobs.NewWorker(rt, st, processor, jobs.WorkerConfig{Logger: logger, Concurrency: cfg.WorkerConcurrency})
 	worker.Background = func(ctx context.Context) {
 		converter.PublishLoop(ctx, runner, filepath.Join(cfg.StorageDir, converter.ReportFile), logger)
 	}
