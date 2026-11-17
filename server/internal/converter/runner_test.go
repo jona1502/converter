@@ -56,13 +56,19 @@ func TestProcessHelper(t *testing.T) {
 			fmt.Println(`{"kind":"progress","phase":"encode"}`)
 		}
 	}
-	if mode == "audio" || mode == "audio-bad" || mode == "audio-large" {
+	if mode == "audio" || mode == "audio-bad" || mode == "audio-large" || mode == "audio-progress" || mode == "audio-progress-bad" {
 		size := 6
 		if mode == "audio-large" {
 			size = 2048
 		}
 		_ = os.WriteFile(req.Results[0].Path, make([]byte, size), 0600)
 		fmt.Println(`{"kind":"progress","phase":"encode"}`)
+		if mode == "audio-progress" {
+			fmt.Println(`{"kind":"progress","phase":"encode","progress":{"step":"encode","current":65536,"total":131072}}`)
+		}
+		if mode == "audio-progress-bad" {
+			fmt.Println(`{"kind":"progress","phase":"encode","progress":{"step":"encode","current":9,"total":4}}`)
+		}
 		channels := 2
 		if mode == "audio-bad" {
 			channels = 9

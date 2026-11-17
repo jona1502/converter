@@ -21,6 +21,8 @@ Dateien an, folgt keinen Symlinks und schreibt nur in diese Dateien.
 Ereignisse: JSONL über stdout, kompakt, ASCII, jede Zeile < ``MAX_EVENT_BYTES``::
 
     {"kind":"progress","phase":"encode"}                                  Bild, Audio
+    {"kind":"progress","phase":"encode",
+     "progress":{"step":"encode","current":65536,"total":1323000}}        Audio, gedrosselt (Frames)
     {"kind":"analysis","analysis":{...PdfAnalysis...}}                    PDF, genau einmal
     {"kind":"progress","phase":"variant",
      "progress":{"step":"variant","level":"high","current":3,"total":12}} PDF, gedrosselt
@@ -215,6 +217,15 @@ class EventWriter:
 
     def progress_encode(self) -> None:
         self._emit({"kind": "progress", "phase": "encode"})
+
+    def progress_encode_frames(self, current: int, total: int) -> None:
+        self._emit(
+            {
+                "kind": "progress",
+                "phase": "encode",
+                "progress": {"step": "encode", "current": current, "total": total},
+            }
+        )
 
     def progress_variant(self, level: str, current: int, total: int) -> None:
         self._emit(

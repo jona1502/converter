@@ -310,3 +310,15 @@ def test_empty_audio_is_rejected(tmp_path: Path, limits: Limits) -> None:
     with pytest.raises(ProcessingError) as exc:
         run(tmp_path, limits)
     assert exc.value.code == "decode-failed"
+
+
+def test_progress_reports_decoded_frames_up_to_total(tmp_path: Path, limits: Limits) -> None:
+    write_input(tmp_path / "input", "wav", seconds=3.0)
+    target = target_file(tmp_path / "output")
+    calls: list[tuple[int, int]] = []
+    convert(tmp_path / "input", target, options(), limits, lambda c, t: calls.append((c, t)))
+    total = int(RATE * 3.0)
+    assert len(calls) == 3  # 65536-Frame-Blöcke
+    assert calls[-1] == (total, total)
+    assert all(c <= t for c, t in calls)
+    assert [c for c, _ in calls] == sorted(c for c, _ in calls)

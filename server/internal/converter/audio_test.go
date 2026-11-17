@@ -148,6 +148,22 @@ func TestRunnerValidatesAudioDetailsAndOutputLimit(t *testing.T) {
 	}
 }
 
+func TestRunnerForwardsAudioFrameProgress(t *testing.T) {
+	var events []Event
+	out, err := helperRunner("audio-progress").Run(context.Background(), audioRequest(t), func(e Event) error { events = append(events, e); return nil })
+	if err != nil || out.ErrorCode != "" || len(events) != 3 || events[1].Kind != KindProgress || events[1].Phase != "encode" ||
+		events[1].Progress == nil || *events[1].Progress != (Progress{Step: "encode", Current: 65536, Total: 131072}) {
+		t.Fatalf("out=%+v err=%v events=%+v", out, err, events)
+	}
+	if raw, _ := json.Marshal(events[1].Progress); string(raw) != `{"step":"encode","current":65536,"total":131072}` {
+		t.Fatalf("json=%s", raw)
+	}
+	out, err = helperRunner("audio-progress-bad").Run(context.Background(), audioRequest(t), func(Event) error { return nil })
+	if err != nil || out.ErrorCode != CodeWorkerFailed {
+		t.Fatalf("current > total: out=%+v err=%v", out, err)
+	}
+}
+
 func TestAdapterUsesAudioTimeoutAndOutputLimit(t *testing.T) {
 	cfg := audioConfig()
 	cfg.AudioTimeout = 299 * time.Second
