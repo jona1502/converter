@@ -305,6 +305,27 @@ func MarkDeleted(ctx context.Context, pool *pgxpool.Pool, sessionID, jobID [16]b
 	return err
 }
 
+// MarkDeletedAfterDownload löscht einen Auftrag nach vollständigem Download
+// (DELETE_AFTER_DOWNLOAD), aber nur, wenn kein weiteres Ergebnis mehr
+// herunterladbar ist. Läuft er noch oder ist er schon gelöscht: kein Effekt.
+func MarkDeletedAfterDownload(ctx context.Context, pool *pgxpool.Pool, sessionID, jobID [16]byte) error {
+	err := pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx, `UPDATE jobs SET deleted_at = now(), version = version + 1, updated_at = now()
+ WHERE id = $1 AND session_id = $2 AND deleted_at IS NULL
+   AND state IN ('succeeded', 'partially_succeeded')
+   AND (SELECT count(*) FROM job_results WHERE job_id = $1 AND state = 'succeeded') = 1`, jobID, sessionID)
+		if err != nil || tag.RowsAffected() == 0 {
+			return err
+		}
+		_, err = tx.Exec(ctx, `INSERT INTO outbox (kind, job_id) VALUES ('delete', $1)`, jobID)
+		return err
+	})
+	if err != nil {
+		return fmt.Errorf("store: Löschen nach Download: %w", err)
+	}
+	return nil
+}
+
 // Download beschreibt eine freigegebene Ergebnisdatei.
 type Download struct {
 	StorageKey   string
