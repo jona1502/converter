@@ -100,7 +100,9 @@ def execute(request: Request, writer: EventWriter) -> None:
         (target,) = request.results
         writer.progress_encode()
         try:
-            details = markdown.convert(Path(request.source), Path(target.path), request.limits)
+            details = markdown.convert(
+                Path(request.source), Path(target.path), request.limits, options
+            )
         except Exception as exc:
             _failure(writer, target, exc, "encode-failed")
             return
