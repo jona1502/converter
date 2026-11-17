@@ -35,6 +35,8 @@ export interface ActionBarProps {
   /** Grund, warum die Hauptaktion nicht möglich ist; null = möglich. */
   readonly disabledReason: string | null;
   readonly processButtonRef?: Ref<HTMLButtonElement>;
+  /** ZIP-Download aller fertigen Ergebnisse; null = nicht verfügbar. */
+  readonly zipHref?: string | null;
 }
 
 export function ActionBar({
@@ -46,6 +48,7 @@ export function ActionBar({
   progress,
   disabledReason,
   processButtonRef,
+  zipHref,
 }: ActionBarProps) {
   const reasonId = useId();
   const disabled = disabledReason !== null;
@@ -79,6 +82,11 @@ export function ActionBar({
         </p>
       )}
       <BatchSummary progress={progress} isProcessing={isProcessing} />
+      {zipHref && (
+        <a className="btn btn-secondary" href={zipHref} download="ergebnisse.zip">
+          Alle als ZIP speichern
+        </a>
+      )}
     </div>
   );
 }
