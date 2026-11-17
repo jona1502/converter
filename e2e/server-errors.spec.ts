@@ -32,3 +32,22 @@ test('Netzwerkabbruch lädt nicht automatisch neu hoch und manueller Neustart nu
  await action.click();await expect.poll(()=>keys.length).toBe(2);
  expect(keys[0]).toBe(keys[1]);await expect(page.locator('a[download]')).toHaveCount(0);
 });
+test('Warteposition und Fortschritt des Servers anzeigen',async({page})=>{
+ await prepare(page);const expiresAt=new Date(Date.now()+60000).toISOString();const input={size:100};
+ const polls=[
+  {id:'one',state:'queued',progress:{step:'queue',position:2}},
+  {id:'one',state:'running',phase:'encode',progress:{step:'encode',current:25,total:100}},
+ ];
+ let index=0;
+ await page.route('**/api/v1/jobs/one',route=>{
+  const next=polls[index++];
+  if(next)return route.fulfill({json:{expiresAt,input,results:[],...next}});
+  return route.fulfill({json:{id:'one',state:'succeeded',expiresAt,input,results:[{state:'succeeded',size:40,mime:'image/webp',downloadName:'test.webp',downloadUrl:'/api/v1/jobs/one/results/two',details:{width:32,height:24}}]}});
+ });
+ await page.route('**/api/v1/jobs',route=>route.fulfill({status:202,json:{id:'one',state:'queued',progress:{step:'queue',position:3},expiresAt,input,results:[]}}));
+ await page.getByRole('button',{name:'Konvertieren',exact:true}).click();
+ await expect(page.locator('.file-row .badge')).toContainText('Platz 3');
+ await expect(page.locator('.file-row .badge')).toContainText('Platz 2');
+ await expect(page.locator('.file-row progress')).toHaveAttribute('value','25');
+ await expect(page.locator('a[download]')).toBeVisible();
+});
