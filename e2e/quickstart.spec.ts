@@ -271,6 +271,23 @@ test('Ablegen per Drag and Drop ergänzt dieselbe Liste wie die Auswahl ohne Upl
   expect(uploads).toEqual([]);
 });
 
+test('Ablegen mehrerer Dateien gleichzeitig ergänzt die Liste, Unbekanntes blockiert nicht', async ({ page }) => {
+  const { uploads } = await open(page);
+  const dropped = [png('eins.png'), pdf('zwei.pdf'), text('drei.txt')];
+  const data = await page.evaluateHandle((items) => {
+    const transfer = new DataTransfer();
+    for (const item of items) transfer.items.add(new File([new Uint8Array(item.bytes)], item.name, { type: item.mimeType }));
+    return transfer;
+  }, dropped.map((file) => ({ name: file.name, mimeType: file.mimeType, bytes: [...file.buffer] })));
+  await page.locator('.drop-zone').dispatchEvent('drop', { dataTransfer: data });
+  await expect(rows(page)).toHaveCount(3);
+  await expect(rows(page).nth(0)).toContainText('eins.png');
+  await expect(rows(page).nth(1)).toContainText('zwei.pdf');
+  await expect(rows(page).nth(2)).toContainText('Dateityp nicht erkannt oder nicht unterstützt');
+  await expect(output(page, 0)).toBeEnabled();
+  expect(uploads).toEqual([]);
+});
+
 test('Tastatur: Auswahl, Ausgabe, Start und Entfernen funktionieren ohne Maus', async ({ page }) => {
   const { uploads } = await open(page);
   await picker(page).focus();
