@@ -201,6 +201,8 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"pdf-compress"}`,
 		`{"tool":"audio-convert","format":"mp3","quality":0.5,"channels":"mono"}`,
 		`{"tool":"audio-convert","format":"flac"}`,
+		`{"tool":"markdown-pdf"}`,
+		`{"tool":"markdown-pdf","pageSize":"letter","orientation":"landscape"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -231,6 +233,8 @@ func TestValidatorRejectsViolations(t *testing.T) {
 		"minItems":                {"PdfOptions", `{"tool":"pdf-compress","levels":[]}`},
 		"oneOf ohne Treffer":      {"JobOptions", `{"tool":"video"}`},
 		"Audioformat":             {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
+		"Markdown Seitenformat":   {"MarkdownOptions", `{"tool":"markdown-pdf","pageSize":"a3"}`},
+		"Markdown Ausrichtung":    {"MarkdownOptions", `{"tool":"markdown-pdf","orientation":"diagonal"}`},
 		"Audiokanäle":             {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
 		"Audio ohne Bildfelder":   {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
 		"const":                   {"LiveResponse", `{"status":"nein"}`},

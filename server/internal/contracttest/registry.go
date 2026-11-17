@@ -24,6 +24,8 @@ func APITypes() *Types {
 	Enum(ts, "", apitypes.ImageFormatOptions())
 	Enum(ts, "", apitypes.AudioFormats())
 	Enum(ts, "", apitypes.AudioChannelModes())
+	Enum(ts, "", apitypes.MarkdownPageSizes())
+	Enum(ts, "", apitypes.MarkdownOrientations())
 	Enum(ts, "", apitypes.CheckStatuses())
 	Enum(ts, "", apitypes.ReadyStatuses())
 	Enum(ts, "", []apitypes.ResizeMode{

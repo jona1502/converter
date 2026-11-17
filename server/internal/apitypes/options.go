@@ -24,7 +24,9 @@ type ImageOptions struct {
 }
 
 type MarkdownOptions struct {
-	Tool Tool `json:"tool"`
+	Tool        Tool                                     `json:"tool"`
+	PageSize    validation.Optional[MarkdownPageSize]    `json:"pageSize,omitzero" strict:"notnull"`
+	Orientation validation.Optional[MarkdownOrientation] `json:"orientation,omitzero" strict:"notnull"`
 }
 
 type PdfOptions struct {
