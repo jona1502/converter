@@ -77,3 +77,13 @@ export function formatSizeChange(original: number, result: number): SizeChange {
   const sign = kind === 'smaller' ? MINUS : '+';
   return { percent: `${sign}${formatNumber(rounded, digits)}${NBSP}%`, value, kind };
 }
+
+/** Aufbewahrungsdauer als deutsche Angabe („1 Stunde“, „30 Minuten“); ungültig oder < 1 s → ''. */
+export function formatRetention(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 1) return '';
+  const unit = (n: number, one: string, many: string) => `${formatNumber(n, 0)}${NBSP}${n === 1 ? one : many}`;
+  if (seconds >= 86_400 && seconds % 86_400 === 0) return unit(seconds / 86_400, 'Tag', 'Tage');
+  if (seconds >= 3_600 && seconds % 3_600 === 0) return unit(seconds / 3_600, 'Stunde', 'Stunden');
+  if (seconds >= 60) return unit(Math.round(seconds / 60), 'Minute', 'Minuten');
+  return unit(Math.round(seconds), 'Sekunde', 'Sekunden');
+}
