@@ -96,7 +96,7 @@ func TestMarkdownUploadAndCapabilities(t *testing.T) {
 			}
 			var persisted map[string]any
 			json.Unmarshal([]byte(canonical), &persisted)
-			if len(persisted) != 1 || persisted["tool"] != "markdown-pdf" {
+			if len(persisted) != 3 || persisted["tool"] != "markdown-pdf" || persisted["pageSize"] != "a4" || persisted["orientation"] != "portrait" {
 				t.Fatal(canonical)
 			}
 			r = f.request("GET", "/capabilities", nil, "")
