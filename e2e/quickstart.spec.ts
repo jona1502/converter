@@ -184,6 +184,16 @@ test('Typ folgt der Signatur, nicht der Endung', async ({ page }) => {
   await expect(action(page, 'PDF komprimieren')).toHaveCount(0);
 });
 
+test('Abweichende Endung wird gemeldet, passende und fehlende nicht', async ({ page }) => {
+  await open(page);
+  await choose(page, png('foto.jpg'));
+  await expect(rows(page)).toContainText('Die Endung .jpg passt nicht zum Inhalt. Erkannt wurde PNG');
+  await choose(page, png('ohneendung'));
+  await expect(rows(page)).toHaveCount(2);
+  await expect(output(page, 1)).toBeEnabled();
+  await expect(rows(page).nth(1)).not.toContainText('passt nicht zum Inhalt');
+});
+
 test('Unbekannter Typ bleibt sichtbar und blockiert gültigen Nachbarn nicht', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, text());
@@ -268,6 +278,23 @@ test('Ablegen per Drag and Drop ergänzt dieselbe Liste wie die Auswahl ohne Upl
   await expect(rows(page)).toHaveCount(2);
   await expect(output(page, 1).locator('option')).toHaveText(await output(page).locator('option').allTextContents());
   await expect(page).toHaveURL(/\/$/);
+  expect(uploads).toEqual([]);
+});
+
+test('Ablegen mehrerer Dateien gleichzeitig ergänzt die Liste, Unbekanntes blockiert nicht', async ({ page }) => {
+  const { uploads } = await open(page);
+  const dropped = [png('eins.png'), pdf('zwei.pdf'), text('drei.txt')];
+  const data = await page.evaluateHandle((items) => {
+    const transfer = new DataTransfer();
+    for (const item of items) transfer.items.add(new File([new Uint8Array(item.bytes)], item.name, { type: item.mimeType }));
+    return transfer;
+  }, dropped.map((file) => ({ name: file.name, mimeType: file.mimeType, bytes: [...file.buffer] })));
+  await page.locator('.drop-zone').dispatchEvent('drop', { dataTransfer: data });
+  await expect(rows(page)).toHaveCount(3);
+  await expect(rows(page).nth(0)).toContainText('eins.png');
+  await expect(rows(page).nth(1)).toContainText('zwei.pdf');
+  await expect(rows(page).nth(2)).toContainText('Dateityp nicht erkannt oder nicht unterstützt');
+  await expect(output(page, 0)).toBeEnabled();
   expect(uploads).toEqual([]);
 });
 

@@ -15,7 +15,7 @@ from xml.sax.saxutils import escape, quoteattr
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, LETTER, landscape
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -33,12 +33,22 @@ from reportlab.platypus.doctemplate import LayoutError
 
 from converter.errors import ProcessingError
 from converter.limits import Limits
+from converter.options import MarkdownOptions
 from converter.processing.files import discard, open_result
 
 MARGIN = 42
-# Platypus frames have 6 pt padding at both horizontal edges.
-WIDTH = A4[0] - 2 * MARGIN - 12
+PAGE_SIZES = {"a4": A4, "letter": LETTER}
 FONT = "MarkdownVera"
+
+
+def _page(options: MarkdownOptions) -> tuple[float, float]:
+    size = PAGE_SIZES[options.page_size]
+    return landscape(size) if options.orientation == "landscape" else size
+
+
+def _width(page: tuple[float, float]) -> float:
+    # Platypus frames have 6 pt padding at both horizontal edges.
+    return page[0] - 2 * MARGIN - 12
 
 
 class _PageLimit(Exception):
@@ -139,10 +149,10 @@ def _style(name: str = "body", **kwargs: Any) -> ParagraphStyle:
     )
 
 
-def _code(content: str, indent: int) -> list[Flowable]:
+def _code(content: str, indent: int, page: tuple[float, float]) -> list[Flowable]:
     style = _style("code", leftIndent=indent, backColor=colors.HexColor("#f3f4f6"))
     style.fontSize, style.leading, style.spaceAfter = 9, 12, 0
-    width = WIDTH - indent - 2
+    width = _width(page) - indent - 2
     widths: dict[str, float] = {}
     result: list[Flowable] = []
     # Wrap by measured glyph width, including unbroken words. Each visual line
@@ -164,7 +174,7 @@ def _code(content: str, indent: int) -> list[Flowable]:
     return result
 
 
-def _table(tokens: list[Token], indent: int) -> LongTable:
+def _table(tokens: list[Token], indent: int, page: tuple[float, float]) -> LongTable:
     rows: list[list[Paragraph]] = []
     row: list[Paragraph] = []
     style = _style("cell")
@@ -177,9 +187,9 @@ def _table(tokens: list[Token], indent: int) -> LongTable:
         elif token.type == "tr_close":
             rows.append(row)
     count = max(len(row) for row in rows)
-    column_width = (WIDTH - indent) / count
+    column_width = (_width(page) - indent) / count
     cell_width = column_width - 12
-    header_budget = (A4[1] - 2 * MARGIN - 12) / 3
+    header_budget = (page[1] - 2 * MARGIN - 12) / 3
     if any(cell.wrap(cell_width, header_budget)[1] > header_budget for cell in rows[0]):
         # ReportLab cannot split a repeated row. Keep the complete original
         # header as a normal, splittable row and repeat only its first three
@@ -209,7 +219,7 @@ def _table(tokens: list[Token], indent: int) -> LongTable:
     )
 
 
-def _story(text: str) -> list[Flowable]:
+def _story(text: str, page: tuple[float, float]) -> list[Flowable]:
     tokens = _Parser("commonmark", {"html": False}).enable("table").parse(text)
     story: list[Flowable] = []
     lists: list[int | None] = []
@@ -259,12 +269,12 @@ def _story(text: str) -> list[Flowable]:
             )
             bullet = None
         elif kind in {"fence", "code_block"}:
-            story.extend(_code(token.content, indent))
+            story.extend(_code(token.content, indent, page))
         elif kind == "table_open":
             end = index + 1
             while tokens[end].type != "table_close":
                 end += 1
-            story.append(_table(tokens[index + 1 : end], indent))
+            story.append(_table(tokens[index + 1 : end], indent, page))
             index = end
         elif kind == "hr":
             story.append(HRFlowable(width="100%", color=colors.HexColor("#c5cbd3"), spaceAfter=8))
@@ -284,13 +294,16 @@ class _BoundedBuffer(io.BytesIO):
         return super().write(data)
 
 
-def render_pdf(text: str, limits: Limits) -> tuple[bytes, int]:
+def render_pdf(
+    text: str, limits: Limits, options: MarkdownOptions | None = None
+) -> tuple[bytes, int]:
     """Shared in-memory renderer, also exercised by the capability probe."""
     _fonts()
     output = _BoundedBuffer(limits.markdown_max_output_bytes)
+    page = _page(options or MarkdownOptions())
     document = SimpleDocTemplate(
         output,
-        pagesize=A4,
+        pagesize=page,
         leftMargin=MARGIN,
         rightMargin=MARGIN,
         topMargin=MARGIN,
@@ -301,12 +314,12 @@ def render_pdf(text: str, limits: Limits) -> tuple[bytes, int]:
         creator="mi-converter",
     )
 
-    def page(canvas: Any, doc: Any) -> None:
+    def check_pages(canvas: Any, doc: Any) -> None:
         if doc.page > limits.markdown_max_pages:
             raise _PageLimit()
 
     try:
-        document.build(_story(text), onFirstPage=page, onLaterPages=page)
+        document.build(_story(text, page), onFirstPage=check_pages, onLaterPages=check_pages)
     except (LayoutError, _PageLimit) as exc:
         raise ProcessingError("dimensions-too-large") from exc
     except _OutputLimit as exc:
@@ -314,7 +327,9 @@ def render_pdf(text: str, limits: Limits) -> tuple[bytes, int]:
     return output.getvalue(), int(document.page)
 
 
-def convert(source: Path, destination: Path, limits: Limits) -> dict[str, object]:
+def convert(
+    source: Path, destination: Path, limits: Limits, options: MarkdownOptions | None = None
+) -> dict[str, object]:
     """Produce exactly one bounded PDF in a pre-existing result file."""
     try:
         try:
@@ -333,7 +348,7 @@ def convert(source: Path, destination: Path, limits: Limits) -> dict[str, object
         ):
             raise ProcessingError("decode-failed")
         try:
-            data, pages = render_pdf(text, limits)
+            data, pages = render_pdf(text, limits, options)
             with os.fdopen(open_result(destination), "wb") as output:
                 output.write(data)
         except (OSError, ValueError) as exc:

@@ -32,8 +32,8 @@ func parseOptions(raw []byte) (options, error) {
 	if err := validation.DecodeStrictBytes(raw, validation.Limits{MaxBytes: 8192}, "options", &input); err != nil {
 		return options{}, httpapi.InvalidRequest(err)
 	}
-	if _, ok := input.Value.(*apitypes.MarkdownOptions); ok {
-		return options{tool: "markdown-pdf", canonical: json.RawMessage(`{"tool":"markdown-pdf"}`), format: "pdf"}, nil
+	if markdown, ok := input.Value.(*apitypes.MarkdownOptions); ok {
+		return parseMarkdownOptions(markdown)
 	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
@@ -143,4 +143,16 @@ func parseAudioOptions(audio *apitypes.AudioOptions) (options, error) {
 	}
 	canonical, err := jobs.CanonicalJSON(map[string]any{"tool": "audio-convert", "format": target, "quality": quality, "channels": string(channels)})
 	return options{tool: "audio-convert", canonical: canonical, format: target}, err
+}
+
+// parseMarkdownOptions prüft markdown-pdf; Standard ist A4 im Hochformat.
+func parseMarkdownOptions(markdown *apitypes.MarkdownOptions) (options, error) {
+	pageSize := markdown.PageSize.Or(apitypes.PageSizeA4)
+	orientation := markdown.Orientation.Or(apitypes.OrientationPortrait)
+	if !slices.Contains(apitypes.MarkdownPageSizes(), pageSize) ||
+		!slices.Contains(apitypes.MarkdownOrientations(), orientation) {
+		return options{}, invalidOptions()
+	}
+	canonical, err := jobs.CanonicalJSON(map[string]any{"tool": "markdown-pdf", "pageSize": string(pageSize), "orientation": string(orientation)})
+	return options{tool: "markdown-pdf", canonical: canonical, format: "pdf"}, err
 }

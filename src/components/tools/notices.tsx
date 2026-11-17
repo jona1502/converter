@@ -1,4 +1,6 @@
-import { formatBytes } from '../../lib/format';
+import { useEffect, useState } from 'react';
+import { capabilities } from '../../lib/api/client';
+import { formatBytes, formatRetention } from '../../lib/format';
 import { formatDurationLimit } from '../../lib/audio/display';
 import type { SupportState } from './useImageBatch';
 
@@ -19,11 +21,23 @@ export function ImageProcessingNotice() {
 }
 
 /** Hinweis, wenn der Browser die nötigen Funktionen nicht bietet. Gibt null zurück, wenn alles verfügbar ist. */
+/** Aufbewahrungsdauer laut Server; '' bis bekannt oder bei Fehler (Hinweis bleibt dann allgemein). */
+function useRetention(): string {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    capabilities(controller.signal).then((c) => setText(formatRetention(c.jobs.ttlSeconds)), () => {});
+    return () => controller.abort();
+  }, []);
+  return text;
+}
+
 export function BrowserSupportNotice({ support }: { support: Pick<SupportState, 'status'> & { readonly reason?: 'apis' | 'encoder' } }) {
+  const retention = useRetention();
   if (support.status !== 'unsupported') return (
     <div className="notice notice-info">
       <p className="notice-title">Upload und Speicherung</p>
-      <p className="mt-1">Erst nach ausdrücklichem Start werden Ihre Dateien auf den Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und nach Ablauf gelöscht. Entfernen oder Zurücksetzen fordert die frühere Löschung an.</p>
+      <p className="mt-1">Erst nach ausdrücklichem Start werden Ihre Dateien auf den Server hochgeladen. Dateien und Ergebnisse werden temporär gespeichert und {retention ? `nach ${retention}` : 'nach Ablauf'} automatisch gelöscht. Entfernen oder Zurücksetzen fordert die frühere Löschung an.</p>
     </div>
   );
   return (

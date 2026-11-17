@@ -965,7 +965,26 @@
       },
       "MarkdownOptions": {
         "additionalProperties": false,
+        "description": "Optionen für markdown-pdf.",
         "properties": {
+          "orientation": {
+            "default": "portrait",
+            "enum": [
+              "portrait",
+              "landscape"
+            ],
+            "title": "Orientation",
+            "type": "string"
+          },
+          "pageSize": {
+            "default": "a4",
+            "enum": [
+              "a4",
+              "letter"
+            ],
+            "title": "PageSize",
+            "type": "string"
+          },
           "tool": {
             "const": "markdown-pdf",
             "title": "Tool",

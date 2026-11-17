@@ -65,6 +65,7 @@ func TestDefaultsMatchContractLimits(t *testing.T) {
 		{"AudioMaxOutputBytes", c.AudioMaxOutputBytes, int64(419_430_400)},
 		{"AudioTimeout", c.AudioTimeout, 300 * time.Second},
 		{"JobTTL", c.JobTTL, time.Hour},
+		{"DeleteAfterDownload", c.DeleteAfterDownload, false},
 		{"SessionMaxActiveJobs", c.SessionMaxActiveJobs, 3},
 		{"GlobalMaxActiveJobs", c.GlobalMaxActiveJobs, 50},
 		{"SessionCreatesPerMinute", c.SessionCreatesPerMinute, 10},

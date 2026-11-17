@@ -306,6 +306,10 @@ func (a *API) download(w http.ResponseWriter, r *http.Request) error {
 	if _, err = io.Copy(w, io.LimitReader(file, info.Size)); err != nil {
 		panic(http.ErrAbortHandler)
 	}
+	if a.cfg.DeleteAfterDownload {
+		// Best effort: bei Fehler greift die reguläre TTL.
+		_ = store.MarkDeletedAfterDownload(context.WithoutCancel(r.Context()), a.pool, owner, id)
+	}
 	return nil
 }
 
