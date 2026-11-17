@@ -264,3 +264,31 @@ func TestLeaseDownload(t *testing.T) {
 		t.Errorf("gelöscht: %v", err)
 	}
 }
+
+func TestMarkDeletedAfterDownload(t *testing.T) {
+	f := newFixture(t)
+	single := f.job(t, f.owner, "succeeded", "")
+	f.result(t, single, 0, "succeeded")
+	multi := f.job(t, f.owner, "succeeded", "")
+	f.result(t, multi, 0, "succeeded")
+	f.result(t, multi, 1, "succeeded")
+	running := f.job(t, f.owner, "running", "")
+	f.result(t, running, 0, "succeeded")
+
+	for _, c := range []struct {
+		name    string
+		id      [16]byte
+		deleted bool
+	}{{"einzelnes Ergebnis", single, true}, {"mehrere Ergebnisse", multi, false}, {"laufend", running, false}} {
+		if err := store.MarkDeletedAfterDownload(f.ctx, f.pool, f.owner, c.id); err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		var deleted bool
+		if err := f.pool.QueryRow(f.ctx, "SELECT deleted_at IS NOT NULL FROM jobs WHERE id = $1", c.id).Scan(&deleted); err != nil {
+			t.Fatal(err)
+		}
+		if deleted != c.deleted {
+			t.Errorf("%s: deleted = %v", c.name, deleted)
+		}
+	}
+}
