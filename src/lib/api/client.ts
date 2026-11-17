@@ -105,6 +105,9 @@ export async function cancelJob(id: string): Promise<void> {
   const token=await csrf();
   await decode(await fetch(`${prefix}/jobs/${encodeURIComponent(id)}/cancel`,{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':token}}));
 }
+/** Download-URL des ZIP-Archivs mit den Ergebnissen mehrerer fertiger Aufträge. */
+export const archiveUrl = (jobIds: readonly string[]) =>
+  `${prefix}/jobs/archive?${jobIds.map(id => `job_id=${encodeURIComponent(id)}`).join('&')}`;
 export const terminal = (job: Job) => !['queued', 'running'].includes(job.state);
 export async function pollJob(initial: Job, signal: AbortSignal, onStatus: (job: Job) => void): Promise<Job> {
   let job = initial, failures = 0;

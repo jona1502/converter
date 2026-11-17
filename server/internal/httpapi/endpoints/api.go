@@ -72,7 +72,7 @@ func (a *API) Register(router *httpapi.Router) {
 		handler      func(http.ResponseWriter, *http.Request) error
 	}{
 		{"GET", "/session", a.session}, {"GET", "/capabilities", a.capabilities}, {"POST", "/jobs", a.create},
-		{"GET", "/jobs/{job_id}", a.get}, {"POST", "/jobs/{job_id}/cancel", a.cancel}, {"DELETE", "/jobs/{job_id}", a.remove},
+		{"GET", "/jobs/archive", a.archive}, {"GET", "/jobs/{job_id}", a.get}, {"POST", "/jobs/{job_id}/cancel", a.cancel}, {"DELETE", "/jobs/{job_id}", a.remove},
 		{"GET", "/jobs/{job_id}/results/{result_id}", a.download},
 	} {
 		handler := route.handler
@@ -80,7 +80,7 @@ func (a *API) Register(router *httpapi.Router) {
 			timeout := 10 * time.Second
 			if route.method == http.MethodPost && route.path == "/jobs" {
 				timeout = a.cfg.UploadMax + 15*time.Second
-			} else if strings.Contains(route.path, "/results/") {
+			} else if strings.Contains(route.path, "/results/") || route.path == "/jobs/archive" {
 				timeout = a.cfg.DownloadMax + 5*time.Second
 			}
 			ctx, cancel := context.WithTimeout(r.Context(), timeout)
@@ -89,7 +89,7 @@ func (a *API) Register(router *httpapi.Router) {
 			if route.path != "/capabilities" && a.pool == nil {
 				return httpapi.ServiceUnavailable()
 			}
-			if route.path != "/jobs" && route.path != "/jobs/{job_id}/results/{result_id}" {
+			if route.path != "/jobs" && route.path != "/jobs/{job_id}/results/{result_id}" && route.path != "/jobs/archive" {
 				ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 				defer cancel()
 				r = r.WithContext(ctx)

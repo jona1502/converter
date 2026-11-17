@@ -304,6 +304,7 @@ export default function AudioConverter({ initialFiles }: ToolProps) {
           isProcessing={isProcessing}
           progress={batch.progress}
           disabledReason={disabledReason}
+          zipHref={batch.zipUrl}
         />}
         resultsHeadingId={listHeadingId}
         resultNotice={settingsChanged && (
