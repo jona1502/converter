@@ -58,7 +58,7 @@ export const TOOLS: readonly Tool[] = [
     id: 'markdown-pdf',
     title: 'Markdown zu PDF',
     description: 'Markdown-Dateien als PDF mit auswählbarem Text ausgeben.',
-    lead: 'Erstellen Sie aus einer Markdown-Datei eine PDF mit auswählbarem Text im A4-Hochformat.',
+    lead: 'Erstellen Sie aus einer Markdown-Datei eine PDF mit auswählbarem Text, wahlweise A4 oder US Letter im Hoch- oder Querformat.',
     href: '/pdf/markdown',
     category: 'pdf',
     operation: 'konvertieren',

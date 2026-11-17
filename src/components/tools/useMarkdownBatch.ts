@@ -1,13 +1,13 @@
 /** Ein Markdown-Dokument: lokale Prüfung, ausdrücklicher Upload, Polling und frühere Löschung. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, capabilities, createJob, deleteJob, pollJob } from '../../lib/api/client';
-import { checkMarkdownFile, MARKDOWN_LIMITS, markdownMessage } from '../../lib/markdown';
+import { buildMarkdownOptions, checkMarkdownFile, MARKDOWN_LIMITS, markdownMessage, type MarkdownSettings } from '../../lib/markdown';
 import type { FileEntry } from './FileList';
 import type { BatchCounts, RunProgress } from './useImageBatch';
 
 export interface MarkdownEntry extends FileEntry {
   readonly file: File;
-  readonly result?: { size: number; pageCount: number };
+  readonly result?: { size: number; pageCount: number; settings: MarkdownSettings };
 }
 type Support = { status: 'checking' | 'ready' } | { status: 'unsupported'; reason: 'apis' | 'encoder' };
 
@@ -81,7 +81,7 @@ export function useMarkdownBatch() {
     return true;
   }, [limits, patch, support.status, update]);
 
-  const process = useCallback(async () => {
+  const process = useCallback(async (settings: MarkdownSettings) => {
     const target = entryRef.current;
     if (!target || !['ready', 'error', 'done'].includes(target.status) || running.current || support.status !== 'ready') return;
     const currentGeneration = generation.current;
@@ -94,7 +94,7 @@ export function useMarkdownBatch() {
     patch(target.id, { status: 'uploading', serverError: undefined, result: undefined, resultUrl: undefined, expiresAt: undefined });
     try {
       key.current ??= crypto.randomUUID();
-      const job = await createJob(target.file, { tool: 'markdown-pdf' }, key.current, abort.signal, waiting => {
+      const job = await createJob(target.file, buildMarkdownOptions(settings), key.current, abort.signal, waiting => {
         if (active()) patch(target.id, { status: waiting ? 'queued' : 'uploading' });
       });
       if (!active() || abort.signal.aborted) { void deleteJob(job.id).catch(() => {}); return; }
@@ -112,7 +112,7 @@ export function useMarkdownBatch() {
       if (result.mime !== 'application/pdf' || !Number.isInteger(pageCount) || typeof pageCount !== 'number' || pageCount < 1 || pageCount > limits.maxPages || result.size > limits.maxOutputBytes) {
         throw new ApiError('encode-failed');
       }
-      patch(target.id, { status: 'done', result: { size: result.size, pageCount }, resultUrl: result.downloadUrl,
+      patch(target.id, { status: 'done', result: { size: result.size, pageCount, settings }, resultUrl: result.downloadUrl,
         outputName: result.downloadName, expiresAt: finished.expiresAt });
     } catch (error) {
       if (active() && !abort.signal.aborted) patch(target.id, { status: 'error', serverError: markdownMessage(error, limits) });
