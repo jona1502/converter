@@ -264,3 +264,44 @@ func TestLeaseDownload(t *testing.T) {
 		t.Errorf("gelöscht: %v", err)
 	}
 }
+
+func TestLeaseArchive(t *testing.T) {
+	f := newFixture(t)
+	const maxDur = 300 * time.Second
+	done := f.job(t, f.owner, "succeeded", "")
+	f.result(t, done, 0, "succeeded")
+	failed := f.job(t, f.owner, "failed", "")
+	f.result(t, failed, 0, "failed")
+	running := f.job(t, f.owner, "running", "")
+	expired := f.job(t, f.owner, "succeeded", "expires_at = now() - interval '1 second'")
+	f.result(t, expired, 0, "succeeded")
+	foreign := f.job(t, f.other, "succeeded", "")
+	f.result(t, foreign, 0, "succeeded")
+	unknown := store.NewID()
+
+	ids := [][16]byte{done, failed, running, expired, foreign, unknown}
+	got, err := store.LeaseArchive(f.ctx, f.pool, f.owner, ids, maxDur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"", store.SkipFailed, store.SkipPending, store.SkipExpired, store.SkipNotFound, store.SkipNotFound}
+	if len(got) != len(want) {
+		t.Fatalf("Einträge = %d", len(got))
+	}
+	for i, w := range want {
+		if got[i].ID != ids[i] || got[i].Skipped != w {
+			t.Errorf("Eintrag %d: Skipped = %q, want %q", i, got[i].Skipped, w)
+		}
+	}
+	if len(got[0].Results) != 1 || got[0].Results[0].DownloadName != "a-high.pdf" || got[0].InputName != "a.pdf" {
+		t.Fatalf("Ergebnisse = %+v", got[0])
+	}
+	var until, other *time.Time
+	if err := f.pool.QueryRow(f.ctx, `SELECT (SELECT download_until FROM jobs WHERE id = $1),
+		(SELECT download_until FROM jobs WHERE id = $2)`, done, failed).Scan(&until, &other); err != nil {
+		t.Fatal(err)
+	}
+	if until == nil || !until.Equal(got[0].Results[0].Deadline) || other != nil {
+		t.Fatalf("download_until fertig=%v fehlgeschlagen=%v", until, other)
+	}
+}

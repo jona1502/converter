@@ -360,3 +360,85 @@ WHERE id = $1 RETURNING download_until`, jobID, micros(maxDuration)).Scan(&d.Dea
 	}
 	return d, nil
 }
+
+// Gründe, aus denen ein Auftrag nicht ins ZIP-Archiv gelangt (ArchiveJob.Skipped).
+const (
+	SkipNotFound = "job-not-found" // unbekannt, fremd oder gelöscht
+	SkipExpired  = "job-expired"
+	SkipFailed   = "job-failed"  // beendet ohne herunterladbares Ergebnis
+	SkipPending  = "job-pending" // noch in Verarbeitung
+)
+
+// ArchiveJob ist ein angefragter Auftrag eines Archivs: entweder mit
+// herunterladbaren Ergebnissen oder mit einem Überspringgrund.
+type ArchiveJob struct {
+	ID        [16]byte
+	InputName string // leer bei SkipNotFound
+	Skipped   string // leer = Ergebnisse enthalten
+	Results   []Download
+}
+
+// LeaseArchive prüft Besitz und Zustand aller Aufträge in einer Transaktion
+// und verlängert die Download-Lease (jobs.download_until) jedes Auftrags mit
+// herunterladbaren Ergebnissen, bevor gestreamt wird – wie LeaseDownload,
+// aber ohne Fehler für einzelne Aufträge: Sie erscheinen mit Skipped. Die
+// Reihenfolge entspricht jobIDs.
+func LeaseArchive(ctx context.Context, pool *pgxpool.Pool, sessionID [16]byte, jobIDs [][16]byte, maxDuration time.Duration) ([]ArchiveJob, error) {
+	out := make([]ArchiveJob, 0, len(jobIDs))
+	err := pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
+		out = out[:0]
+		for _, id := range jobIDs {
+			item := ArchiveJob{ID: id}
+			var state string
+			var expired bool
+			err := tx.QueryRow(ctx, `SELECT input_name, state, expires_at <= now() FROM jobs
+WHERE id = $1 AND session_id = $2 AND deleted_at IS NULL FOR UPDATE`, id, sessionID).Scan(&item.InputName, &state, &expired)
+			switch {
+			case errors.Is(err, pgx.ErrNoRows):
+				item.Skipped = SkipNotFound
+			case err != nil:
+				return err
+			case expired || state == "expired":
+				item.Skipped = SkipExpired
+			case state == "queued" || state == "running":
+				item.Skipped = SkipPending
+			default:
+				rows, err := tx.Query(ctx, `SELECT storage_key, size, mime, download_name FROM job_results
+WHERE job_id = $1 AND state = 'succeeded' AND storage_key IS NOT NULL AND size IS NOT NULL ORDER BY ordinal`, id)
+				if err != nil {
+					return err
+				}
+				for rows.Next() {
+					var d Download
+					if err := rows.Scan(&d.StorageKey, &d.Size, &d.MIME, &d.DownloadName); err != nil {
+						rows.Close()
+						return err
+					}
+					item.Results = append(item.Results, d)
+				}
+				rows.Close()
+				if err := rows.Err(); err != nil {
+					return err
+				}
+				if len(item.Results) == 0 {
+					item.Skipped = SkipFailed
+					break
+				}
+				var deadline time.Time
+				if err := tx.QueryRow(ctx, `UPDATE jobs SET download_until = now() + $2 * interval '1 microsecond'
+WHERE id = $1 RETURNING download_until`, id, micros(maxDuration)).Scan(&deadline); err != nil {
+					return err
+				}
+				for i := range item.Results {
+					item.Results[i].Deadline = deadline
+				}
+			}
+			out = append(out, item)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("store: Archiv-Lease: %w", err)
+	}
+	return out, nil
+}
