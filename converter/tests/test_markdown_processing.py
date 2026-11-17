@@ -257,3 +257,31 @@ def test_file_access_uses_stable_errors(
         convert(source, destination, Limits())
     assert exc.value.code == code
     assert destination.exists() == allocate
+
+
+def test_oversized_table_header_continues_without_losing_text(tmp_path: Path) -> None:
+    header = "HEADERSTART" + "M" * 14000 + "HEADEREND"
+    path, details = render(
+        tmp_path,
+        f"| {header} | Value |\n| --- | --- |\n| Body | Last |\n",
+    )
+    pages = texts(path)
+    page_count = details["pageCount"]
+    assert isinstance(page_count, int)
+    assert 2 < page_count == len(pages) < 300
+    # Every continuation keeps a compact, recognizable header. Remove that
+    # first header row from each page to check the original content exactly.
+    assert all("HEADERSTART" in page and "Value" in page for page in pages)
+    body = "".join(page.partition("Value")[2] for page in pages)
+    body = body.replace("Value", "").replace("\r", "").replace("\n", "").replace(" ", "")
+    assert header in body
+    assert body.count("M") == 14000
+    assert body.count("HEADEREND") == 1
+    assert "Body" in body and "Last" in body
+    with pdfium.PdfDocument(path) as pdf:
+        for page in pdf:
+            text = page.get_textpage()
+            for i in range(text.count_chars()):
+                left, bottom, right, top = text.get_charbox(i)
+                assert 42 <= left <= right <= 595.276 - 42
+                assert 42 <= bottom <= top <= 841.89 - 42

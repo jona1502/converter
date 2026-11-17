@@ -177,9 +177,19 @@ def _table(tokens: list[Token], indent: int) -> LongTable:
         elif token.type == "tr_close":
             rows.append(row)
     count = max(len(row) for row in rows)
+    column_width = (WIDTH - indent) / count
+    cell_width = column_width - 12
+    header_budget = (A4[1] - 2 * MARGIN - 12) / 3
+    if any(cell.wrap(cell_width, header_budget)[1] > header_budget for cell in rows[0]):
+        # ReportLab cannot split a repeated row. Keep the complete original
+        # header as a normal, splittable row and repeat only its first three
+        # rendered lines. This bounds repetition without dropping header text.
+        rows.insert(
+            0, [cast(Paragraph, cell.split(cell_width, 3 * style.leading)[0]) for cell in rows[0]]
+        )
     return _PaginatedTable(
         rows,
-        colWidths=[(WIDTH - indent) / count] * count,
+        colWidths=[column_width] * count,
         repeatRows=1,
         splitByRow=1,
         splitInRow=1,
