@@ -25,7 +25,7 @@ PDF-Seiten wurden gerendert und visuell geprüft, einschließlich langer Zeilen,
 - Frontend: **554 Tests bestanden, 10 bestehende Tests übersprungen**; Astro-Typprüfung ohne Diagnosen, Produktionsbuild mit neun Seiten und API-Typgenerierungsprüfung bestanden.
 - Neue Markdown-E2E: **24 Workflow-Prüfungen** über Chromium, Firefox, WebKit und mobiles Chromium bestanden; zusätzlich **12 Prüfungen** für Navigation und Unicode-Metadaten bestanden.
 - Bestehender Stack-Smoke-Test: Bildkonvertierung, Bildkomprimierung, Skalierung und drei PDF-Komprimierungsvarianten bestanden.
-- Vollständiger E2E-Regressionslauf: **571 von 576 Prüfungen bestanden**. Fünf Fehler betrafen vorhandene Audio-Farbübergänge und eine WebKit-Fokusannahme in den Tests. Beide Ursachen wurden vor der Korrektur gezielt reproduziert. Nach zwei reinen Testsynchronisierungsänderungen bestanden **24 gezielte Prüfungen** über alle vier Browserprofile mit je zwei Wiederholungen. Der vollständige 576er-Lauf wurde danach nicht erneut ausgeführt; Produktcode und Prüfregeln blieben unverändert.
+- Vollständiger E2E-Regressionslauf nach den Testkorrekturen: **576 von 576 Prüfungen bestanden**, über Chromium, Firefox, WebKit und mobiles Chromium, gegen den echten Compose-Stack (7,0 Minuten). Der erste Lauf hatte fünf Fehler bei vorhandenen Audio-Farbübergängen und einer WebKit-Fokusannahme in den Tests gezeigt. Beide Ursachen wurden vor der Korrektur gezielt reproduziert und durch reine Testsynchronisierung behoben; Produktcode und Prüfregeln blieben unverändert.
 - API-, Worker- und Web-Images gebaut; lokaler Compose-Stack mit neuer Migration gestartet und gesund.
 
 Native Windows-Go-Tests sind wegen POSIX-Pfadannahmen und fehlender Testdatenbankvariablen keine geeignete Prüfumgebung; die maßgeblichen Go-Prüfungen liefen erfolgreich unter Linux. Die Windows-Python-Suite überspringt Linux-Sandboxtests; diese sind im vollständigen Linux-Lauf enthalten. WebKit kann Unicode-Dateinamen beim tatsächlichen Download auf den ASCII-Fallback normalisieren; kanonische Metadaten und Downloadattribute wurden mit Umlauten browserübergreifend geprüft.
@@ -37,4 +37,8 @@ Die vorhandene Audio-Auswahl besitzt während ihres kurzen Farbwechsels vorüber
 1. Im bestehenden Checkout auf dem ausdrücklich gewünschten neuen Branch gearbeitet. Folge: keine Isolation gegen gleichzeitige manuelle Änderungen; alle Änderungen sind in separaten Commits nachvollziehbar.
 2. „Ja fang an“ als Ausführungsfreigabe für Entwurf und Implementierungsplan behandelt, nachdem beide erstellt waren. Folge bei abweichender Erwartung: die betroffenen Implementierungsentscheidungen müssten nachgearbeitet werden.
 
-Kein Push, Merge oder öffentliches Deployment durchgeführt.
+## Merge-Freigabe
+
+Am 17.11.2026 für die vom Nutzer angeforderte lokale Übernahme auf `main` erneut geprüft: 271 Python-Tests, 554 Frontend-Tests mit zehn bestehenden übersprungenen Tests, sämtliche 576 E2E-Prüfungen, Go-Race-Suite, `go vet`, Astro-Typprüfung, Produktionsbuild und API-Typgenerierungsprüfung bestanden. `main` und das frisch abgerufene `origin/main` stehen unverändert auf `6217c53`; die Übernahme kann ohne Konflikte als Fast-forward erfolgen. Die unabhängigen Reviews bleiben für den unveränderten Produktcode gültig.
+
+Lokaler Merge auf `main` freigegeben. Kein Push oder öffentliches Deployment beauftragt.
