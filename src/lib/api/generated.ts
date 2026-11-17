@@ -28,7 +28,7 @@ export interface ApiSchemas {
   "ResultState": "pending" | "running" | "succeeded" | "failed" | "cancelled";
   "SessionResponse": { "created": boolean; "csrfToken": string; "expiresAt": string };
   "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf";
-  "MarkdownOptions": { "tool": "markdown-pdf" };
+  "MarkdownOptions": { "orientation"?: "portrait" | "landscape"; "pageSize"?: "a4" | "letter"; "tool": "markdown-pdf" };
   "MarkdownCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number };
   "MarkdownDetails": { "pageCount": number };
 }

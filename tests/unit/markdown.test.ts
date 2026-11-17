@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkMarkdownFile, markdownMessage } from '../../src/lib/markdown';
+import { buildMarkdownOptions, checkMarkdownFile, DEFAULT_MARKDOWN_SETTINGS, markdownMessage, markdownPageLabel } from '../../src/lib/markdown';
 import { ApiError } from '../../src/lib/api/client';
 
 describe('Markdown-Vorprüfung ohne Upload', () => {
@@ -24,5 +24,16 @@ describe('Markdown-Vorprüfung ohne Upload', () => {
     expect(markdownMessage(new ApiError('result-too-large'))).toMatch(/PDF/);
     expect(markdownMessage(new ApiError('dimensions-too-large'))).toMatch(/Seiten/);
     expect(markdownMessage(new ApiError('service-unavailable'))).toMatch(/verfügbar/);
+  });
+});
+
+describe('Markdown-Seiteneinstellungen', () => {
+  it('sendet immer vollständige Optionen, Standard ist A4-Hochformat', () => {
+    expect(buildMarkdownOptions(DEFAULT_MARKDOWN_SETTINGS)).toEqual({ tool: 'markdown-pdf', pageSize: 'a4', orientation: 'portrait' });
+    expect(buildMarkdownOptions({ pageSize: 'letter', orientation: 'landscape' })).toEqual({ tool: 'markdown-pdf', pageSize: 'letter', orientation: 'landscape' });
+  });
+  it('benennt die gewählte Seite', () => {
+    expect(markdownPageLabel(DEFAULT_MARKDOWN_SETTINGS)).toBe('A4-Hochformat');
+    expect(markdownPageLabel({ pageSize: 'letter', orientation: 'landscape' })).toBe('US Letter-Querformat');
   });
 });

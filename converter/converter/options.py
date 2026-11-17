@@ -28,6 +28,9 @@ AUDIO_FORMATS: Final = ("mp3", "wav", "flac", "ogg")
 # Nur bei diesen Zielformaten wirkt quality (libsndfile compression_level).
 AUDIO_QUALITY_FORMATS: Final = ("mp3", "ogg")
 AUDIO_CHANNELS: Final = ("original", "mono")
+MARKDOWN_TOOL: Final = "markdown-pdf"
+MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
+MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
 DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
@@ -102,7 +105,9 @@ class AudioOptions:
 
 @dataclass(frozen=True, slots=True)
 class MarkdownOptions:
-    tool: str = "markdown-pdf"
+    tool: str = MARKDOWN_TOOL
+    page_size: str = "a4"
+    orientation: str = "portrait"
 
 
 JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
@@ -242,6 +247,27 @@ def _audio(value: dict[str, object]) -> AudioOptions:
     return AudioOptions(format=output, quality=quality, channels=channels)
 
 
+def _markdown(value: dict[str, object]) -> MarkdownOptions:
+    raw = v.obj(
+        value,
+        required=("tool",),
+        optional=("pageSize", "orientation"),
+        code=CODE,
+        where="options",
+    )
+    page_size = "a4"
+    if "pageSize" in raw:
+        page_size = v.string(raw["pageSize"], code=CODE, where="pageSize", max_length=16)
+        if page_size not in MARKDOWN_PAGE_SIZES:
+            raise v.fail(CODE, "pageSize: unknown")
+    orientation = "portrait"
+    if "orientation" in raw:
+        orientation = v.string(raw["orientation"], code=CODE, where="orientation", max_length=16)
+        if orientation not in MARKDOWN_ORIENTATIONS:
+            raise v.fail(CODE, "orientation: unknown")
+    return MarkdownOptions(page_size=page_size, orientation=orientation)
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -253,7 +279,6 @@ def parse_options(value: object) -> JobOptions:
         return _pdf(value)
     if tool == AUDIO_TOOL:
         return _audio(value)
-    if tool == "markdown-pdf":
-        v.obj(value, required=("tool",), code=CODE, where="options")
-        return MarkdownOptions()
+    if tool == MARKDOWN_TOOL:
+        return _markdown(value)
     raise v.fail(CODE, "tool: unknown")

@@ -43,10 +43,20 @@ func markdownBody(t *testing.T, name string, data []byte) ([]byte, string) {
 }
 func TestMarkdownOptionsCanonicalAndStrict(t *testing.T) {
 	o, err := parseOptions([]byte(`{"tool":"markdown-pdf"}`))
-	if err != nil || o.tool != "markdown-pdf" || string(o.canonical) != `{"tool":"markdown-pdf"}` {
+	const defaults = `{"orientation":"portrait","pageSize":"a4","tool":"markdown-pdf"}`
+	if err != nil || o.tool != "markdown-pdf" || string(o.canonical) != defaults {
 		t.Fatalf("%+v %v", o, err)
 	}
-	for _, raw := range []string{`{"tool":"markdown-pdf","format":"pdf"}`, `{"tool":"markdown-pdf","levels":null}`} {
+	o, err = parseOptions([]byte(`{"tool":"markdown-pdf","pageSize":"letter","orientation":"landscape"}`))
+	if err != nil || string(o.canonical) != `{"orientation":"landscape","pageSize":"letter","tool":"markdown-pdf"}` {
+		t.Fatalf("%+v %v", o, err)
+	}
+	for _, raw := range []string{
+		`{"tool":"markdown-pdf","format":"pdf"}`, `{"tool":"markdown-pdf","levels":null}`,
+		`{"tool":"markdown-pdf","pageSize":"a3"}`, `{"tool":"markdown-pdf","pageSize":null}`,
+		`{"tool":"markdown-pdf","pageSize":4}`, `{"tool":"markdown-pdf","orientation":"diagonal"}`,
+		`{"tool":"markdown-pdf","orientation":null}`, `{"tool":"markdown-pdf","margin":10}`,
+	} {
 		if _, err := parseOptions([]byte(raw)); err == nil {
 			t.Fatalf("accepted %s", raw)
 		}
@@ -86,7 +96,7 @@ func TestMarkdownUploadAndCapabilities(t *testing.T) {
 			}
 			var persisted map[string]any
 			json.Unmarshal([]byte(canonical), &persisted)
-			if len(persisted) != 1 || persisted["tool"] != "markdown-pdf" {
+			if len(persisted) != 3 || persisted["tool"] != "markdown-pdf" || persisted["pageSize"] != "a4" || persisted["orientation"] != "portrait" {
 				t.Fatal(canonical)
 			}
 			r = f.request("GET", "/capabilities", nil, "")
