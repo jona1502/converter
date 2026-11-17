@@ -55,6 +55,17 @@ export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
 
 export const TOOLS: readonly Tool[] = [
   {
+    id: 'markdown-pdf',
+    title: 'Markdown zu PDF',
+    description: 'Markdown-Dateien als PDF mit auswählbarem Text ausgeben.',
+    lead: 'Erstellen Sie aus einer Markdown-Datei eine PDF mit auswählbarem Text im A4-Hochformat.',
+    href: '/pdf/markdown',
+    category: 'pdf',
+    operation: 'konvertieren',
+    action: 'convert',
+    available: true,
+  },
+  {
     id: 'pdf-komprimieren',
     title: 'PDF komprimieren',
     description: 'Drei Qualitätsstufen auf dem Server berechnen und tatsächliche Dateigrößen vergleichen.',

@@ -1,22 +1,25 @@
 /**
  * Typerkennung und Aktionswahl der Startseite. Gelesen werden nur die ersten Bytes jeder Datei,
- * erkannt wird an der Signatur (nicht an Endung oder MIME-Typ), alles lokal und ohne Upload.
+ * Bilder, PDF und Audio werden an der Signatur erkannt. Markdown benötigt eine passende Endung
+ * und gültigen UTF-8-Text. Alles bleibt lokal und ohne Upload.
  * Die Aktionen je Typ kommen aus dem Werkzeugkatalog.
  */
 import { availableTools, TOOL_ACTIONS, type Tool, type ToolCategory } from '../data/tools';
 import { detectFormat } from './image/sniff';
 import { findPdfSignature } from './pdf/signature';
 import { AUDIO_SNIFF_BYTES, sniffAudio } from './audio/sniff';
+import { checkMarkdownFile } from './markdown';
 
-export type FileKind = 'image' | 'pdf' | 'audio';
+export type FileKind = 'image' | 'pdf' | 'audio' | 'markdown';
 
 /** Gruppen in fester Reihenfolge der Anzeige. */
-export const FILE_KINDS: readonly FileKind[] = ['image', 'pdf', 'audio'];
+export const FILE_KINDS: readonly FileKind[] = ['image', 'pdf', 'audio', 'markdown'];
 
 const KIND_INFO: Readonly<Record<FileKind, { label: string; category: ToolCategory }>> = {
   image: { label: 'Bild', category: 'bilder' },
   pdf: { label: 'PDF', category: 'pdf' },
   audio: { label: 'Audio', category: 'audio' },
+  markdown: { label: 'Markdown', category: 'pdf' },
 };
 
 /** Anzeigename des Typs (Einzahl). */
@@ -32,11 +35,13 @@ export function detectKindFromHead(head: Uint8Array): FileKind | null {
   return null;
 }
 
-/** Liest höchstens AUDIO_SNIFF_BYTES und erkennt den Typ. Unlesbare Dateien gelten als unbekannt. */
+/** Prüft Kopfbytes; für Markdown zusätzlich die gesamte Quelle bis 2 MiB. Unlesbares bleibt unbekannt. */
 export async function detectFileKind(file: File): Promise<FileKind | null> {
   try {
     const head = new Uint8Array(await file.slice(0, AUDIO_SNIFF_BYTES).arrayBuffer());
-    return detectKindFromHead(head);
+    const signed = detectKindFromHead(head);
+    if (signed) return signed;
+    return /\.(md|markdown)$/i.test(file.name) && (await checkMarkdownFile(file)).ok ? 'markdown' : null;
   } catch {
     return null;
   }
@@ -44,9 +49,10 @@ export async function detectFileKind(file: File): Promise<FileKind | null> {
 
 /** Werkzeuge, die zu einem Dateityp passen, in Reihenfolge Konvertieren, Komprimieren, Skalieren. */
 export function toolsForKind(kind: FileKind): Tool[] {
+  if (kind === 'markdown') return availableTools.filter((tool) => tool.id === 'markdown-pdf');
   const { category } = KIND_INFO[kind];
   return TOOL_ACTIONS.flatMap((action) =>
-    availableTools.filter((tool) => tool.category === category && tool.action === action.id),
+    availableTools.filter((tool) => tool.category === category && tool.action === action.id && tool.id !== 'markdown-pdf'),
   );
 }
 

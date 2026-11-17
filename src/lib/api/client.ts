@@ -9,6 +9,8 @@ export interface Capabilities {
   pdf: {maxFileBytes: number};
   /** Fehlt bei älteren Servern; dann ist audio-convert nicht verfügbar. */
   audio?: ApiSchemas['AudioCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist markdown-pdf nicht verfügbar. */
+  markdown?: ApiSchemas['MarkdownCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {

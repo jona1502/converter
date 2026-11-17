@@ -15,6 +15,7 @@ import { detectFileKind, kindLabel, type FileKind } from '../../lib/quickstart';
 import { audioAcceptAttribute, AUDIO_FORMAT_INFO, type AudioFormat } from '../../lib/audio/formats';
 import { DEFAULT_ICO_SIZES, type ImageFormat } from '../../lib/image';
 import { formatBytes } from '../../lib/format';
+import { MARKDOWN_ACCEPT } from '../../lib/markdown';
 import { DropZone } from '../tools/DropZone';
 import { acceptAttribute, formatLabel, INPUT_FORMATS, OUTPUT_FORMATS } from '../tools/formats';
 import { imageErrorMessage } from '../tools/errorMessages';
@@ -31,11 +32,12 @@ const TOOL_COMPONENTS: Readonly<Record<string, ToolComponent>> = {
   'bilder-skalieren': lazy(() => import('../tools/ImageResizer')),
   'pdf-komprimieren': lazy(() => import('../tools/PdfCompressor')),
   'audio-konvertieren': lazy(() => import('../tools/AudioConverter')),
+  'markdown-pdf': lazy(() => import('../tools/MarkdownConverter')),
 };
 
 /** Textlinks in der Reihenfolge Bilder, PDF, Audio. */
 const LINKED_TOOLS = availableToolsByCategory.flatMap((group) => group.tools);
-const ACCEPT = [acceptAttribute(INPUT_FORMATS), '.pdf,application/pdf', audioAcceptAttribute()].join(',');
+const ACCEPT = [acceptAttribute(INPUT_FORMATS), '.pdf,application/pdf', audioAcceptAttribute(), MARKDOWN_ACCEPT].join(',');
 interface QueueRow {
   readonly id: string;
   readonly file: File;
@@ -177,7 +179,7 @@ export default function QuickStart() {
             <p className="page-lead mx-auto">Legen Sie Dateien ab und wählen Sie direkt die Ausgabe. Hochgeladen wird erst nach „Konvertieren“.</p>
           </div>
           <DropZone variant={rows.length ? 'default' : 'hero'} accept={ACCEPT} disabled={!hydrated || running} buttonRef={pickRef} buttonLabel={rows.length ? 'Weitere Dateien hinzufügen' : 'Dateien auswählen'} onFiles={addFiles} title="Dateien hierher ziehen">
-            <p>Bilder, PDF und Audio. Die Erkennung läuft in Ihrem Browser; hochgeladen wird erst, wenn Sie ausdrücklich starten. Höchstens {Math.min(image.limits.maxFiles, audio.limits.maxFiles)} Dateien; Bilder bis {formatBytes(image.limits.maxFileBytes)}, Audio bis {formatBytes(audio.limits.maxFileBytes)}.</p>
+            <p>Bilder, PDF, Audio und Markdown (.md, .markdown, UTF-8). Die Erkennung läuft in Ihrem Browser; hochgeladen wird erst, wenn Sie ausdrücklich starten. Höchstens {Math.min(image.limits.maxFiles, audio.limits.maxFiles)} Dateien; Bilder bis {formatBytes(image.limits.maxFileBytes)}, Audio bis {formatBytes(audio.limits.maxFileBytes)}, Markdown bis 2 MB.</p>
           </DropZone>
           {rows.length > 0 && <section aria-label="Ausgewählte Dateien" className="flex min-w-0 flex-col gap-4">
             <h2 className="text-lg font-semibold">Dateien und Ausgabe</h2>
@@ -189,13 +191,13 @@ export default function QuickStart() {
                 const input = row.kind === 'image' && image.entries.find(entry => entry.file === row.file)?.probe?.format;
                 const audioInput = row.kind === 'audio' && audio.entries.find(entry => entry.file === row.file)?.inputFormat;
                 const imageError = entry?.error === 'file-too-large' ? `Die Datei ist zu groß. Erlaubt sind höchstens ${formatBytes(image.limits.maxFileBytes)} pro Bild.` : entry?.error === 'dimensions-too-large' ? `Das Bild überschreitet die erlaubten ${image.limits.maxEdge} Pixel je Kante oder ${image.limits.maxPixels} Pixel insgesamt.` : entry?.error ? imageErrorMessage(entry.error) : undefined;
-                const message = row.message ?? entry?.serverError ?? imageError ?? (row.kind === null ? 'Dateityp nicht erkannt oder nicht unterstützt. Unterstützt werden Bilder, PDF und Audio (MP3, WAV, FLAC, OGG).' : row.kind === 'pdf' ? 'PDF: Komprimierung im zusätzlichen Werkzeug verfügbar.' : undefined);
+                const message = row.message ?? entry?.serverError ?? imageError ?? (row.kind === null ? 'Dateityp nicht erkannt oder nicht unterstützt. Unterstützt werden Bilder, PDF, Audio (MP3, WAV, FLAC, OGG) und Markdown (.md, .markdown in UTF-8).' : row.kind === 'pdf' ? 'PDF: Komprimierung im zusätzlichen Werkzeug verfügbar.' : row.kind === 'markdown' ? 'Markdown: PDF-Erstellung im zusätzlichen Werkzeug verfügbar.' : undefined);
                 const unsupported = row.kind === 'image' ? image.support.status === 'unsupported' || (image.support.status === 'ready' && !imageFormats.length) : row.kind === 'audio' && audio.support.status === 'unsupported';
                 return <li key={row.id} data-status={status} className="file-row flex min-w-0 flex-col gap-3 rounded-lg border border-border p-4 text-left sm:flex-row sm:flex-wrap sm:items-start">
                   <div className="min-w-0 flex-1">
                     <p className="break-all font-semibold">{row.file.name}</p>
                     <p className="text-sm text-muted">{formatBytes(row.file.size)} · {row.kind ? kindLabel(row.kind) : 'Datei'}{input ? ` · ${formatLabel(input)}` : audioInput ? ` · ${AUDIO_FORMAT_INFO[audioInput].label}` : ''}</p>
-                    <p role="status" className="text-sm">{row.kind === 'pdf' ? 'PDF erkannt' : STATUS[status]}</p>
+                    <p role="status" className="text-sm">{row.kind === 'pdf' ? 'PDF erkannt' : row.kind === 'markdown' ? 'Markdown erkannt' : STATUS[status]}</p>
                     {message && <p className="hint break-words">{message}</p>}
                     {unsupported && <p className="hint">Die Konvertierung ist derzeit nicht verfügbar. Bitte laden Sie die Seite später erneut.</p>}
                     {entry?.resultUrl && <p className="mt-2 break-all"><a className="link" href={entry.resultUrl} download={entry.outputName}>Download: {entry.outputName}</a> {entry.result && <span className="text-sm text-muted">({formatBytes(entry.result.size)})</span>}</p>}
@@ -209,6 +211,7 @@ export default function QuickStart() {
                   <button id={`remove-${row.id}`} type="button" className="btn btn-ghost shrink-0 self-start" aria-label={`${row.file.name} entfernen`} onClick={() => remove(row)}>Entfernen</button>
                   {row.kind === 'image' && !row.message && status !== 'invalid' && <div className="flex w-full flex-wrap gap-3"><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-komprimieren', row.file)}>Komprimieren</button><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-skalieren', row.file)}>Skalieren</button></div>}
                   {row.kind === 'pdf' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-komprimieren', row.file)}>PDF komprimieren</button>}
+                  {row.kind === 'markdown' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('markdown-pdf', row.file)}>PDF erstellen</button>}
                 </li>;
               })}
             </ul>

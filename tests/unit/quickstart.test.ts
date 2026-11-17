@@ -20,6 +20,13 @@ function file(bytes: Uint8Array | string, name: string): File {
 }
 
 describe('Typerkennung', () => {
+  it('erkennt Markdown nur mit passender Endung und gültigem Text, nach vorhandenen Signaturen', async () => {
+    expect(await detectFileKind(new File(['\ufeff# Grüße'], 'NOTIZ.MARKDOWN'))).toBe('markdown');
+    expect(await detectFileKind(file('# Hallo', 'notiz.md'))).toBe('markdown');
+    expect(await detectFileKind(file('   ', 'leer.md'))).toBeNull();
+    expect(await detectFileKind(file(Uint8Array.of(0xff), 'kaputt.md'))).toBeNull();
+    expect(await detectFileKind(file(PNG, 'foto.md'))).toBe('image');
+  });
   it('erkennt Bild, PDF und Audio an der Signatur', () => {
     expect(detectKindFromHead(PNG)).toBe('image');
     expect(detectKindFromHead(JPEG)).toBe('image');
@@ -42,6 +49,10 @@ describe('Typerkennung', () => {
 
 describe('Aktionen je Typ', () => {
   const ids = (kind: Parameters<typeof toolsForKind>[0]) => toolsForKind(kind).map((tool) => tool.id);
+  it('bietet für Markdown ausschließlich das eigene PDF-Werkzeug', () => {
+    expect(ids('markdown')).toEqual(['markdown-pdf']);
+    expect(ids('pdf')).toEqual(['pdf-komprimieren']);
+  });
 
   it('bietet für Bilder Konvertieren, Komprimieren und Skalieren', () => {
     expect(ids('image')).toEqual(['bilder-konvertieren', 'bilder-komprimieren', 'bilder-skalieren']);

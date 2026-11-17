@@ -1,6 +1,6 @@
 # MI converter
 
-Deutschsprachige Astro/React-Website mit Go-Backend für Bildkonvertierung, Komprimierung, Skalierung, PDF-Komprimierung und Audiokonvertierung. Die Website verarbeitet Dateien auf dem Server. Ein Upload beginnt erst nach einem ausdrücklichen Klick auf den Verarbeitungsbutton.
+Deutschsprachige Astro/React-Website mit Go-Backend für Bildkonvertierung, Komprimierung, Skalierung, PDF-Komprimierung, Markdown zu PDF und Audiokonvertierung. Die Website verarbeitet Dateien auf dem Server. Ein Upload beginnt erst nach einem ausdrücklichen Klick auf den Verarbeitungsbutton.
 
 ## Lokal starten
 
@@ -34,7 +34,7 @@ Compose ist für lokalen HTTP-Betrieb konfiguriert: lokale Zugangsdaten, Entwick
 6. Fertige Dateien werden synchronisiert und in der Datenbank veröffentlicht. Die Oberfläche fragt den Status ab und bietet autorisierte Downloads an.
 7. Cleanup sperrt abgelaufene Aufträge und entfernt Dateien und Metadaten. Download- und alte Worker-Leases werden berücksichtigt.
 
-Ein Bild entspricht einem Auftrag mit einem Ergebnis. Eine PDF erzeugt drei sequenzielle Varianten; fertige Varianten sind bereits während der übrigen Verarbeitung abrufbar.
+Ein Bild oder Markdown-Dokument entspricht einem Auftrag mit einem Ergebnis. PDF-Komprimierung erzeugt drei sequenzielle Varianten; fertige Varianten sind bereits während der übrigen Verarbeitung abrufbar.
 
 ## Funktionen und Grenzen
 
@@ -42,6 +42,7 @@ Ein Bild entspricht einem Auftrag mit einem Ergebnis. Eine PDF erzeugt drei sequ
 - Komprimierung: Qualität für JPEG/WebP, optional kleinere Abmessungen. PNG wird verlustfrei optimiert; keine wirkungslose Qualitätsanzeige.
 - Skalierung: Prozent/Zielmaße, Seitenverhältnis standardmäßig erhalten, Vergrößerung nur ausdrücklich.
 - PDF: high/balanced/small mit 300/150/100-DPI-Zielen und zusätzlichen Pixelgrenzen. Jede Variante beginnt beim Original. Keine Rasterung ganzer Seiten, OCR oder Verkleinerung von Schriften. Masken, Spezialfarbräume und unsicher unterstützte Filter bleiben unverändert.
+- Markdown zu PDF (`/pdf/markdown`): jeweils eine `.md`- oder `.markdown`-Datei in UTF-8, optional mit BOM. Auswahl und vollständige lokale Textprüfung laden nichts hoch; erst „PDF erstellen“ startet den Serverauftrag. Überschriften, Absätze, Listen, Zitate, Links, Tabellen und Codeblöcke erscheinen als auswählbarer Text im A4-Hochformat. Lange Codezeilen und Tabellenzellen werden umgebrochen, Tabellenköpfe wiederholt. Eingebettete lizenzierte Schrift für lateinisches Alphabet und deutsche Umlaute; keine vollständige CJK-/Emoji-Abdeckung. Bilder werden ausschließlich als Alternativtext ausgegeben, ohne Ressourcen zu laden; HTML wird nicht ausgeführt. Aktive Links nur für `https`, `http`, `mailto`. Kein eigenes CSS, JavaScript, Mermaid, LaTeX oder ZIP.
 - Audio: MP3, WAV, FLAC und OGG (Vorbis/Opus) als Eingabe; MP3, WAV, FLAC und Ogg Vorbis als Ausgabe (soundfile/libsndfile aus dem Wheel, kein ffmpeg). Qualität wirkt nur bei MP3/OGG, optional Mono-Downmix. Abtastrate bleibt erhalten; MP3 nur bis 48 kHz und höchstens zwei Kanäle. Tags und Cover werden nicht übernommen. Kein M4A/AAC.
 
 Bilder: maximal 52.428.800 Bytes Eingabe, 40 MP, 16.384 px je Kante und 104.857.600 Bytes Ausgabe. Bis zu 30 Bilder je Stapel, zwei parallele Uploads und standardmäßig drei aktive Aufträge je Sitzung.
@@ -49,6 +50,8 @@ Bilder: maximal 52.428.800 Bytes Eingabe, 40 MP, 16.384 px je Kante und 104.857.
 PDF: maximal 100.000.000 Bytes Eingabe, 300.000.000 Bytes über alle Ergebnisse und 40 MP je neu kodiertem Bild. Verschlüsselte oder nur durch Reparatur lesbare PDFs werden abgelehnt. Signaturen können ungültig werden; PDF/A-Erhalt ist nicht garantiert. Ergebnisse können größer werden; echte Größen werden angezeigt.
 
 Audio: maximal 104.857.600 Bytes Eingabe, 1800 s Dauer (laut Header und beim Dekodieren gezählt), 8 Kanäle, 192.000 Hz und 419.430.400 Bytes Ausgabe. Verarbeitung blockweise, damit 1 GiB Adressraum reicht.
+
+Markdown: maximal 2.097.152 Bytes Eingabe, 20.971.520 Bytes PDF-Ausgabe, 300 Seiten und 120 Sekunden Prozesslaufzeit. Ungültiges UTF-8, leere/whitespace-only Dateien, Binärdaten und C0/C1-Steuerzeichen außer Tab/CR/LF werden abgelehnt. Serverfähigkeiten melden Verfügbarkeit und Grenzen; Fehler oder unvollständige Ergebnisse erzeugen keinen Download. Entfernen/Reset fordert wie bei den anderen Werkzeugen die Serverlöschung an.
 
 Startwerte: eine Stunde Gültigkeit, 5 GB gemeinsames Dateibudget, 50 aktive Aufträge insgesamt, zehn Erstellversuche pro Minute je Sitzung und Client-IP. Prozesszeitlimit: 120 s Bild, 300 s PDF, 300 s Audio. Linux-Parser: 1 GiB Adressraum; Workercontainer: 1,5 GiB. Konfiguration: `server/internal/config/config.go`.
 
