@@ -11,7 +11,8 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType, type LazyExoticComponent } from 'react';
 import { availableTools, availableToolsByCategory, type Tool } from '../../data/tools';
-import { detectFileKind, kindLabel, type FileKind } from '../../lib/quickstart';
+import { kindLabel, type FileKind } from '../../lib/quickstart';
+import { detectFile, extensionNote } from '../../lib/detect';
 import { audioAcceptAttribute, AUDIO_FORMAT_INFO, type AudioFormat } from '../../lib/audio/formats';
 import { DEFAULT_ICO_SIZES, type ImageFormat } from '../../lib/image';
 import { formatBytes } from '../../lib/format';
@@ -44,6 +45,8 @@ interface QueueRow {
   readonly kind?: FileKind | null;
   readonly output?: ImageFormat | AudioFormat;
   readonly message?: string;
+  /** Hinweis, wenn die Endung nicht zum erkannten Inhalt passt. */
+  readonly note?: string;
 }
 interface Secondary { readonly tool: Tool; readonly files: File[] }
 const STATUS = { checking: 'Wird geprüft …', ready: 'Bereit', invalid: 'Nicht verarbeitbar', uploading: 'Wird hochgeladen …', queued: 'Wartet …', processing: 'Wird verarbeitet …', done: 'Fertig', error: 'Fehlgeschlagen' };
@@ -107,9 +110,10 @@ export default function QuickStart() {
     headingRef.current?.focus();
     for (const row of created) {
       if (row.message) continue;
-      void detectFileKind(row.file).then(kind => {
+      void detectFile(row.file).then(detection => {
         if (!alive.current || !rowsRef.current.some(entry => entry.id === row.id)) return;
-        updateRows(previous => previous.map(entry => entry.id === row.id ? { ...entry, kind } : entry));
+        const note = extensionNote(row.file.name, detection);
+        updateRows(previous => previous.map(entry => entry.id === row.id ? { ...entry, kind: detection.kind, ...(note ? { note } : {}) } : entry));
       });
     }
   };
@@ -198,6 +202,7 @@ export default function QuickStart() {
                     <p className="break-all font-semibold">{row.file.name}</p>
                     <p className="text-sm text-muted">{formatBytes(row.file.size)} · {row.kind ? kindLabel(row.kind) : 'Datei'}{input ? ` · ${formatLabel(input)}` : audioInput ? ` · ${AUDIO_FORMAT_INFO[audioInput].label}` : ''}</p>
                     <p role="status" className="text-sm">{row.kind === 'pdf' ? 'PDF erkannt' : row.kind === 'markdown' ? 'Markdown erkannt' : STATUS[status]}</p>
+                    {row.note && !message && <p className="hint break-words">{row.note}</p>}
                     {message && <p className="hint break-words">{message}</p>}
                     {unsupported && <p className="hint">Die Konvertierung ist derzeit nicht verfügbar. Bitte laden Sie die Seite später erneut.</p>}
                     {entry?.resultUrl && <p className="mt-2 break-all"><a className="link" href={entry.resultUrl} download={entry.outputName}>Download: {entry.outputName}</a> {entry.result && <span className="text-sm text-muted">({formatBytes(entry.result.size)})</span>}</p>}

@@ -184,6 +184,16 @@ test('Typ folgt der Signatur, nicht der Endung', async ({ page }) => {
   await expect(action(page, 'PDF komprimieren')).toHaveCount(0);
 });
 
+test('Abweichende Endung wird gemeldet, passende und fehlende nicht', async ({ page }) => {
+  await open(page);
+  await choose(page, png('foto.jpg'));
+  await expect(rows(page)).toContainText('Die Endung .jpg passt nicht zum Inhalt. Erkannt wurde PNG');
+  await choose(page, png('ohneendung'));
+  await expect(rows(page)).toHaveCount(2);
+  await expect(output(page, 1)).toBeEnabled();
+  await expect(rows(page).nth(1)).not.toContainText('passt nicht zum Inhalt');
+});
+
 test('Unbekannter Typ bleibt sichtbar und blockiert gültigen Nachbarn nicht', async ({ page }) => {
   const { uploads } = await open(page);
   await choose(page, text());
