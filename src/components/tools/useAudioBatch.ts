@@ -7,7 +7,7 @@
  * Speicherung in Web Storage, IndexedDB oder Cache und keine Konsolenausgaben.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ApiError, capabilities, createJob, deleteJob, pollJob } from '../../lib/api/client';
+import { ApiError, archiveUrl, capabilities, createJob, deleteJob, pollJob } from '../../lib/api/client';
 import { jobProgress } from '../../lib/api/progress';
 import { checkAudioFile } from '../../lib/audio/check';
 import { AUDIO_FORMATS, AUDIO_FORMAT_INFO, isAudioFormat, type AudioFormat } from '../../lib/audio/formats';
@@ -315,7 +315,13 @@ export function useAudioBatch() {
     return total === 0 ? null : { total, done, failed, finished: done + failed };
   }, [entries, runIds]);
 
-  return { entries, support, limits, isProcessing, counts, progress, addFiles, remove, reset, processAll };
+  /** ZIP mit allen fertigen Ergebnissen; erst ab zwei fertigen Dateien und nach Ende des Durchlaufs. */
+  const zipUrl = useMemo(() => {
+    const ids = entries.flatMap((entry) => entry.status === 'done' && entry.jobId ? [entry.jobId] : []);
+    return !isProcessing && ids.length >= 2 ? archiveUrl(ids) : null;
+  }, [entries, isProcessing]);
+
+  return { entries, support, limits, isProcessing, counts, progress, zipUrl, addFiles, remove, reset, processAll };
 }
 
 export type AudioBatch = ReturnType<typeof useAudioBatch>;

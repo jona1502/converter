@@ -29,6 +29,7 @@ type apiFixture struct {
 	router       *httpapi.Router
 	pool         *pgxpool.Pool
 	cookie, csrf string
+	key          string // abweichender Idempotency-Key
 }
 
 func fixture(t *testing.T) *apiFixture {
@@ -76,7 +77,11 @@ func (f *apiFixture) request(method, path string, body []byte, content string) *
 	if content != "" {
 		r.Header.Set("Content-Type", content)
 	}
-	r.Header.Set("Idempotency-Key", "stable-request-key-123456")
+	key := "stable-request-key-123456"
+	if f.key != "" {
+		key = f.key
+	}
+	r.Header.Set("Idempotency-Key", key)
 	w := httptest.NewRecorder()
 	f.router.ServeHTTP(w, r)
 	return w
