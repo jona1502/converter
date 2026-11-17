@@ -91,6 +91,7 @@ type Config struct {
 	DeleteAfterDownload      bool
 	PhysicalDeleteMax        time.Duration
 	UploadConcurrency        int
+	WorkerConcurrency        int
 	UploadMax                time.Duration
 	developmentSecretKeyOnly Secret
 }
@@ -168,6 +169,7 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.PhysicalDeleteMax = p.seconds("PHYSICAL_DELETE_MAX_SECONDS", 600)
 	c.UploadConcurrency = int(p.positive("UPLOAD_CONCURRENCY", 2))
 	c.UploadMax = p.seconds("UPLOAD_MAX_SECONDS", 600)
+	c.WorkerConcurrency = int(p.positive("WORKER_CONCURRENCY", 1))
 
 	// Feldübergreifende Regeln nur bei gültigen Einzelwerten (wie der
 	// model_validator in Python).

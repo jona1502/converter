@@ -8,6 +8,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, archiveUrl, capabilities, createJob, deleteJob, pollJob } from '../../lib/api/client';
+import { jobProgress } from '../../lib/api/progress';
 import { checkAudioFile } from '../../lib/audio/check';
 import { AUDIO_FORMATS, AUDIO_FORMAT_INFO, isAudioFormat, type AudioFormat } from '../../lib/audio/formats';
 import { DEFAULT_AUDIO_QUALITY, DEFAULT_QUALITY_FORMATS, buildAudioOptions, type AudioSettings } from '../../lib/audio/options';
@@ -242,7 +243,7 @@ export function useAudioBatch() {
           jobsRef.current.set(entry.id, job.id);
           const finished = await pollJob(job, controller.signal, (status) => {
             if (exists(entry.id) && !controller.signal.aborted) {
-              patch(entry.id, { status: status.state === 'queued' ? 'queued' : 'processing', jobId: job.id, expiresAt: status.expiresAt });
+              patch(entry.id, { status: status.state === 'queued' ? 'queued' : 'processing', jobId: job.id, expiresAt: status.expiresAt, jobProgress: jobProgress(status) });
             }
           });
           if (controller.signal.aborted || !exists(entry.id)) continue;

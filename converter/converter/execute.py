@@ -49,8 +49,19 @@ def run_image(request: Request, options: ImageOptions, writer: EventWriter) -> N
 def run_audio(request: Request, options: AudioOptions, writer: EventWriter) -> None:
     (target,) = request.results
     writer.progress_encode()
+    last = 0.0
+
+    def progress(current: int, total: int) -> None:
+        nonlocal last
+        now = time.monotonic()
+        if current >= total or now - last >= PROGRESS_INTERVAL:
+            last = now
+            writer.progress_encode_frames(current, total)
+
     try:
-        details = audio.convert(Path(request.source), Path(target.path), options, request.limits)
+        details = audio.convert(
+            Path(request.source), Path(target.path), options, request.limits, progress
+        )
     except Exception as exc:
         _failure(writer, target, exc, "encode-failed")
         return

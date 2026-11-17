@@ -63,6 +63,8 @@ var (
 type WorkerConfig struct {
 	PollInterval     time.Duration // 1 s bei leerer Queue
 	RecoveryInterval time.Duration // 1 s (bisher Dispatcher-Takt)
+	// Concurrency: Anzahl gleichzeitig verarbeiteter Aufträge (Slots); Standard 1.
+	Concurrency int
 	// ShutdownGrace: So lange darf ein laufender Auftrag nach dem
 	// Herunterfahrsignal noch fertig werden; danach wird er abgebrochen und
 	// seine Lease verfällt (Recovery reiht ihn wieder ein). Standard 20 s.
@@ -77,6 +79,9 @@ func (c WorkerConfig) withDefaults() WorkerConfig {
 	if c.RecoveryInterval <= 0 {
 		c.RecoveryInterval = time.Second
 	}
+	if c.Concurrency <= 0 {
+		c.Concurrency = 1
+	}
 	if c.ShutdownGrace < 0 {
 		c.ShutdownGrace = 0
 	} else if c.ShutdownGrace == 0 {
@@ -88,7 +93,7 @@ func (c WorkerConfig) withDefaults() WorkerConfig {
 	return c
 }
 
-// Worker verarbeitet Aufträge mit Concurrency 1.
+// Worker verarbeitet Aufträge in WorkerConfig.Concurrency parallelen Slots.
 type Worker struct {
 	rt        *Runtime
 	storage   *storage.Local
@@ -118,15 +123,24 @@ func (w *Worker) Run(ctx context.Context) error {
 	}
 	defer wg.Wait()
 
+	for range w.cfg.Concurrency {
+		wg.Go(func() { w.slotLoop(ctx) })
+	}
+	return nil
+}
+
+// slotLoop beansprucht und verarbeitet Aufträge nacheinander. Mehrere Slots
+// teilen sich die Queue; FOR UPDATE SKIP LOCKED verteilt die Einträge.
+func (w *Worker) slotLoop(ctx context.Context) {
 	for {
 		if ctx.Err() != nil {
-			return nil
+			return
 		}
 		task, consumed, err := w.rt.ClaimNext(ctx)
 		switch {
 		case err != nil:
 			if ctx.Err() != nil {
-				return nil
+				return
 			}
 			w.cfg.Logger.Warn("Claim fehlgeschlagen", "errorType", fmt.Sprintf("%T", err))
 		case task != nil:
@@ -137,7 +151,7 @@ func (w *Worker) Run(ctx context.Context) error {
 		}
 		select {
 		case <-ctx.Done():
-			return nil
+			return
 		case <-time.After(w.cfg.PollInterval):
 		}
 	}

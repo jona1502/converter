@@ -71,6 +71,9 @@ type Result struct {
 type LoadedJob struct {
 	Job     Job
 	Results []Result
+	// QueuePosition ist die 1-basierte Stelle eines wartenden Auftrags in der
+	// Dispatch-Queue; 0 = unbekannt oder nicht wartend.
+	QueuePosition int
 }
 
 const jobColumns = `id, session_id, tool, state, phase, options, input_name, input_size,
@@ -116,7 +119,33 @@ WHERE id = $1 AND session_id = $2 AND deleted_at IS NULL`, jobID, sessionID))
 	if err != nil {
 		return LoadedJob{}, err
 	}
-	return LoadedJob{Job: job, Results: results}, nil
+	loaded := LoadedJob{Job: job, Results: results}
+	if job.State == "queued" {
+		loaded.QueuePosition, err = queuePosition(ctx, db, jobID)
+		if err != nil {
+			return LoadedJob{}, err
+		}
+	}
+	return loaded, nil
+}
+
+// queuePosition zählt die vor dem Auftrag wartenden Dispatch-Einträge
+// (Reihenfolge wie ClaimNext: nach id). Ohne offenen Eintrag (Auftrag wird
+// gerade beansprucht) liefert sie 0.
+func queuePosition(ctx context.Context, db DB, jobID [16]byte) (int, error) {
+	var position int
+	err := db.QueryRow(ctx, `SELECT 1 + (SELECT count(*) FROM outbox o
+        WHERE o.kind = 'dispatch' AND o.published_at IS NULL AND o.id < me.id)
+  FROM outbox me
+ WHERE me.job_id = $1 AND me.kind = 'dispatch' AND me.published_at IS NULL
+ ORDER BY me.id LIMIT 1`, jobID).Scan(&position)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, fmt.Errorf("store: Warteschlangenposition: %w", err)
+	}
+	return position, nil
 }
 
 func loadResults(ctx context.Context, db DB, jobID [16]byte) ([]Result, error) {
@@ -202,6 +231,10 @@ func (l LoadedJob) View(now time.Time) JobView {
 			v.Phase = j.Phase
 		}
 		v.Progress = j.Progress
+	}
+	if state == "queued" && l.QueuePosition > 0 {
+		// Im freien progress-Objekt des Vertrags: kein neues Feld nötig.
+		v.Progress = json.RawMessage(fmt.Sprintf(`{"step":"queue","position":%d}`, l.QueuePosition))
 	}
 	for _, r := range l.Results {
 		v.Results = append(v.Results, ResultView{

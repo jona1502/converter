@@ -9,6 +9,7 @@ lügen können. Keine Metadaten/Tags werden übernommen, kein Resampling.
 from __future__ import annotations
 
 import io
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, BinaryIO, Final, cast
 
@@ -134,6 +135,8 @@ def _encode(
     rate: int,
     channels: int,
     max_frames: int,
+    progress: Callable[[int, int], None] | None = None,
+    total_frames: int = 0,
 ) -> int:
     container, subtype = target_format(options.format, str(reader.subtype))
     out_channels = 1 if options.channels == "mono" else channels
@@ -159,6 +162,9 @@ def _encode(
             if not len(block):
                 break
             total += len(block)
+            if progress is not None:
+                # Der Header kann lügen: current nie über total melden.
+                progress(total, max(total, total_frames))
             if total > max_frames:
                 raise ProcessingError("duration-too-long")
             if out_channels != channels:
@@ -181,7 +187,13 @@ def _encode(
     return total
 
 
-def _convert(source: Path, target: Path, options: AudioOptions, limits: Limits) -> dict[str, Any]:
+def _convert(
+    source: Path,
+    target: Path,
+    options: AudioOptions,
+    limits: Limits,
+    progress: Callable[[int, int], None] | None,
+) -> dict[str, Any]:
     if source.stat().st_size > limits.audio_max_input_bytes:
         raise ProcessingError("file-too-large")
     try:
@@ -195,7 +207,9 @@ def _convert(source: Path, target: Path, options: AudioOptions, limits: Limits) 
             raise ProcessingError("unsupported-audio")
         sink = _BoundedSink(target, limits.audio_max_output_bytes)
         try:
-            total = _encode(reader, sink, options, rate, channels, max_frames)
+            total = _encode(
+                reader, sink, options, rate, channels, max_frames, progress, header_frames(reader)
+            )
         except ProcessingError:
             if sink.exceeded:
                 raise ProcessingError("result-too-large") from None
@@ -215,9 +229,16 @@ def _convert(source: Path, target: Path, options: AudioOptions, limits: Limits) 
     }
 
 
-def convert(source: Path, target: Path, options: AudioOptions, limits: Limits) -> dict[str, Any]:
+def convert(
+    source: Path,
+    target: Path,
+    options: AudioOptions,
+    limits: Limits,
+    progress: Callable[[int, int], None] | None = None,
+) -> dict[str, Any]:
+    """Konvertiert; ``progress(frames_decoded, frames_total)`` nach jedem Block."""
     try:
-        return _convert(source, target, options, limits)
+        return _convert(source, target, options, limits, progress)
     except ProcessingError:
         raise
     except MemoryError:

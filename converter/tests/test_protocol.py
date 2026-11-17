@@ -148,15 +148,21 @@ def test_events_are_compact_ascii_and_bounded() -> None:
     sink = io.BytesIO()
     writer = EventWriter(sink)
     writer.progress_encode()
+    writer.progress_encode_frames(5, 10)
     writer.result("id", {"format": "png", "name": "Bärbel"})
     writer.error("id", "decode-failed", "encode-failed")
     writer.error("id", "/secret/path", "encode-failed")
     writer.fatal("Traceback: /secret")
     lines = sink.getvalue().splitlines()
     assert lines[0] == b'{"kind":"progress","phase":"encode"}'
-    assert b"\\u00e4" in lines[1]
-    assert json.loads(lines[3])["code"] == "encode-failed"
-    assert json.loads(lines[4]) == {"kind": "fatal", "code": "worker-failed"}
+    assert json.loads(lines[1]) == {
+        "kind": "progress",
+        "phase": "encode",
+        "progress": {"step": "encode", "current": 5, "total": 10},
+    }
+    assert b"\\u00e4" in lines[2]
+    assert json.loads(lines[4])["code"] == "encode-failed"
+    assert json.loads(lines[5]) == {"kind": "fatal", "code": "worker-failed"}
     with pytest.raises(ValueError, match="too large"):
         encode_event({"kind": "analysis", "analysis": {"x": "a" * MAX_EVENT_BYTES}})
     with pytest.raises(ValueError):
@@ -284,11 +290,16 @@ def test_cli_audio_job_completes(tmp_path: Path) -> None:
     assert result.events == [
         {"kind": "progress", "phase": "encode"},
         {
+            "kind": "progress",
+            "phase": "encode",
+            "progress": {"step": "encode", "current": 4_410, "total": 4_410},
+        },
+        {
             "kind": "result",
             "id": result_id,
             "details": {
                 "format": "mp3",
-                "durationSeconds": result.events[1]["details"]["durationSeconds"],
+                "durationSeconds": result.events[2]["details"]["durationSeconds"],
                 "sampleRate": 44_100,
                 "channels": 1,
                 "qualityApplied": True,

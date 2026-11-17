@@ -19,10 +19,11 @@ const (
 	KindError    Kind = "error"
 )
 
-// Progress: echte Zähler einer PDF-Stufe.
+// Progress: echte Zähler einer PDF-Stufe (variant) bzw. der Audio-Frames
+// (encode, ohne level).
 type Progress struct {
 	Step    string `json:"step"`
-	Level   string `json:"level"`
+	Level   string `json:"level,omitempty"`
 	Current int64  `json:"current"`
 	Total   int64  `json:"total"`
 }
@@ -31,8 +32,8 @@ type Progress struct {
 // erscheint im Outcome.
 type Event struct {
 	Kind     Kind
-	Phase    string          // progress: "encode" (Bild) | "variant" (PDF)
-	Progress *Progress       // nur bei Phase "variant"
+	Phase    string          // progress: "encode" (Bild, Audio) | "variant" (PDF)
+	Progress *Progress       // Phase "variant"; bei Audio optional mit Phase "encode"
 	Analysis json.RawMessage // analysis: geprüft und neu kodiert (PdfAnalysis)
 	ResultID string          // result/error: ID aus dem Request
 	Level    string          // result/error: Stufe ("" bei Bildern)
@@ -242,14 +243,32 @@ func (s *session) handle(data []byte) error {
 
 func (s *session) progress(data []byte) error {
 	if !s.pdf {
-		o, err := parseObject(data, []string{"kind", "phase"}, nil)
+		var optional []string
+		if s.audio {
+			optional = []string{"progress"}
+		}
+		o, err := parseObject(data, []string{"kind", "phase"}, optional)
 		if err != nil {
 			return violated("progress-Felder")
 		}
 		if phase, err := o.str("phase", 16); err != nil || phase != "encode" {
 			return violated("progress-Phase")
 		}
-		return s.deliver(Event{Kind: KindProgress, Phase: "encode"})
+		if _, ok := o["progress"]; !ok {
+			return s.deliver(Event{Kind: KindProgress, Phase: "encode"})
+		}
+		p, err := o.nested("progress", []string{"step", "current", "total"}, nil)
+		if err != nil {
+			return violated("progress-Objekt")
+		}
+		step, err1 := p.str("step", 16)
+		total, err2 := p.integer("total", 0, 1<<40)
+		current, err3 := p.integer("current", 0, total)
+		if errors.Join(err1, err2, err3) != nil || step != "encode" {
+			return violated("progress-Werte")
+		}
+		return s.deliver(Event{Kind: KindProgress, Phase: "encode",
+			Progress: &Progress{Step: step, Current: current, Total: total}})
 	}
 	if !s.analysis {
 		return violated("progress vor analysis")
