@@ -46,6 +46,15 @@ for (const width of [390, 1440]) {
     test(`${path}: Navigation ohne axe-Verstöße (${width} px)`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(path);
+      if (path === '/audio/konvertieren') {
+        const original = page.getByRole('radio', { name: 'Wie im Original', exact: true });
+        await expect(original).toBeEnabled();
+        // Hydrierung aktiviert die Auswahl und startet deren Farbwechsel. Den fertigen Zustand
+        // prüfen, statt zufällig einen kontrastarmen Zwischenwert der CSS-Transition zu scannen.
+        await original.locator('..').evaluate(async label => {
+          await Promise.all(label.getAnimations().map(animation => animation.finished));
+        });
+      }
       const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
       const scan = async () => {
         const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();

@@ -103,6 +103,9 @@ test.describe('Desktop (1440 px)', () => {
     await expect(group(page, 'Skalieren')).toHaveAttribute('aria-expanded', 'false');
     await expect(link(page, 'Bilder skalieren')).toBeHidden();
     await group(page, 'Skalieren').click();
+    // WebKit fokussiert Buttons bei einem Mausklick nicht: Fokus vor dem Verlassen herstellen.
+    await group(page, 'Skalieren').focus();
+    await expect(group(page, 'Skalieren')).toBeFocused();
     await page.getByRole('main').getByRole('link').first().focus();
     await expect(group(page, 'Skalieren')).toHaveAttribute('aria-expanded', 'false');
   });
