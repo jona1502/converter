@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LIMITS, buildOutputFileName, makeUniqueFileNames, type EncodeSupport, type ImageErrorCode, type ProbeResult, type ProcessOptions, type ProcessResult } from '../../lib/image';
 import {probeServerImage} from '../../lib/api/probe';
 import { errorCodeOf } from './errorMessages';
+import { jobProgress, type JobProgress } from '../../lib/api/progress';
 import { ApiError, apiMessage, capabilities, createJob, deleteJob, pollJob, type Tool } from '../../lib/api/client';
 
 export type EntryStatus = 'checking' | 'ready' | 'invalid' | 'uploading' | 'queued' | 'processing' | 'done' | 'error';
@@ -29,6 +30,8 @@ export interface BatchEntry {
   readonly serverError?: string;
   readonly jobId?: string;
   readonly expiresAt?: string;
+  /** Warteposition bzw. Fortschritt laut Server, solange der Auftrag aktiv ist. */
+  readonly jobProgress?: JobProgress;
 }
 
 export type SupportState =
@@ -229,7 +232,7 @@ export function useImageBatch(tool: Tool = 'image-convert') {
             if (controller.signal.aborted || !exists(entry.id)) { void deleteJob(job.id).catch(() => {}); continue; }
             jobsRef.current.set(entry.id,job.id);
             const finished = await pollJob(job,controller.signal,status => {
-              if (exists(entry.id) && !controller.signal.aborted) patch(entry.id,{status: status.state === 'queued' ? 'queued' : 'processing',jobId: job.id,expiresAt:status.expiresAt});
+              if (exists(entry.id) && !controller.signal.aborted) patch(entry.id,{status: status.state === 'queued' ? 'queued' : 'processing',jobId: job.id,expiresAt:status.expiresAt,jobProgress: jobProgress(status)});
             });
             if (controller.signal.aborted || !exists(entry.id)) continue;
             const result = finished.results[0];

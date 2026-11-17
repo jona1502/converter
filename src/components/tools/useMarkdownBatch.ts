@@ -1,6 +1,7 @@
 /** Ein Markdown-Dokument: lokale Prüfung, ausdrücklicher Upload, Polling und frühere Löschung. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, capabilities, createJob, deleteJob, pollJob } from '../../lib/api/client';
+import { jobProgress } from '../../lib/api/progress';
 import { checkMarkdownFile, MARKDOWN_LIMITS, markdownMessage } from '../../lib/markdown';
 import type { FileEntry } from './FileList';
 import type { BatchCounts, RunProgress } from './useImageBatch';
@@ -101,7 +102,7 @@ export function useMarkdownBatch() {
       key.current = null;
       jobId.current = job.id;
       const finished = await pollJob(job, abort.signal, status => {
-        if (active()) patch(target.id, { status: status.state === 'queued' ? 'queued' : 'processing', expiresAt: status.expiresAt });
+        if (active()) patch(target.id, { status: status.state === 'queued' ? 'queued' : 'processing', expiresAt: status.expiresAt, jobProgress: jobProgress(status) });
       });
       if (!active() || abort.signal.aborted) return;
       const result = finished.results[0];

@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from 'react';
 import { formatBytes, formatSizeChange } from '../../lib/format';
+import type { JobProgress } from '../../lib/api/progress';
 import type { ImageErrorCode, InputFormat } from '../../lib/image';
 import { imageErrorMessage } from './errorMessages';
 import { formatLabel } from './formats';
@@ -35,6 +36,8 @@ export interface FileEntry {
   readonly error?: ImageErrorCode;
   readonly serverError?: string;
   readonly expiresAt?: string;
+  /** Warteposition bzw. Fortschritt laut Server. */
+  readonly jobProgress?: JobProgress;
 }
 
 /** Werkzeugspezifische Darstellung in einer Dateizeile. */
@@ -175,7 +178,10 @@ export interface EntryRowProps<E extends FileEntry> extends EntryRenderers<E> {
 /** Dateizeile mit Status, Entfernen, Fehlern und werkzeugspezifischem Ergebnis. */
 export function EntryRow<E extends FileEntry>({ entry, onRemove, removeButtonRef, extraNotes, originalPrefix, renderResult }: EntryRowProps<E>) {
   const expired = Boolean(entry.result && entry.expiresAt && Date.parse(entry.expiresAt) <= Date.now());
-  const status = expired ? { label: 'Abgelaufen', badge: 'badge-warn' } : STATUS[entry.status];
+  const base = expired ? { label: 'Abgelaufen', badge: 'badge-warn' } : STATUS[entry.status];
+  const position = entry.status === 'queued' ? entry.jobProgress?.position : undefined;
+  const fraction = entry.status === 'processing' ? entry.jobProgress?.fraction : undefined;
+  const status = position ? { ...base, label: `Wartet auf Verarbeitung (Platz ${position})` } : base;
   return (
     <li className="file-row" data-status={entry.status}>
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -208,7 +214,7 @@ export function EntryRow<E extends FileEntry>({ entry, onRemove, removeButtonRef
       )}
       {entry.serverError && <p className="field-error">{entry.serverError}</p>}
       {expired && entry.expiresAt && <p className="hint">Abgelaufen am <time dateTime={entry.expiresAt}>{new Date(entry.expiresAt).toLocaleString('de-DE')}</time>.</p>}
-      {entry.status === 'processing' && <progress className="progress" aria-label={`${entry.name} wird verarbeitet`} />}
+      {entry.status === 'processing' && <progress className="progress" aria-label={`${entry.name} wird verarbeitet`} {...(fraction === undefined ? {} : { value: Math.round(fraction * 100), max: 100 })} />}
       {entry.status === 'done' && !expired && renderResult(entry)}
       {extraNotes?.(entry)}
     </li>

@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {formatBytes, formatSizeChange} from '../../lib/format';
 import {ToolWorkspace} from './ToolWorkspace';
 import {useInitialFiles, type ToolProps} from './useInitialFiles';
+import {jobProgress} from '../../lib/api/progress';
 import {apiMessage, ApiError, capabilities, cancelJob, createJob, deleteJob, pollJob, type Job} from '../../lib/api/client';
 const levels = ['high','balanced','small'] as const;
 const labels = {high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei'};
@@ -60,8 +61,9 @@ export default function PdfCompressor({initialFiles}: ToolProps) {
   const imageAnalysis=job?.analysis?.images;
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
+  const queuePosition=job?jobProgress(job)?.position:undefined;
   const statusText=job?.state==='expired'?'Auftrag abgelaufen. Sie können die PDF erneut komprimieren.':busy?
-    !job?'Datei wird hochgeladen …':job.state==='queued'?'Wartet auf Verarbeitung …':'PDF wird verarbeitet …':
+    !job?'Datei wird hochgeladen …':job.state==='queued'?`Wartet auf Verarbeitung${queuePosition?` (Platz ${queuePosition})`:''} …`:'PDF wird verarbeitet …':
     job?.state==='succeeded'?'Alle drei Varianten sind fertig.':job?.state==='partially_succeeded'?'Verarbeitung mit Teilfehlern abgeschlossen.':'';
   const signaturesInvalidated=Array.isArray(job?.analysis?.limitations)&&job.analysis.limitations.some(
     limitation=>limitation&&typeof limitation==='object'&&limitation.code==='signatures-invalidated',
