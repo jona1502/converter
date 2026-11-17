@@ -245,6 +245,7 @@ Download eines veröffentlichten Ergebnisses (`result.state = "succeeded"`).
 - `200`, `Content-Type` = Ergebnis-MIME, `Content-Length`, `Content-Disposition: attachment; filename="<ASCII-Ersatz ohne " \ und Steuerzeichen>"; filename*=UTF-8''<prozentkodiert>`, `Cache-Control: private, no-store`, `X-Content-Type-Options: nosniff`, `Content-Security-Policy: sandbox`.
 - `404 job-not-found` / `404 result-not-found` / `410 job-expired`.
 - Neue Downloads nach Ablauf gesperrt. Laufende Downloads dürfen höchstens `DOWNLOAD_MAX_SECONDS` (Standard 300) weiterlaufen; der Cleanup löscht erst danach physisch.
+- Aufbewahrung: Aufträge laufen nach `JOB_TTL_SECONDS` (Standard 3600) ab; der Cleanup-Dienst (alle `CLEANUP_INTERVAL_SECONDS`, Standard 60) löscht Dateien innerhalb des Storage-Roots und räumt verwaiste Dateien auf. Laufende Aufträge bleiben unberührt. `DELETE_AFTER_DOWNLOAD=true` (Standard `false`) löscht einen Auftrag nach vollständigem Download, sofern er genau ein Ergebnis hat. Die Dauer steht in `GET /capabilities` unter `jobs.ttlSeconds`.
 
 ### `GET /api/v1/health/live` und `GET /api/v1/health/ready`
 

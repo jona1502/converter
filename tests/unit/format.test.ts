@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBytes, formatSizeChange } from '../../src/lib/format';
+import { formatBytes, formatRetention, formatSizeChange } from '../../src/lib/format';
 
 const S = ' ';
 const M = '−';
@@ -53,5 +53,17 @@ describe('formatSizeChange', () => {
   it('lehnt ungültige Werte ab', () => {
     expect(() => formatSizeChange(0, 10)).toThrow(RangeError);
     expect(() => formatSizeChange(10, -1)).toThrow(RangeError);
+  });
+});
+
+describe('formatRetention', () => {
+  it('formatiert Aufbewahrungsdauern', () => {
+    expect(formatRetention(3600)).toBe(`1${S}Stunde`);
+    expect(formatRetention(7200)).toBe(`2${S}Stunden`);
+    expect(formatRetention(1800)).toBe(`30${S}Minuten`);
+    expect(formatRetention(86_400)).toBe(`1${S}Tag`);
+    expect(formatRetention(45)).toBe(`45${S}Sekunden`);
+    expect(formatRetention(0)).toBe('');
+    expect(formatRetention(Number.NaN)).toBe('');
   });
 });

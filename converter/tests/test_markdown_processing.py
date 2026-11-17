@@ -13,13 +13,16 @@ import pytest
 
 from converter.errors import ProcessingError, ProtocolError
 from converter.limits import Limits, parse_limits
-from converter.options import parse_options
+from converter.options import MarkdownOptions, parse_options
 from converter.protocol import EventWriter, parse_request
 from tests.helpers import DEFAULT_LIMITS, encode, new_id, request, run_cli, target_file
 
 
 def render(
-    tmp_path: Path, text: str | bytes, limits: Limits | None = None
+    tmp_path: Path,
+    text: str | bytes,
+    limits: Limits | None = None,
+    options: MarkdownOptions | None = None,
 ) -> tuple[Path, dict[str, object]]:
     from converter.processing.markdown.pipeline import convert
 
@@ -28,7 +31,7 @@ def render(
     destination = tmp_path / "result.pdf"
     if not destination.exists():
         target_file(destination)
-    details = convert(source, destination, limits or Limits())
+    details = convert(source, destination, limits or Limits(), options)
     return destination, details
 
 
@@ -50,6 +53,46 @@ def test_markdown_options_and_legacy_limits() -> None:
         parse_limits({**DEFAULT_LIMITS, "markdownMaxPages": True})
     with pytest.raises(ProtocolError):
         parse_limits({k: v for k, v in DEFAULT_LIMITS.items() if k != "imageMaxEdge"})
+
+
+def test_markdown_page_options_parse_and_reject() -> None:
+    parsed = parse_options(
+        {"tool": "markdown-pdf", "pageSize": "letter", "orientation": "landscape"}
+    )
+    assert (parsed.page_size, parsed.orientation) == ("letter", "landscape")  # type: ignore[union-attr]
+    default = parse_options({"tool": "markdown-pdf"})
+    assert (default.page_size, default.orientation) == ("a4", "portrait")  # type: ignore[union-attr]
+    for bad in (
+        {"pageSize": "a3"},
+        {"pageSize": None},
+        {"pageSize": 4},
+        {"orientation": "diagonal"},
+        {"margin": 10},
+    ):
+        with pytest.raises(ProtocolError):
+            parse_options({"tool": "markdown-pdf", **bad})
+
+
+@pytest.mark.parametrize(
+    ("page_size", "orientation", "width", "height"),
+    [
+        ("a4", "portrait", 595.28, 841.89),
+        ("letter", "portrait", 612, 792),
+        ("a4", "landscape", 841.89, 595.28),
+        ("letter", "landscape", 792, 612),
+    ],
+)
+def test_markdown_page_size_and_orientation(
+    tmp_path: Path, page_size: str, orientation: str, width: float, height: float
+) -> None:
+    path, _ = render(
+        tmp_path,
+        "# Titel\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n```\n" + "x" * 300 + "\n```\n",
+        options=MarkdownOptions(page_size=page_size, orientation=orientation),
+    )
+    with pdfium.PdfDocument(path) as pdf:
+        w, h = pdf[0].get_size()
+    assert (round(w, 1), round(h, 1)) == (round(width, 1), round(height, 1))
 
 
 def test_syntax_selectable_umlauts_and_embedded_fonts(tmp_path: Path) -> None:

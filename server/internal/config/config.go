@@ -88,6 +88,7 @@ type Config struct {
 	StorageBudgetBytes       int64
 	CleanupInterval          time.Duration
 	DownloadMax              time.Duration
+	DeleteAfterDownload      bool
 	PhysicalDeleteMax        time.Duration
 	UploadConcurrency        int
 	WorkerConcurrency        int
@@ -164,6 +165,7 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.StorageBudgetBytes = p.positive("STORAGE_BUDGET_BYTES", 5_000_000_000)
 	c.CleanupInterval = p.seconds("CLEANUP_INTERVAL_SECONDS", 60)
 	c.DownloadMax = p.seconds("DOWNLOAD_MAX_SECONDS", 300)
+	c.DeleteAfterDownload = p.boolean("DELETE_AFTER_DOWNLOAD", false)
 	c.PhysicalDeleteMax = p.seconds("PHYSICAL_DELETE_MAX_SECONDS", 600)
 	c.UploadConcurrency = int(p.positive("UPLOAD_CONCURRENCY", 2))
 	c.UploadMax = p.seconds("UPLOAD_MAX_SECONDS", 600)

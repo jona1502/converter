@@ -202,6 +202,28 @@ const (
 
 func AudioChannelModes() []AudioChannels { return []AudioChannels{ChannelsOriginal, ChannelsMono} }
 
+// MarkdownPageSize: Feld pageSize der Markdown-Optionen (Inline-Enum).
+type MarkdownPageSize string
+
+const (
+	PageSizeA4     MarkdownPageSize = "a4"
+	PageSizeLetter MarkdownPageSize = "letter"
+)
+
+func MarkdownPageSizes() []MarkdownPageSize { return []MarkdownPageSize{PageSizeA4, PageSizeLetter} }
+
+// MarkdownOrientation: Feld orientation der Markdown-Optionen (Inline-Enum).
+type MarkdownOrientation string
+
+const (
+	OrientationPortrait  MarkdownOrientation = "portrait"
+	OrientationLandscape MarkdownOrientation = "landscape"
+)
+
+func MarkdownOrientations() []MarkdownOrientation {
+	return []MarkdownOrientation{OrientationPortrait, OrientationLandscape}
+}
+
 // OutputFormat: erzeugbare Bildformate (keine eigene OpenAPI-Komponente).
 type OutputFormat string
 

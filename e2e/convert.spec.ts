@@ -90,3 +90,27 @@ test('Zurücksetzen während der Verarbeitung verwirft alte Statusmeldungen', as
   await expect(page.locator('.file-row')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Herunterladen/ })).toHaveCount(0);
 });
+
+test('Ablegen mehrerer Dateien nimmt gültige auf und blockiert sie nicht durch ungültige', async ({ page }) => {
+  await ready(page);
+  const png = await image(page);
+  const files = [
+    { ...png, name: 'eins.png' },
+    { ...png, name: 'zwei.png' },
+    { name: 'kaputt.png', mimeType: 'image/png', buffer: Buffer.from('not an image') },
+  ];
+  const data = await page.evaluateHandle(items => {
+    const transfer = new DataTransfer();
+    for (const item of items) transfer.items.add(new File([new Uint8Array(item.bytes)], item.name, { type: item.mimeType }));
+    return transfer;
+  }, files.map(file => ({ name: file.name, mimeType: file.mimeType, bytes: Array.from(file.buffer) })));
+  const zone = page.locator('.drop-zone');
+  await zone.dispatchEvent('dragenter', { dataTransfer: data });
+  await expect(zone).toHaveAttribute('data-dragging', 'true');
+  await zone.dispatchEvent('drop', { dataTransfer: data });
+  await expect(zone).not.toHaveAttribute('data-dragging', 'true');
+  await expect(page.locator('.file-row')).toHaveCount(3);
+  await expect(page.getByText('3 Dateien in der Liste, davon 2 verarbeitbar, 1 nicht verwendbar.')).toBeVisible();
+  await expect(page.getByText(/Diese Datei ist kein unterstütztes Bild/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Konvertieren', exact: true })).toBeEnabled();
+});
