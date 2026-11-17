@@ -184,12 +184,13 @@ type CancelResponse struct {
 // --- Capabilities (Vertrag §4, im OpenAPI freies Objekt) -------------------
 
 type Capabilities struct {
-	APIVersion string            `json:"apiVersion"`
-	Tools      []Tool            `json:"tools"`
-	Image      ImageCapabilities `json:"image"`
-	Pdf        PdfCapabilities   `json:"pdf"`
-	Audio      AudioCapabilities `json:"audio"`
-	Jobs       JobCapabilities   `json:"jobs"`
+	APIVersion string               `json:"apiVersion"`
+	Tools      []Tool               `json:"tools"`
+	Image      ImageCapabilities    `json:"image"`
+	Pdf        PdfCapabilities      `json:"pdf"`
+	Audio      AudioCapabilities    `json:"audio"`
+	Jobs       JobCapabilities      `json:"jobs"`
+	Markdown   MarkdownCapabilities `json:"markdown"`
 }
 
 // AudioDetails: details eines audio-convert-Ergebnisses (OpenAPI-Komponente
@@ -259,4 +260,17 @@ type JobCapabilities struct {
 	MaxActivePerSession int `json:"maxActivePerSession"`
 	MaxBatchFiles       int `json:"maxBatchFiles"`
 	CreatePerMinute     int `json:"createPerMinute"`
+}
+
+// MarkdownCapabilities reports renderer availability and configured bounds.
+type MarkdownCapabilities struct {
+	Available      bool  `json:"available"`
+	MaxFileBytes   int64 `json:"maxFileBytes"`
+	MaxOutputBytes int64 `json:"maxOutputBytes"`
+	MaxPages       int64 `json:"maxPages"`
+}
+
+// MarkdownDetails describes the single generated PDF.
+type MarkdownDetails struct {
+	PageCount int64 `json:"pageCount"`
 }

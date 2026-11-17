@@ -50,7 +50,7 @@ func TestAudioRequestSendsAudioLimits(t *testing.T) {
 			t.Errorf("%s = %d, erwartet %d", k, wire.Limits[k], v)
 		}
 	}
-	if len(wire.Limits) != 12 || len(wire.Results) != 1 || wire.Results[0].Level != nil {
+	if len(wire.Limits) != 15 || len(wire.Results) != 1 || wire.Results[0].Level != nil {
 		t.Fatalf("Anfrage = %s", payload)
 	}
 }

@@ -29,21 +29,22 @@ const cleanupTimeout = 10 * time.Second
 // Limits sind die für die Annahme nötigen Einstellungen (gleiche Bedeutung
 // und Defaults wie CONVERTER_* in app/core/config.py).
 type Limits struct {
-	ImageMaxInputBytes   int64         // 52_428_800
-	PDFMaxInputBytes     int64         // 100_000_000
-	AudioMaxInputBytes   int64         // 104_857_600
-	StorageBudgetBytes   int64         // 5_000_000_000
-	SessionMaxActiveJobs int           // 3
-	GlobalMaxActiveJobs  int           // 50
-	UploadMax            time.Duration // 600 s, auch Lebensdauer der Reservierung
-	JobTTL               time.Duration // 3600 s
-	JobMaxAttempts       int           // 3
+	MarkdownMaxInputBytes int64
+	ImageMaxInputBytes    int64         // 52_428_800
+	PDFMaxInputBytes      int64         // 100_000_000
+	AudioMaxInputBytes    int64         // 104_857_600
+	StorageBudgetBytes    int64         // 5_000_000_000
+	SessionMaxActiveJobs  int           // 3
+	GlobalMaxActiveJobs   int           // 50
+	UploadMax             time.Duration // 600 s, auch Lebensdauer der Reservierung
+	JobTTL                time.Duration // 3600 s
+	JobMaxAttempts        int           // 3
 }
 
-// MaxUploadInputBytes = max(Bild, PDF, Audio); so viel reserviert jede
+// MaxUploadInputBytes = max(Bild, PDF, Audio, Markdown); so viel reserviert jede
 // Annahme, weil das Werkzeug erst nach dem Lesen der Optionen feststeht.
 func (l Limits) MaxUploadInputBytes() int64 {
-	return max(l.ImageMaxInputBytes, l.PDFMaxInputBytes, l.AudioMaxInputBytes)
+	return max(l.ImageMaxInputBytes, l.PDFMaxInputBytes, l.AudioMaxInputBytes, l.MarkdownMaxInputBytes)
 }
 
 func (l Limits) validate() error {
@@ -235,6 +236,9 @@ type Upload struct {
 }
 
 func (u Upload) resultRows(originalName string) ([]resultRow, error) {
+	if u.Tool == "markdown-pdf" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil
+	}
 	if u.Tool == "pdf-compress" {
 		if len(u.PDFLevels) == 0 {
 			return nil, errors.New("jobs: PDF ohne Stufen")
@@ -295,7 +299,7 @@ func (s *Service) Finalize(ctx context.Context, sessionID [16]byte, r Reservatio
 	targetKey := storage.InputKey(jobID)
 	fallback := ImageFallbackBase
 	switch {
-	case u.InputFormat == "pdf":
+	case u.InputFormat == "pdf" || u.InputFormat == "markdown":
 		fallback = PDFFallbackBase
 	case u.Tool == "audio-convert":
 		fallback = AudioFallbackBase

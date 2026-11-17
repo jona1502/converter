@@ -32,6 +32,9 @@ func parseOptions(raw []byte) (options, error) {
 	if err := validation.DecodeStrictBytes(raw, validation.Limits{MaxBytes: 8192}, "options", &input); err != nil {
 		return options{}, httpapi.InvalidRequest(err)
 	}
+	if _, ok := input.Value.(*apitypes.MarkdownOptions); ok {
+		return options{tool: "markdown-pdf", canonical: json.RawMessage(`{"tool":"markdown-pdf"}`), format: "pdf"}, nil
+	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
 		if len(levels) == 0 || len(levels) > 3 {

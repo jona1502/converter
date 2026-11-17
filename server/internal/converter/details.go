@@ -321,3 +321,16 @@ func ValidatePdfAnalysis(raw []byte) (json.RawMessage, error) {
 	}
 	return json.Marshal(a)
 }
+
+// ValidateMarkdownDetails accepts only a bounded PDF page count.
+func ValidateMarkdownDetails(raw json.RawMessage, limits Limits) (json.RawMessage, error) {
+	o, err := parseObject(raw, []string{"pageCount"}, nil)
+	if err != nil {
+		return nil, detailsErr(err)
+	}
+	pages, err := o.integer("pageCount", 1, limits.MarkdownMaxPages)
+	if err != nil {
+		return nil, detailsErr(err)
+	}
+	return json.Marshal(apitypes.MarkdownDetails{PageCount: pages})
+}

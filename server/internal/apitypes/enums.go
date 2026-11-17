@@ -89,10 +89,11 @@ const (
 	ToolImageResize   Tool = "image-resize"
 	ToolPDFCompress   Tool = "pdf-compress"
 	ToolAudioConvert  Tool = "audio-convert"
+	ToolMarkdownPDF   Tool = "markdown-pdf"
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF}
 }
 
 // IsImage: image-convert, image-compress und image-resize.
@@ -159,23 +160,24 @@ func PdfLevels() []PdfLevel {
 type InputFormat string
 
 const (
-	InputJPEG InputFormat = "jpeg"
-	InputPNG  InputFormat = "png"
-	InputWebP InputFormat = "webp"
-	InputGIF  InputFormat = "gif"
-	InputBMP  InputFormat = "bmp"
-	InputICO  InputFormat = "ico"
-	InputAVIF InputFormat = "avif"
-	InputPDF  InputFormat = "pdf"
-	InputMP3  InputFormat = "mp3"
-	InputWAV  InputFormat = "wav"
-	InputFLAC InputFormat = "flac"
-	InputOGG  InputFormat = "ogg"
+	InputJPEG     InputFormat = "jpeg"
+	InputPNG      InputFormat = "png"
+	InputWebP     InputFormat = "webp"
+	InputGIF      InputFormat = "gif"
+	InputBMP      InputFormat = "bmp"
+	InputICO      InputFormat = "ico"
+	InputAVIF     InputFormat = "avif"
+	InputPDF      InputFormat = "pdf"
+	InputMarkdown InputFormat = "markdown"
+	InputMP3      InputFormat = "mp3"
+	InputWAV      InputFormat = "wav"
+	InputFLAC     InputFormat = "flac"
+	InputOGG      InputFormat = "ogg"
 )
 
 func InputFormats() []InputFormat {
 	return []InputFormat{InputJPEG, InputPNG, InputWebP, InputGIF, InputBMP, InputICO, InputAVIF, InputPDF,
-		InputMP3, InputWAV, InputFLAC, InputOGG}
+		InputMP3, InputWAV, InputFLAC, InputOGG, InputMarkdown}
 }
 
 // AudioFormat: Ein- und Ausgabeformate von audio-convert (Inline-Enum).

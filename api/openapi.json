@@ -391,7 +391,8 @@
           "mp3",
           "wav",
           "flac",
-          "ogg"
+          "ogg",
+          "markdown"
         ],
         "title": "InputFormat",
         "type": "string"
@@ -471,7 +472,8 @@
             "image-compress": "#/components/schemas/ImageOptions",
             "image-convert": "#/components/schemas/ImageOptions",
             "image-resize": "#/components/schemas/ImageOptions",
-            "pdf-compress": "#/components/schemas/PdfOptions"
+            "pdf-compress": "#/components/schemas/PdfOptions",
+            "markdown-pdf": "#/components/schemas/MarkdownOptions"
           },
           "propertyName": "tool"
         },
@@ -484,6 +486,9 @@
           },
           {
             "$ref": "#/components/schemas/AudioOptions"
+          },
+          {
+            "$ref": "#/components/schemas/MarkdownOptions"
           }
         ]
       },
@@ -952,10 +957,68 @@
           "image-compress",
           "image-resize",
           "pdf-compress",
-          "audio-convert"
+          "audio-convert",
+          "markdown-pdf"
         ],
         "title": "Tool",
         "type": "string"
+      },
+      "MarkdownOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "const": "markdown-pdf",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "MarkdownOptions",
+        "type": "object"
+      },
+      "MarkdownCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxFileBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxPages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "maxPages"
+        ],
+        "title": "MarkdownCapabilities",
+        "type": "object"
+      },
+      "MarkdownDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount"
+        ],
+        "title": "MarkdownDetails",
+        "type": "object"
       }
     }
   },
@@ -967,7 +1030,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {

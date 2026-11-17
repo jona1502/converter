@@ -23,6 +23,8 @@ import (
 // RuntimeConfig enthält die Grenzen und Zeiten der Verarbeitung. Nullwerte
 // werden durch DefaultRuntimeConfig ersetzt.
 type RuntimeConfig struct {
+	MarkdownMaxOutputBytes  int64
+	MarkdownTimeout         time.Duration
 	ImageMaxOutputBytes     int64         // 104_857_600, Arbeitsreserve je Bildauftrag
 	PDFMaxResultsTotalBytes int64         // 300_000_000, Gesamtbudget je PDF-Auftrag
 	AudioMaxOutputBytes     int64         // 419_430_400, Arbeitsreserve je Audioauftrag
@@ -37,6 +39,7 @@ type RuntimeConfig struct {
 // DefaultRuntimeConfig entspricht den Python-Defaults.
 func DefaultRuntimeConfig() RuntimeConfig {
 	return RuntimeConfig{
+		MarkdownMaxOutputBytes: 20_971_520, MarkdownTimeout: 120 * time.Second,
 		ImageMaxOutputBytes:     104_857_600,
 		PDFMaxResultsTotalBytes: 300_000_000,
 		AudioMaxOutputBytes:     419_430_400,
@@ -51,6 +54,12 @@ func DefaultRuntimeConfig() RuntimeConfig {
 
 func (c RuntimeConfig) withDefaults() RuntimeConfig {
 	d := DefaultRuntimeConfig()
+	if c.MarkdownMaxOutputBytes <= 0 {
+		c.MarkdownMaxOutputBytes = d.MarkdownMaxOutputBytes
+	}
+	if c.MarkdownTimeout <= 0 {
+		c.MarkdownTimeout = d.MarkdownTimeout
+	}
 	if c.ImageMaxOutputBytes <= 0 {
 		c.ImageMaxOutputBytes = d.ImageMaxOutputBytes
 	}
@@ -84,7 +93,7 @@ func (c RuntimeConfig) withDefaults() RuntimeConfig {
 // staleGrace: stale_attempts.reap_after = now + max(Timeouts) + 10 s
 // (runtime.retire_attempt), damit ein verwaister Kindprozess sicher beendet ist.
 func (c RuntimeConfig) staleGrace() time.Duration {
-	return max(c.ImageTimeout, c.PDFTimeout, c.AudioTimeout) + 10*time.Second
+	return max(c.ImageTimeout, c.PDFTimeout, c.AudioTimeout, c.MarkdownTimeout) + 10*time.Second
 }
 
 // Runtime führt die Datenbankübergänge eines Workers aus.
@@ -216,6 +225,9 @@ func (rt *Runtime) claimJob(ctx context.Context, tx pgx.Tx, jobID [16]byte) (*Ta
 		return nil, nil
 	}
 	working := rt.cfg.ImageMaxOutputBytes
+	if tool == "markdown-pdf" {
+		working = rt.cfg.MarkdownMaxOutputBytes
+	}
 	if tool == "audio-convert" {
 		working = rt.cfg.AudioMaxOutputBytes
 	}
@@ -413,7 +425,7 @@ func (rt *Runtime) PublishResult(ctx context.Context, t *Task, resultID [16]byte
 	}
 	var width, height *int64
 	// Nur Bilder haben Abmessungen; Audio und PDF lassen input_width/height NULL.
-	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" {
+	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" && t.Tool != "markdown-pdf" {
 		var err error
 		if width, height, err = sourceSize(details); err != nil {
 			return false, err

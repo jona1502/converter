@@ -41,7 +41,7 @@ const (
 	probeOK = `{"protocolVersion":1,"inputFormats":["jpeg","png","webp","gif","bmp","ico","avif"],` +
 		`"outputFormats":["jpeg","png","webp","bmp","ico"],"pdf":true,` +
 		`"audio":{"inputFormats":["mp3","wav","flac","ogg"],"outputFormats":["mp3","wav","flac","ogg"]},` +
-		`"versions":{"python":"3.13.17","pillow":"13.0.0","pikepdf":"10.17.0","qpdf":"12.4.2",` +
+		`"markdown":{"available":true},"versions":{"python":"3.13.17","pillow":"13.0.0","pikepdf":"10.17.0","qpdf":"12.4.2",` +
 		`"soundfile":"0.14.0","libsndfile":"1.2.2","numpy":"2.5.4"}}`
 )
 

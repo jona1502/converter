@@ -61,6 +61,9 @@ var ErrInvalidRequest = errors.New("converter: ungültige Anfrage")
 
 // Limits sind die Verarbeitungsgrenzen (Vertrag §6) für den Kindprozess.
 type Limits struct {
+	MarkdownMaxInputBytes   int64 `json:"markdownMaxInputBytes"`
+	MarkdownMaxOutputBytes  int64 `json:"markdownMaxOutputBytes"`
+	MarkdownMaxPages        int64 `json:"markdownMaxPages"`
 	ImageMaxInputBytes      int64 `json:"imageMaxInputBytes"`
 	ImageMaxPixels          int64 `json:"imageMaxPixels"`
 	ImageMaxEdge            int64 `json:"imageMaxEdge"`
@@ -78,6 +81,7 @@ type Limits struct {
 // DefaultLimits entspricht den Startwerten aus Vertrag §6.
 func DefaultLimits() Limits {
 	return Limits{
+		MarkdownMaxInputBytes: 2_097_152, MarkdownMaxOutputBytes: 20_971_520, MarkdownMaxPages: 300,
 		ImageMaxInputBytes:      52_428_800,
 		ImageMaxPixels:          40_000_000,
 		ImageMaxEdge:            16_384,
@@ -95,6 +99,7 @@ func DefaultLimits() Limits {
 
 func (l Limits) valid() bool {
 	for _, v := range []int64{
+		l.MarkdownMaxInputBytes, l.MarkdownMaxOutputBytes, l.MarkdownMaxPages,
 		l.ImageMaxInputBytes, l.ImageMaxPixels, l.ImageMaxEdge, l.ImageMaxOutputBytes,
 		l.PdfMaxInputBytes, l.PdfMaxResultsTotalBytes, l.PdfImageMaxPixels,
 		l.AudioMaxInputBytes, l.AudioMaxDurationSeconds, l.AudioMaxChannels,
@@ -133,6 +138,13 @@ type Request struct {
 func (r Request) isPDF() bool { return len(r.Results) > 0 && r.Results[0].Level != "" }
 
 // isAudio: options.tool ist audio-convert (Optionen sind bereits geprüft).
+func (r Request) isMarkdown() bool {
+	var head struct {
+		Tool string `json:"tool"`
+	}
+	return json.Unmarshal(r.Options, &head) == nil && head.Tool == "markdown-pdf"
+}
+
 func (r Request) isAudio() bool {
 	var head struct {
 		Tool string `json:"tool"`
@@ -183,7 +195,7 @@ func (r Request) encode() ([]byte, error) {
 	if !pdf && len(r.Results) != 1 {
 		return nil, invalid("Bild/Audio hat genau ein Ergebnis")
 	}
-	if pdf && r.isAudio() {
+	if pdf && (r.isAudio() || r.isMarkdown()) {
 		return nil, invalid("Audio ohne Stufe")
 	}
 	ids, paths, levels := map[string]bool{}, map[string]bool{r.Source: true}, map[string]bool{}

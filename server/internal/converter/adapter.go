@@ -29,6 +29,7 @@ func NewProcessor(runner *Runner, cfg *config.Config) *Processor {
 func (p *Processor) request(task jobs.Task) (Request, error) {
 	c := p.cfg
 	limits := Limits{
+		MarkdownMaxInputBytes: c.MarkdownMaxInputBytes, MarkdownMaxOutputBytes: c.MarkdownMaxOutputBytes, MarkdownMaxPages: c.MarkdownMaxPages,
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
@@ -37,10 +38,23 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		AudioMaxChannels: c.AudioMaxChannels, AudioMaxSampleRate: c.AudioMaxSampleRate,
 		AudioMaxOutputBytes: c.AudioMaxOutputBytes,
 	}
+	if limits.MarkdownMaxInputBytes == 0 {
+		limits.MarkdownMaxInputBytes = 2_097_152
+	}
+	if limits.MarkdownMaxOutputBytes == 0 {
+		limits.MarkdownMaxOutputBytes = 20_971_520
+	}
+	if limits.MarkdownMaxPages == 0 {
+		limits.MarkdownMaxPages = 300
+	}
 	req := Request{Source: task.InputPath, Options: task.Options, Limits: limits,
 		MemoryBytes: 1 << 30, Timeout: c.ImageTimeout, OutputLimit: c.ImageMaxOutputBytes}
 	for _, target := range task.Results {
 		req.Results = append(req.Results, ResultTarget{ID: storage.FormatUUID(target.ID), Level: target.Level, Path: target.Path})
+	}
+	if task.Tool == "markdown-pdf" {
+		req.Timeout = c.MarkdownTimeout
+		req.OutputLimit = limits.MarkdownMaxOutputBytes
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout

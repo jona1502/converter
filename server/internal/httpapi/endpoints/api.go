@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -58,7 +59,7 @@ func (s sessions) CreateSession(ctx context.Context, h auth.TokenHash) (auth.Sto
 }
 
 func New(cfg *config.Config, pool *pgxpool.Pool, files *storage.Local, limiter *ratelimit.Limiter) (*API, error) {
-	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, AudioMaxInputBytes: cfg.AudioMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
+	service, err := jobs.New(pool, files, jobs.Limits{ImageMaxInputBytes: cfg.ImageMaxInputBytes, PDFMaxInputBytes: cfg.PdfMaxInputBytes, AudioMaxInputBytes: cfg.AudioMaxInputBytes, MarkdownMaxInputBytes: cfg.MarkdownMaxInputBytes, StorageBudgetBytes: cfg.StorageBudgetBytes, SessionMaxActiveJobs: cfg.SessionMaxActiveJobs, GlobalMaxActiveJobs: cfg.GlobalMaxActiveJobs, UploadMax: cfg.UploadMax, JobTTL: cfg.JobTTL, JobMaxAttempts: cfg.JobMaxAttempts})
 	if err != nil {
 		return nil, err
 	}
@@ -324,6 +325,10 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 	out.Audio = apitypes.AudioCapabilities{QualityFormats: []apitypes.AudioFormat{apitypes.AudioMP3, apitypes.AudioOGG},
 		DefaultQuality: .8, MaxFileBytes: a.cfg.AudioMaxInputBytes, MaxDurationSeconds: int(a.cfg.AudioMaxDurationSeconds),
 		MaxChannels: int(a.cfg.AudioMaxChannels), MaxSampleRate: int(a.cfg.AudioMaxSampleRate), MaxOutputBytes: a.cfg.AudioMaxOutputBytes}
+	out.Markdown = apitypes.MarkdownCapabilities{Available: report.Markdown.Available, MaxFileBytes: a.cfg.MarkdownMaxInputBytes, MaxOutputBytes: a.cfg.MarkdownMaxOutputBytes, MaxPages: a.cfg.MarkdownMaxPages}
+	if !report.Markdown.Available {
+		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolMarkdownPDF })
+	}
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -424,6 +429,12 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
+	if opts.tool == "markdown-pdf" {
+		report, err := converter.LoadReport(filepath.Join(a.cfg.StorageDir, converter.ReportFile), time.Now().UTC(), 15*time.Minute)
+		if err != nil || !report.Markdown.Available {
+			return httpapi.NewError(503, apitypes.CodeServiceUnavailable, "Markdown-Verarbeitung ist nicht verfügbar.")
+		}
+	}
 	part, err = multipart.NextPart()
 	if err != nil {
 		return httpapi.NewError(422, apitypes.CodeMissingFile, "Genau eine Datei erwartet.")
@@ -442,6 +453,8 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	}
 	limit := a.cfg.ImageMaxInputBytes
 	switch opts.tool {
+	case "markdown-pdf":
+		limit = a.cfg.MarkdownMaxInputBytes
 	case "pdf-compress":
 		limit = a.cfg.PdfMaxInputBytes
 	case "audio-convert":
@@ -452,12 +465,27 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	if writer != nil {
 		sink = io.MultiWriter(writer, hash)
 	}
-	size, err := io.CopyBuffer(sink, io.LimitReader(part, limit+1), make([]byte, 64*1024))
+	var size int64
+	var markdownErr error
+	if opts.tool == "markdown-pdf" {
+		size, markdownErr = jobs.ValidateMarkdown(io.TeeReader(io.LimitReader(part, limit+1), sink))
+		if markdownErr != nil && !errors.Is(markdownErr, jobs.ErrInvalidMarkdown) {
+			return bodyError(markdownErr)
+		}
+	} else {
+		size, err = io.CopyBuffer(sink, io.LimitReader(part, limit+1), make([]byte, 64*1024))
+	}
 	if err != nil {
 		return bodyError(err)
 	}
 	if size > limit {
 		return httpapi.NewError(413, apitypes.CodeFileTooLarge, "Datei überschreitet das Limit.")
+	}
+	if opts.tool == "markdown-pdf" {
+		ext := strings.ToLower(filepath.Ext(originalName))
+		if markdownErr != nil || (ext != ".md" && ext != ".markdown") {
+			return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Eine nicht leere UTF-8-Markdown-Datei wird benötigt.")
+		}
 	}
 	if size == 0 {
 		return httpapi.NewError(415, apitypes.CodeUnsupportedType, "Datei ist leer.")
@@ -495,6 +523,8 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		}
 		format := "pdf"
 		switch opts.tool {
+		case "markdown-pdf":
+			format = "markdown"
 		case "pdf-compress":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
@@ -526,7 +556,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			if _, ok := jobs.AudioMIME[output]; !ok {
 				return invalidOptions()
 			}
-		} else if opts.tool != "pdf-compress" {
+		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}

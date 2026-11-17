@@ -57,6 +57,9 @@ type Config struct {
 	HealthCheckTimeout time.Duration
 
 	// Grenzwerte (Vertrag §6).
+	MarkdownMaxInputBytes    int64
+	MarkdownMaxOutputBytes   int64
+	MarkdownMaxPages         int64
 	ImageMaxInputBytes       int64
 	ImageMaxPixels           int64
 	ImageMaxEdge             int
@@ -81,6 +84,7 @@ type Config struct {
 	ImageTimeout             time.Duration
 	PdfTimeout               time.Duration
 	AudioTimeout             time.Duration
+	MarkdownTimeout          time.Duration
 	StorageBudgetBytes       int64
 	CleanupInterval          time.Duration
 	DownloadMax              time.Duration
@@ -125,6 +129,10 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.DatabasePoolSize = int(p.intRange("DATABASE_POOL_SIZE", 5, 1, 50))
 	c.HealthCheckTimeout = p.floatSeconds("HEALTH_CHECK_TIMEOUT_SECONDS", 2.0, 30)
 
+	c.MarkdownMaxInputBytes = p.positive("MARKDOWN_MAX_INPUT_BYTES", 2_097_152)
+	c.MarkdownMaxOutputBytes = p.positive("MARKDOWN_MAX_OUTPUT_BYTES", 20_971_520)
+	c.MarkdownMaxPages = p.positive("MARKDOWN_MAX_PAGES", 300)
+	c.MarkdownTimeout = p.seconds("MARKDOWN_TIMEOUT_SECONDS", 120)
 	c.ImageMaxInputBytes = p.positive("IMAGE_MAX_INPUT_BYTES", 52_428_800)
 	c.ImageMaxPixels = p.positive("IMAGE_MAX_PIXELS", 40_000_000)
 	c.ImageMaxEdge = int(p.positive("IMAGE_MAX_EDGE", 16_384))
@@ -184,7 +192,7 @@ func (c *Config) crossChecks() []string {
 		problems = append(problems, Prefix+"SESSION_TTL_SECONDS muss JOB_TTL_SECONDS abdecken")
 	}
 	need := max(c.DownloadMax, c.ImageTimeout+c.CleanupInterval, c.PdfTimeout+c.CleanupInterval,
-		c.AudioTimeout+c.CleanupInterval) +
+		c.AudioTimeout+c.CleanupInterval, c.MarkdownTimeout+c.CleanupInterval) +
 		c.CleanupInterval + 10*time.Second
 	if c.PhysicalDeleteMax < need {
 		problems = append(problems, Prefix+"PHYSICAL_DELETE_MAX_SECONDS muss Download, Parser-Zeitlimit und Cleanup-Karenz abdecken")
@@ -224,7 +232,7 @@ func (c *Config) IsProduction() bool { return c.Environment == Production }
 
 // MaxUploadInputBytes: größte Eingabe über alle Werkzeuge.
 func (c *Config) MaxUploadInputBytes() int64 {
-	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes, c.AudioMaxInputBytes)
+	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes, c.AudioMaxInputBytes, c.MarkdownMaxInputBytes)
 }
 
 // SlogLevel bildet LogLevel auf log/slog ab.

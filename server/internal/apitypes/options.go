@@ -23,6 +23,10 @@ type ImageOptions struct {
 	IcoSizes   validation.Optional[[]int]         `json:"icoSizes,omitzero"`
 }
 
+type MarkdownOptions struct {
+	Tool Tool `json:"tool"`
+}
+
 type PdfOptions struct {
 	Tool   Tool                            `json:"tool"`
 	Levels validation.Optional[[]PdfLevel] `json:"levels,omitzero" strict:"notnull"`
@@ -35,8 +39,8 @@ type AudioOptions struct {
 	Channels validation.Optional[AudioChannels] `json:"channels,omitzero" strict:"notnull"`
 }
 
-// JobOptions: ImageOptions, PdfOptions oder AudioOptions, unterschieden über
-// "tool". Value ist *ImageOptions, *PdfOptions oder *AudioOptions.
+// JobOptions: ImageOptions, PdfOptions, AudioOptions oder MarkdownOptions,
+// unterschieden über "tool". Value ist ein Zeiger auf die jeweilige Variante.
 type JobOptions struct {
 	Value any
 }
@@ -47,6 +51,8 @@ func (JobOptions) UnionVariant(tag string) any {
 	switch Tool(tag) {
 	case ToolImageConvert, ToolImageCompress, ToolImageResize:
 		return new(ImageOptions)
+	case ToolMarkdownPDF:
+		return new(MarkdownOptions)
 	case ToolPDFCompress:
 		return new(PdfOptions)
 	case ToolAudioConvert:

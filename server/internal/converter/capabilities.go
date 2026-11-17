@@ -14,9 +14,9 @@ import (
 	"miconverter/server/internal/storage"
 )
 
-// ReportSchemaVersion ist die Version von capabilities.json (2: mit audio).
+// ReportSchemaVersion ist die Version von capabilities.json (3: mit Markdown).
 // Ein älterer Bericht gilt als ungültig, bis die Probe ihn neu schreibt.
-const ReportSchemaVersion = 2
+const ReportSchemaVersion = 3
 
 // ReportFile ist der Dateiname des Berichts im privaten Volume.
 const ReportFile = "capabilities.json"
@@ -65,16 +65,22 @@ type AudioReport struct {
 	OutputFormats []string `json:"outputFormats"`
 }
 
+// MarkdownReport is confirmed by a real isolated rendering probe.
+type MarkdownReport struct {
+	Available bool `json:"available"`
+}
+
 // Report ist der versionierte Capabilities-Bericht (capabilities.json).
 type Report struct {
-	SchemaVersion   int         `json:"schemaVersion"`
-	ProtocolVersion int         `json:"protocolVersion"`
-	GeneratedAt     time.Time   `json:"generatedAt"`
-	InputFormats    []string    `json:"inputFormats"`
-	OutputFormats   []string    `json:"outputFormats"`
-	PDF             bool        `json:"pdf"`
-	Audio           AudioReport `json:"audio"`
-	Versions        Versions    `json:"versions"`
+	SchemaVersion   int            `json:"schemaVersion"`
+	ProtocolVersion int            `json:"protocolVersion"`
+	GeneratedAt     time.Time      `json:"generatedAt"`
+	InputFormats    []string       `json:"inputFormats"`
+	OutputFormats   []string       `json:"outputFormats"`
+	PDF             bool           `json:"pdf"`
+	Audio           AudioReport    `json:"audio"`
+	Markdown        MarkdownReport `json:"markdown"`
+	Versions        Versions       `json:"versions"`
 }
 
 // ImageFormats liefert die Formatlisten für GET /capabilities
@@ -199,7 +205,7 @@ func decodeFormats(o object, key string) ([]string, error) {
 
 // parseProbe dekodiert die Probezeile des Konverters streng.
 func parseProbe(data []byte, now time.Time) (Report, error) {
-	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "audio", "versions"}, nil)
+	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, nil)
 	if err != nil {
 		return Report{}, err
 	}
@@ -215,6 +221,9 @@ func parseProbe(data []byte, now time.Time) (Report, error) {
 		return Report{}, err
 	}
 	if rep.PDF, err = o.boolean("pdf"); err != nil {
+		return Report{}, err
+	}
+	if rep.Markdown, err = decodeMarkdown(o); err != nil {
 		return Report{}, err
 	}
 	if rep.Audio, err = decodeAudio(o); err != nil {
@@ -300,7 +309,7 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, fmt.Errorf("%w: lesen", ErrReportInvalid)
 	}
 	o, err := parseObject(data, []string{"schemaVersion", "protocolVersion", "generatedAt",
-		"inputFormats", "outputFormats", "pdf", "audio", "versions"}, nil)
+		"inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, nil)
 	if err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
@@ -324,6 +333,9 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 	if rep.PDF, err = o.boolean("pdf"); err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
+	if rep.Markdown, err = decodeMarkdown(o); err != nil {
+		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
+	}
 	if rep.Audio, err = decodeAudio(o); err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
@@ -337,4 +349,13 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, ErrReportStale
 	}
 	return rep, nil
+}
+
+func decodeMarkdown(o object) (MarkdownReport, error) {
+	m, err := parseObject(o["markdown"], []string{"available"}, nil)
+	if err != nil {
+		return MarkdownReport{}, err
+	}
+	available, err := m.boolean("available")
+	return MarkdownReport{Available: available}, err
 }
