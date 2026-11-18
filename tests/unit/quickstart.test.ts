@@ -51,7 +51,7 @@ describe('Aktionen je Typ', () => {
   const ids = (kind: Parameters<typeof toolsForKind>[0]) => toolsForKind(kind).map((tool) => tool.id);
   it('bietet für Markdown ausschließlich das eigene PDF-Werkzeug', () => {
     expect(ids('markdown')).toEqual(['markdown-pdf']);
-    expect(ids('pdf')).toEqual(['pdf-komprimieren']);
+    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen']);
   });
 
   it('bietet für Bilder Konvertieren, Komprimieren und Skalieren', () => {
@@ -59,9 +59,9 @@ describe('Aktionen je Typ', () => {
     expect(toolsForKind('image').map(actionLabel)).toEqual(['Konvertieren', 'Komprimieren', 'Skalieren']);
   });
 
-  it('bietet für PDF nur Komprimieren und für Audio nur Konvertieren', () => {
-    expect(ids('pdf')).toEqual(['pdf-komprimieren']);
-    expect(toolsForKind('pdf').map(actionLabel)).toEqual(['Komprimieren']);
+  it('bietet für PDF Komprimieren und Drehen und für Audio nur Konvertieren', () => {
+    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen']);
+    expect(toolsForKind('pdf').map(actionLabel)).toEqual(['Komprimieren', 'Drehen']);
     expect(ids('audio')).toEqual(['audio-konvertieren']);
     expect(toolsForKind('audio').map(actionLabel)).toEqual(['Konvertieren']);
   });

@@ -5,9 +5,9 @@
  */
 
 export type ToolCategory = 'bilder' | 'pdf' | 'audio';
-export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
+export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren' | 'drehen';
 /** Aktion, nach der die Kopfzeile die Werkzeuge in Menüs gruppiert. */
-export type ToolAction = 'convert' | 'compress' | 'resize';
+export type ToolAction = 'convert' | 'compress' | 'resize' | 'rotate';
 
 export interface ToolActionInfo {
   readonly id: ToolAction;
@@ -51,6 +51,7 @@ export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
   { id: 'convert', title: 'Konvertieren' },
   { id: 'compress', title: 'Komprimieren' },
   { id: 'resize', title: 'Skalieren' },
+  { id: 'rotate', title: 'Drehen' },
 ];
 
 export const TOOLS: readonly Tool[] = [
@@ -118,6 +119,17 @@ export const TOOLS: readonly Tool[] = [
     category: 'audio',
     operation: 'konvertieren',
     action: 'convert',
+    available: true,
+  },
+  {
+    id: 'pdf-drehen',
+    title: 'PDF drehen',
+    description: 'Alle oder ausgewählte Seiten einer PDF um 90°, 180° oder 270° drehen.',
+    lead: 'Drehen Sie alle oder ausgewählte Seiten Ihrer PDF; Inhalt und Qualität bleiben unverändert, nur der Drehwinkel der Seiten ändert sich.',
+    href: '/pdf/drehen',
+    category: 'pdf',
+    operation: 'drehen',
+    action: 'rotate',
     available: true,
   },
 ];
