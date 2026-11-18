@@ -7,6 +7,8 @@ requires-python = ">=3.13,<3.14"
 # backend/uv.lock (gleiche geprüften Codecs und Lizenzen), dazu soundfile
 # (Wheel mit gebündeltem libsndfile inklusive MP3) und numpy für Audio.
 # Markdown wird mit markdown-it-py geparst und direkt mit ReportLab erzeugt.
+# PDF zu Bild rastert mit pypdfium2 (PDFium, BSD-3/Apache-2.0; Wheel bündelt
+# die Bibliothek), Entscheidung in docs/superpowers/specs/2026-11-18-pdf-to-image-design.md.
 # Kein FastAPI, SQLAlchemy, Celery, Redis, pydantic, ffmpeg oder PyAV.
 dependencies = [
     "pillow==13.0.0",
@@ -15,12 +17,12 @@ dependencies = [
     "numpy==2.5.4",
     "markdown-it-py==4.0.0",
     "reportlab==4.4.4",
+    "pypdfium2==5.14.0",
 ]
 
 [dependency-groups]
 dev = [
     "mypy==2.4.0",
-    "pypdfium2==5.14.0",  # nur unabhängiger Testrenderer, nie im Laufzeitimage
     "pytest==9.1.1",
     "ruff==0.17.1",
     "types-reportlab==4.4.4.20250926",

@@ -52,7 +52,8 @@ COPY --from=build /out/worker /app/worker
 # beim Bauen nachweislich enthalten sein (die Rundreise prüft die Probe).
 RUN chmod -R a-x,u=rwX,go=rX /opt/venv/lib/python3.13/site-packages/converter \
     && python -I -c "import converter.cli" \
-    && python -I -c "import soundfile as sf; assert {'MP3','WAV','FLAC','OGG'} <= set(sf.available_formats()), sf.__libsndfile_version__"
+    && python -I -c "import soundfile as sf; assert {'MP3','WAV','FLAC','OGG'} <= set(sf.available_formats()), sf.__libsndfile_version__" \
+    && python -I -c "import pypdfium2 as p; print(p.version.PYPDFIUM_INFO, p.version.PDFIUM_INFO)"
 USER 10001:10001
 WORKDIR /
 ENTRYPOINT ["/app/worker"]
