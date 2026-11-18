@@ -46,7 +46,14 @@ from typing import IO, Any, Final
 from converter import validation as v
 from converter.errors import ProtocolError
 from converter.limits import Limits, parse_limits
-from converter.options import AudioOptions, ImageOptions, JobOptions, MarkdownOptions, parse_options
+from converter.options import (
+    AudioOptions,
+    ImageOptions,
+    JobOptions,
+    MarkdownOptions,
+    SplitOptions,
+    parse_options,
+)
 from converter.rotate_options import PdfRotateOptions
 
 PROTOCOL_VERSION: Final = 1
@@ -88,6 +95,7 @@ RESULT_CODES: Final = frozenset(
         "invalid-options",
         "duration-too-long",
         "unsupported-audio",
+        "page-range-invalid",
     }
 )
 # protocol-error/sandbox-failed sind intern: Go bildet sie auf worker-failed ab.
@@ -148,7 +156,9 @@ def _results(value: object, options: JobOptions) -> tuple[ResultTarget, ...]:
         if level is not None and type(level) is not str:
             raise v.fail(CODE, f"{where}.level: string or null expected")
         targets.append(ResultTarget(result_id, level, _absolute(raw["path"], f"{where}.path")))
-    if isinstance(options, ImageOptions | AudioOptions | MarkdownOptions | PdfRotateOptions):
+    if isinstance(
+        options, ImageOptions | AudioOptions | MarkdownOptions | PdfRotateOptions | SplitOptions
+    ):
         expected: list[str | None] = [None]
     else:
         expected = list(options.levels)

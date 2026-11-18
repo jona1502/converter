@@ -52,7 +52,7 @@ export function toolsForKind(kind: FileKind): Tool[] {
   if (kind === 'markdown') return availableTools.filter((tool) => tool.id === 'markdown-pdf');
   const { category } = KIND_INFO[kind];
   return TOOL_ACTIONS.flatMap((action) =>
-    availableTools.filter((tool) => tool.category === category && tool.action === action.id && tool.id !== 'markdown-pdf'),
+    availableTools.filter((tool) => tool.category === category && tool.action === action.id && tool.id !== 'markdown-pdf' && tool.quickStart !== false),
   );
 }
 

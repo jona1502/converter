@@ -45,7 +45,7 @@ var resultCodes = map[string]bool{
 	"parse-failed": true, "not-pdf": true, "file-too-large": true, "result-too-large": true,
 	"memory-limit": true, "dimensions-too-large": true, "animated-unsupported": true,
 	"unsupported-type": true, "original-format-unsupported": true, "invalid-options": true,
-	"duration-too-long": true, "unsupported-audio": true,
+	"duration-too-long": true, "unsupported-audio": true, "page-range-invalid": true,
 }
 
 // internalFatal sind interne Codes, die nie in der API erscheinen.
@@ -195,7 +195,7 @@ func (r Request) encode() ([]byte, error) {
 	if !pdf && len(r.Results) != 1 {
 		return nil, invalid("Bild/Audio hat genau ein Ergebnis")
 	}
-	if pdf && (r.isAudio() || r.isMarkdown() || r.isRotate()) {
+	if pdf && (r.isAudio() || r.isMarkdown() || r.isRotate() || r.isSplit()) {
 		return nil, invalid("Audio ohne Stufe")
 	}
 	ids, paths, levels := map[string]bool{}, map[string]bool{r.Source: true}, map[string]bool{}

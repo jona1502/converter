@@ -334,6 +334,7 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolMarkdownPDF })
 	}
 	out.PdfRotate = a.pdfRotateCapabilities(report)
+	a.addSplitCapabilities(&out, report)
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -440,6 +441,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			return httpapi.NewError(503, apitypes.CodeServiceUnavailable, "Markdown-Verarbeitung ist nicht verfügbar.")
 		}
 	}
+	if opts.tool == "pdf-split" {
+		if err := a.requireSplit(); err != nil {
+			return err
+		}
+	}
 	part, err = multipart.NextPart()
 	if err != nil {
 		return httpapi.NewError(422, apitypes.CodeMissingFile, "Genau eine Datei erwartet.")
@@ -460,7 +466,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	switch opts.tool {
 	case "markdown-pdf":
 		limit = a.cfg.MarkdownMaxInputBytes
-	case "pdf-compress", "pdf-rotate":
+	case "pdf-compress", "pdf-rotate", "pdf-split":
 		limit = a.cfg.PdfMaxInputBytes
 	case "audio-convert":
 		limit = a.cfg.AudioMaxInputBytes
@@ -530,7 +536,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		switch opts.tool {
 		case "markdown-pdf":
 			format = "markdown"
-		case "pdf-compress", "pdf-rotate":
+		case "pdf-compress", "pdf-rotate", "pdf-split":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
 			}
@@ -561,7 +567,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			if _, ok := jobs.AudioMIME[output]; !ok {
 				return invalidOptions()
 			}
-		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" && opts.tool != "pdf-rotate" {
+		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" && opts.tool != "pdf-rotate" && opts.tool != "pdf-split" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}

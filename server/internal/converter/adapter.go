@@ -65,6 +65,15 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 			req.Limits.PdfMaxResultsTotalBytes = req.OutputLimit
 		}
 	}
+	if task.Tool == "pdf-split" {
+		// Ein Ergebnis (PDF oder ZIP) im Rahmen des PDF-Gesamtbudgets.
+		if task.OutputBudget <= 0 {
+			return Request{}, invalid("PDF-Arbeitsbudget fehlt")
+		}
+		req.Limits.PdfMaxResultsTotalBytes = min(c.PdfMaxResultsTotalBytes, task.OutputBudget)
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = req.Limits.PdfMaxResultsTotalBytes
+	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout
 		req.OutputLimit = c.AudioMaxOutputBytes

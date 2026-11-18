@@ -474,7 +474,8 @@
             "image-resize": "#/components/schemas/ImageOptions",
             "pdf-compress": "#/components/schemas/PdfOptions",
             "markdown-pdf": "#/components/schemas/MarkdownOptions",
-            "pdf-rotate": "#/components/schemas/PdfRotateOptions"
+            "pdf-rotate": "#/components/schemas/PdfRotateOptions",
+            "pdf-split": "#/components/schemas/SplitOptions"
           },
           "propertyName": "tool"
         },
@@ -493,6 +494,9 @@
           },
           {
             "$ref": "#/components/schemas/PdfRotateOptions"
+          },
+          {
+            "$ref": "#/components/schemas/SplitOptions"
           }
         ]
       },
@@ -772,7 +776,8 @@
           "animated-unsupported",
           "unsupported-type",
           "duration-too-long",
-          "unsupported-audio"
+          "unsupported-audio",
+          "page-range-invalid"
         ],
         "title": "ProcessingErrorCode",
         "type": "string"
@@ -963,7 +968,8 @@
           "pdf-compress",
           "audio-convert",
           "markdown-pdf",
-          "pdf-rotate"
+          "pdf-rotate",
+          "pdf-split"
         ],
         "title": "Tool",
         "type": "string"
@@ -1125,6 +1131,83 @@
         ],
         "title": "PdfRotateDetails",
         "type": "object"
+      },
+      "SplitOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-split. Bei mode ranges ist ranges Pflicht (z. B. 1-3,5,7-: ASCII, ohne Leerraum, aufsteigend, Seiten 1 bis 99999, höchstens 500 Bereiche), bei mode each ist ranges nicht erlaubt. Genau ein Bereich ergibt eine PDF, sonst ein ZIP.",
+        "properties": {
+          "mode": {
+            "enum": [
+              "ranges",
+              "each"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "ranges": {
+            "maxLength": 1024,
+            "title": "Ranges",
+            "type": "string"
+          },
+          "tool": {
+            "const": "pdf-split",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "mode"
+        ],
+        "title": "SplitOptions",
+        "type": "object"
+      },
+      "PdfSplitCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxFileBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxParts": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "maxParts"
+        ],
+        "title": "PdfSplitCapabilities",
+        "type": "object"
+      },
+      "SplitDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "partCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount",
+          "partCount"
+        ],
+        "title": "SplitDetails",
+        "type": "object"
       }
     }
   },
@@ -1136,7 +1219,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {

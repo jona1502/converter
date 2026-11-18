@@ -77,7 +77,7 @@ func ProcessingErrorCodes() []ProcessingErrorCode {
 		ProcDecodeFailed, ProcEncodeFailed, ProcSaveFailed, ProcEncrypted, ProcParseFailed,
 		ProcResultTooLarge, ProcTimeout, ProcMemoryLimit, ProcWorkerFailed, ProcStorageFull,
 		ProcDimensionsTooLarge, ProcAnimatedUnsupported, ProcUnsupportedType,
-		ProcDurationTooLong, ProcUnsupportedAudio,
+		ProcDurationTooLong, ProcUnsupportedAudio, ProcPageRangeInvalid,
 	}
 }
 
@@ -94,7 +94,7 @@ const (
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF, ToolPDFRotate}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF, ToolPDFRotate, ToolPDFSplit}
 }
 
 // IsImage: image-convert, image-compress und image-resize.

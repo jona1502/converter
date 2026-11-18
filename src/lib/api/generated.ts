@@ -11,7 +11,7 @@ export interface ApiSchemas {
   "InputFormat": "jpeg" | "png" | "webp" | "gif" | "bmp" | "ico" | "avif" | "pdf" | "mp3" | "wav" | "flac" | "ogg" | "markdown";
   "JobError": { "code": ApiSchemas["ProcessingErrorCode"] | ApiSchemas["ApiErrorCode"] };
   "JobInput": { "format": ApiSchemas["InputFormat"]; "height": number | null; "name": string; "size": number; "width": number | null };
-  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"];
+  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"] | ApiSchemas["SplitOptions"];
   "JobPhase": "analyze" | "variant" | "encode" | "save";
   "JobResultView": { "details": Record<string, unknown> | null; "downloadName": string; "downloadUrl": string | null; "error": ApiSchemas["JobError"] | null; "id": string; "level": ApiSchemas["PdfLevel"] | null; "mime": string; "size": number | null; "state": ApiSchemas["ResultState"] };
   "JobState": "queued" | "running" | "succeeded" | "partially_succeeded" | "failed" | "cancelled" | "expired";
@@ -19,7 +19,7 @@ export interface ApiSchemas {
   "LiveResponse": { "status"?: "ok" };
   "PdfLevel": "high" | "balanced" | "small";
   "PdfOptions": { "levels"?: Array<ApiSchemas["PdfLevel"]>; "tool": "pdf-compress" };
-  "ProcessingErrorCode": "decode-failed" | "encode-failed" | "save-failed" | "encrypted" | "parse-failed" | "result-too-large" | "timeout" | "memory-limit" | "worker-failed" | "storage-full" | "dimensions-too-large" | "animated-unsupported" | "unsupported-type" | "duration-too-long" | "unsupported-audio";
+  "ProcessingErrorCode": "decode-failed" | "encode-failed" | "save-failed" | "encrypted" | "parse-failed" | "result-too-large" | "timeout" | "memory-limit" | "worker-failed" | "storage-full" | "dimensions-too-large" | "animated-unsupported" | "unsupported-type" | "duration-too-long" | "unsupported-audio" | "page-range-invalid";
   "ReadyResponse": { "checks": Record<string, "ok" | "fail">; "status": "ok" | "unavailable" };
   "ResizeDimensions": { "allowUpscale": boolean; "height"?: number | null; "keepAspectRatio": boolean; "mode": "dimensions"; "width"?: number | null };
   "ResizeMaxEdge": { "maxEdge": number; "mode": "maxEdge" };
@@ -27,11 +27,14 @@ export interface ApiSchemas {
   "ResizePercent": { "allowUpscale": boolean; "mode": "percent"; "percent": number };
   "ResultState": "pending" | "running" | "succeeded" | "failed" | "cancelled";
   "SessionResponse": { "created": boolean; "csrfToken": string; "expiresAt": string };
-  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate";
+  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate" | "pdf-split";
   "MarkdownOptions": { "orientation"?: "portrait" | "landscape"; "pageSize"?: "a4" | "letter"; "tool": "markdown-pdf" };
   "MarkdownCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number };
   "MarkdownDetails": { "pageCount": number };
   "PdfRotateOptions": { "angle": 90 | 180 | 270; "pages"?: string; "tool": "pdf-rotate" };
   "PdfRotateCapabilities": { "angles": Array<number>; "available": boolean; "maxFileBytes": number; "maxOutputBytes": number };
   "PdfRotateDetails": { "pageCount": number; "rotatedPages": number };
+  "SplitOptions": { "mode": "ranges" | "each"; "ranges"?: string; "tool": "pdf-split" };
+  "PdfSplitCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxParts": number };
+  "SplitDetails": { "pageCount": number; "partCount": number };
 }

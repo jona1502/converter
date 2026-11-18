@@ -38,6 +38,9 @@ func parseOptions(raw []byte) (options, error) {
 	if rotate, ok := input.PdfRotate(); ok {
 		return parsePdfRotateOptions(rotate)
 	}
+	if split, ok := input.Value.(*apitypes.SplitOptions); ok {
+		return parseSplitOptions(split)
+	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
 		if len(levels) == 0 || len(levels) > 3 {
