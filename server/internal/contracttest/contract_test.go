@@ -181,6 +181,15 @@ func TestSerializedDTOsValidate(t *testing.T) {
 		t.Fatal("AudioDetails mit unbekanntem Format akzeptiert")
 	}
 
+	merge := mustJSON(t, apitypes.PdfMergeCapabilities{Available: true, MinFiles: 2, MaxFiles: 20, MaxTotalBytes: 100_000_000, MaxOutputBytes: 100_000_000, MaxPages: 2000})
+	if err := spec.ValidateComponent("PdfMergeCapabilities", merge); err != nil {
+		t.Fatalf("PdfMergeCapabilities: %v %s", err, merge)
+	}
+	mergeDetails := mustJSON(t, apitypes.PdfMergeDetails{PageCount: 5, SourceCount: 2})
+	if err := spec.ValidateComponent("PdfMergeDetails", mergeDetails); err != nil {
+		t.Fatalf("PdfMergeDetails: %v", err)
+	}
+
 	caps := mustJSON(t, apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools()})
 	schema, err = spec.ResponseSchema("/api/v1/capabilities", "GET", 200)
 	if err != nil {
@@ -203,6 +212,7 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"audio-convert","format":"flac"}`,
 		`{"tool":"markdown-pdf"}`,
 		`{"tool":"markdown-pdf","pageSize":"letter","orientation":"landscape"}`,
+		`{"tool":"pdf-merge"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -235,6 +245,8 @@ func TestValidatorRejectsViolations(t *testing.T) {
 		"Audioformat":             {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
 		"Markdown Seitenformat":   {"MarkdownOptions", `{"tool":"markdown-pdf","pageSize":"a3"}`},
 		"Markdown Ausrichtung":    {"MarkdownOptions", `{"tool":"markdown-pdf","orientation":"diagonal"}`},
+		"PdfMerge unbekanntes Feld": {"PdfMergeOptions", `{"tool":"pdf-merge","order":[1,0]}`},
+		"PdfMerge zu wenige Dateien": {"PdfMergeCapabilities", `{"available":true,"minFiles":1,"maxFiles":20,"maxTotalBytes":1,"maxOutputBytes":1,"maxPages":1}`},
 		"Audiokanäle":             {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
 		"Audio ohne Bildfelder":   {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
 		"const":                   {"LiveResponse", `{"status":"nein"}`},
