@@ -59,6 +59,8 @@ func (JobOptions) UnionVariant(tag string) any {
 		return new(PdfOptions)
 	case ToolAudioConvert:
 		return new(AudioOptions)
+	case ToolPDFToImage:
+		return new(PdfImageOptions)
 	}
 	return nil
 }
