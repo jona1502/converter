@@ -35,6 +35,9 @@ func parseOptions(raw []byte) (options, error) {
 	if markdown, ok := input.Value.(*apitypes.MarkdownOptions); ok {
 		return parseMarkdownOptions(markdown)
 	}
+	if merge, ok := input.Value.(*apitypes.PdfMergeOptions); ok {
+		return parsePdfMergeOptions(merge)
+	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
 		if len(levels) == 0 || len(levels) > 3 {
