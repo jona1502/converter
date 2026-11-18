@@ -69,7 +69,7 @@ const (
 	audioFormatCheck   = `constraint jobs.ck_jobs_input_format c CHECK (input_format = ANY (ARRAY['jpeg'::text, 'png'::text, 'webp'::text, 'gif'::text, 'bmp'::text, 'ico'::text, 'avif'::text, 'pdf'::text, 'mp3'::text, 'wav'::text, 'flac'::text, 'ogg'::text]))`
 )
 
-// currentSchema ist der Alembic-0003-Schnappschuss plus 0004_audio/0005_markdown: nur die
+// currentSchema ist der Alembic-0003-Schnappschuss plus 0004_audio/0005_markdown/0006_pdf_to_image: nur die
 // beiden CHECK-Constraints für Werkzeug und Eingabeformat sind erweitert.
 func currentSchema(t *testing.T) string {
 	t.Helper()
@@ -79,7 +79,7 @@ func currentSchema(t *testing.T) string {
 			t.Fatalf("Referenzzeile fehlt: %s", line)
 		}
 	}
-	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text", 1)+"\n", 1)
+	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-to-image'::text", 1)+"\n", 1)
 	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text", 1)+"\n", 1)
 }
 
@@ -222,7 +222,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Baselined || !slices.Equal(res.Applied, []int{1, 2, 3, 4, 5}) {
+	if res.Baselined || !slices.Equal(res.Applied, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
 	assertSchema(t, ctx, pool, currentSchema(t))
@@ -238,7 +238,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if res.Baselined || len(res.Applied) != 0 {
 		t.Fatalf("zweiter Lauf = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 }
@@ -263,7 +263,7 @@ func TestMigration0004AllowsAudioJobs(t *testing.T) {
 	}
 	before := dataDump(t, ctx, pool)
 	res, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(res.Applied, []int{4, 5}) {
+	if err != nil || !slices.Equal(res.Applied, []int{4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v, %v", res, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -303,10 +303,10 @@ func TestMigrateBaselinesAlembicHeadWithoutTouchingData(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Baseline übernimmt 1–3 ohne SQL, danach laufen 0004_audio und 0005_markdown.
-	if !res.Baselined || !slices.Equal(res.Applied, []int{4, 5}) {
+	if !res.Baselined || !slices.Equal(res.Applied, []int{4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -398,7 +398,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
 		switch len(results[i].Applied) {
-		case 5:
+		case 6:
 			applied++
 		case 0:
 		default:
@@ -408,7 +408,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 	if applied != 1 {
 		t.Fatalf("%d Runner haben migriert, erwartet genau 1", applied)
 	}
-	if v := versions(t, ctx, pools[0]); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pools[0]); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	assertSchema(t, ctx, pools[0], currentSchema(t))
@@ -438,7 +438,7 @@ func TestMigrateConcurrentBaselineOnce(t *testing.T) {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
 		// Nur der baselinende Runner führt danach 0004 und 0005 aus.
-		if results[i].Baselined != slices.Equal(results[i].Applied, []int{4, 5}) ||
+		if results[i].Baselined != slices.Equal(results[i].Applied, []int{4, 5, 6}) ||
 			(!results[i].Baselined && len(results[i].Applied) != 0) {
 			t.Fatalf("Runner %d: %+v", i, results[i])
 		}
@@ -490,7 +490,11 @@ func TestMigration0005PreservesJobsAndAddsMarkdown(t *testing.T) {
 		t.Fatal("0004 accepted Markdown")
 	}
 	before := dataDump(t, ctx, pool)
-	result, err := store.Migrate(ctx, pool, migrations.FS)
+	untilFive := fstest.MapFS{}
+	for _, m := range all[:5] {
+		untilFive[fmt.Sprintf("%04d_%s.sql", m.Version, m.Name)] = &fstest.MapFile{Data: []byte(m.SQL)}
+	}
+	result, err := store.Migrate(ctx, pool, untilFive)
 	if err != nil || !slices.Equal(result.Applied, []int{5}) {
 		t.Fatalf("%+v %v", result, err)
 	}
