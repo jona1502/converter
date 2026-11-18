@@ -239,6 +239,9 @@ func (u Upload) resultRows(originalName string) ([]resultRow, error) {
 	if u.Tool == "markdown-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil
 	}
+	if u.Tool == "pdf-merge" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: PDFMergeDownloadName}}, nil
+	}
 	if u.Tool == "pdf-compress" {
 		if len(u.PDFLevels) == 0 {
 			return nil, errors.New("jobs: PDF ohne Stufen")

@@ -15,6 +15,8 @@ const (
 	ImageFallbackBase = "bild"
 	PDFFallbackBase   = "dokument"
 	AudioFallbackBase = "audio"
+	// PDFMergeDownloadName ist der feste Name des zusammengeführten PDFs.
+	PDFMergeDownloadName = "zusammengefuehrt.pdf"
 )
 
 // OutputExtensions und OutputMIME je Ausgabeformat (domain.py).
