@@ -1,0 +1,22 @@
+{
+  "description": "Gemeinsame Testvektoren fuer die Seitenbereichs-Syntax von pdf-split (Go, Python, TypeScript). Ende null = offen bis zur letzten Seite.",
+  "maxPageNumber": 99999,
+  "maxRanges": 500,
+  "maxLength": 1024,
+  "valid": [
+    { "input": "1", "ranges": [[1, 1]] },
+    { "input": "1-3", "ranges": [[1, 3]] },
+    { "input": "2-2", "ranges": [[2, 2]] },
+    { "input": "7-", "ranges": [[7, null]] },
+    { "input": "1-3,5,7-", "ranges": [[1, 3], [5, 5], [7, null]] },
+    { "input": "10-20,1", "ranges": [[10, 20], [1, 1]] },
+    { "input": "1-3,2-4", "ranges": [[1, 3], [2, 4]] },
+    { "input": "99999", "ranges": [[99999, 99999]] },
+    { "input": "1,1", "ranges": [[1, 1], [1, 1]] }
+  ],
+  "invalid": [
+    "", " ", "0", "00", "01", "1-0", "3-1", "1,", ",1", "1,,2", "1 - 3", " 1", "1 ", "1-3 ", "1, 2",
+    "-3", "-", "a", "1-b", "1--2", "1-2-3", "1.5", "+1", "1;2", "1\t", "1\n", "１", "١",
+    "100000", "1-100000", "1e3", "0x1", "1,-"
+  ]
+}
