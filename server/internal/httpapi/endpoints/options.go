@@ -21,6 +21,11 @@ type options struct {
 	format     string
 	levels     []string
 	resizeMode string
+	// pdf-to-image: ZIP statt Einzelbild, Seite des Einzelbilds und Anzahl
+	// ausdrücklich gewählter Seiten (0 = alle).
+	pdfArchive bool
+	pdfPage    int
+	pageCount  int
 }
 
 func invalidOptions() error {
@@ -34,6 +39,9 @@ func parseOptions(raw []byte) (options, error) {
 	}
 	if markdown, ok := input.Value.(*apitypes.MarkdownOptions); ok {
 		return parseMarkdownOptions(markdown)
+	}
+	if pdfImage, ok := input.PdfImage(); ok {
+		return parsePdfImageOptions(pdfImage)
 	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
