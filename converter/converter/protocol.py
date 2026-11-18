@@ -46,7 +46,14 @@ from typing import IO, Any, Final
 from converter import validation as v
 from converter.errors import ProtocolError
 from converter.limits import Limits, parse_limits
-from converter.options import AudioOptions, ImageOptions, JobOptions, MarkdownOptions, parse_options
+from converter.options import (
+    AudioOptions,
+    ImageOptions,
+    ImagePdfOptions,
+    JobOptions,
+    MarkdownOptions,
+    parse_options,
+)
 
 PROTOCOL_VERSION: Final = 1
 MAX_REQUEST_BYTES: Final = 64 * 1024
@@ -147,7 +154,7 @@ def _results(value: object, options: JobOptions) -> tuple[ResultTarget, ...]:
         if level is not None and type(level) is not str:
             raise v.fail(CODE, f"{where}.level: string or null expected")
         targets.append(ResultTarget(result_id, level, _absolute(raw["path"], f"{where}.path")))
-    if isinstance(options, ImageOptions | AudioOptions | MarkdownOptions):
+    if isinstance(options, ImageOptions | AudioOptions | MarkdownOptions | ImagePdfOptions):
         expected: list[str | None] = [None]
     else:
         expected = list(options.levels)

@@ -31,6 +31,10 @@ AUDIO_CHANNELS: Final = ("original", "mono")
 MARKDOWN_TOOL: Final = "markdown-pdf"
 MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
 MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
+IMAGE_PDF_TOOL: Final = "image-pdf"
+IMAGE_PDF_PAGE_SIZES: Final = ("a4", "letter", "fit")
+IMAGE_PDF_ORIENTATIONS: Final = ("auto", "portrait", "landscape")
+IMAGE_PDF_MARGINS: Final = ("none", "small", "medium")
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
 DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
@@ -110,7 +114,15 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+@dataclass(frozen=True, slots=True)
+class ImagePdfOptions:
+    tool: str = IMAGE_PDF_TOOL
+    page_size: str = "a4"
+    orientation: str = "auto"
+    margin: str = "small"
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions | ImagePdfOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -268,6 +280,31 @@ def _markdown(value: dict[str, object]) -> MarkdownOptions:
     return MarkdownOptions(page_size=page_size, orientation=orientation)
 
 
+def _choice(raw: dict[str, object], name: str, allowed: tuple[str, ...], default: str) -> str:
+    if name not in raw:
+        return default
+    chosen = v.string(raw[name], code=CODE, where=name, max_length=16)
+    if chosen not in allowed:
+        raise v.fail(CODE, f"{name}: unknown")
+    return chosen
+
+
+def _image_pdf(value: dict[str, object]) -> ImagePdfOptions:
+    raw = v.obj(
+        value,
+        required=("tool",),
+        optional=("pageSize", "orientation", "margin"),
+        code=CODE,
+        where="options",
+    )
+    page_size = _choice(raw, "pageSize", IMAGE_PDF_PAGE_SIZES, "a4")
+    orientation = _choice(raw, "orientation", IMAGE_PDF_ORIENTATIONS, "auto")
+    margin = _choice(raw, "margin", IMAGE_PDF_MARGINS, "small")
+    if page_size == "fit" and orientation != "auto":
+        raise v.fail(CODE, "orientation: only auto with fit")
+    return ImagePdfOptions(page_size=page_size, orientation=orientation, margin=margin)
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -281,4 +318,6 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == IMAGE_PDF_TOOL:
+        return _image_pdf(value)
     raise v.fail(CODE, "tool: unknown")

@@ -118,5 +118,9 @@ def execute(request: Request, writer: EventWriter) -> None:
             _failure(writer, target, exc, "encode-failed")
             return
         writer.result(target.id, details)
-    else:
+    elif isinstance(options, PdfOptions):
         run_pdf(request, options, writer)
+    else:
+        # image-pdf is parsed but not executable until its pipeline is wired.
+        (target,) = request.results
+        _failure(writer, target, ProcessingError("unsupported-type"), "encode-failed")
