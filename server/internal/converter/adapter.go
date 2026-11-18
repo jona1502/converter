@@ -30,6 +30,7 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	c := p.cfg
 	limits := Limits{
 		MarkdownMaxInputBytes: c.MarkdownMaxInputBytes, MarkdownMaxOutputBytes: c.MarkdownMaxOutputBytes, MarkdownMaxPages: c.MarkdownMaxPages,
+		ImagePdfMaxImages: c.ImagePdfMaxImages, ImagePdfMaxInputBytes: c.ImagePdfMaxInputBytes,
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
@@ -43,6 +44,12 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	}
 	if limits.MarkdownMaxOutputBytes == 0 {
 		limits.MarkdownMaxOutputBytes = 20_971_520
+	}
+	if limits.ImagePdfMaxImages == 0 {
+		limits.ImagePdfMaxImages = 30
+	}
+	if limits.ImagePdfMaxInputBytes == 0 {
+		limits.ImagePdfMaxInputBytes = 104_857_600
 	}
 	if limits.MarkdownMaxPages == 0 {
 		limits.MarkdownMaxPages = 300
@@ -78,6 +85,10 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		// Eingaben sind höchstens PdfMaxInputBytes; das Ergebnis erhält dieselbe Grenze.
 		req.Timeout = c.PdfTimeout
 		req.OutputLimit = c.PdfMaxInputBytes
+	}
+	if task.Tool == "image-pdf" {
+		// Ein Bündel dekodiert bis zu ImagePdfMaxImages Bilder nacheinander.
+		req.Timeout = c.PdfTimeout
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout

@@ -243,6 +243,9 @@ func (u Upload) resultRows(originalName string) ([]resultRow, error) {
 		row, err := splitResultRow(originalName, u.Options)
 		return []resultRow{row}, err
 	}
+	if u.Tool == "image-pdf" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: ImagePdfDownloadName(originalName)}}, nil
+	}
 	if u.Tool == "markdown-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil
 	}
@@ -313,6 +316,8 @@ func (s *Service) Finalize(ctx context.Context, sessionID [16]byte, r Reservatio
 		fallback = PDFFallbackBase
 	case u.Tool == "audio-convert":
 		fallback = AudioFallbackBase
+	case u.Tool == "image-pdf":
+		fallback = ImagePdfFallbackBase
 	}
 	rows, err := u.resultRows(u.OriginalName)
 	if err == nil && u.Size > r.Bytes {

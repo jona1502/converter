@@ -17,6 +17,8 @@ export interface Capabilities {
   pdfSplit?: ApiSchemas['PdfSplitCapabilities'];
   /** Fehlt bei älteren Servern; dann ist pdf-merge nicht verfügbar. */
   pdfMerge?: ApiSchemas['PdfMergeCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist image-pdf nicht verfügbar. */
+  imagePdf?: ApiSchemas['ImagePdfCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {

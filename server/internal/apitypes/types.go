@@ -194,6 +194,7 @@ type Capabilities struct {
 	PdfRotate  RotateCapabilities   `json:"pdfRotate"`
 	PdfSplit   PdfSplitCapabilities `json:"pdfSplit"`
 	PdfMerge   PdfMergeCapabilities `json:"pdfMerge"`
+	ImagePdf   ImagePdfCapabilities `json:"imagePdf"`
 }
 
 // AudioDetails: details eines audio-convert-Ergebnisses (OpenAPI-Komponente

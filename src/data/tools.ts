@@ -159,6 +159,17 @@ export const TOOLS: readonly Tool[] = [
     action: 'merge',
     available: true,
   },
+  {
+    id: 'image-pdf',
+    title: 'Bild zu PDF',
+    description: 'Mehrere Bilder in eigener Reihenfolge zu einer PDF zusammenfassen, ein Bild pro Seite.',
+    lead: 'Fassen Sie Bilder in Ihrer Reihenfolge zu einer PDF zusammen, ein Bild pro Seite, wahlweise A4, US Letter oder in Bildgröße.',
+    href: '/pdf/aus-bildern',
+    category: 'pdf',
+    operation: 'konvertieren',
+    action: 'convert',
+    available: true,
+  },
 ];
 
 /** Alle freigeschalteten Werkzeuge in Listenreihenfolge. */

@@ -336,6 +336,10 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 	out.PdfRotate = a.pdfRotateCapabilities(report)
 	a.addSplitCapabilities(&out, report)
 	out.PdfMerge = a.mergeCapabilities(report)
+	out.ImagePdf = a.imagePdfCapabilities(report)
+	if !out.ImagePdf.Available {
+		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolImagePDF })
+	}
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -450,6 +454,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	if opts.tool == "pdf-merge" {
 		return a.createMergeJob(ctx, w, multipart, opts, owner, key, replay, reservation)
 	}
+	if opts.tool == "image-pdf" {
+		if err := a.requireImagePdf(); err != nil {
+			return err
+		}
+	}
 	part, err = multipart.NextPart()
 	if err != nil {
 		return httpapi.NewError(422, apitypes.CodeMissingFile, "Genau eine Datei erwartet.")
@@ -470,6 +479,8 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	switch opts.tool {
 	case "markdown-pdf":
 		limit = a.cfg.MarkdownMaxInputBytes
+	case "image-pdf":
+		limit = a.cfg.ImagePdfMaxInputBytes
 	case "pdf-compress", "pdf-rotate", "pdf-split":
 		limit = a.cfg.PdfMaxInputBytes
 	case "audio-convert":
@@ -540,6 +551,11 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		switch opts.tool {
 		case "markdown-pdf":
 			format = "markdown"
+		case "image-pdf":
+			if err = a.checkImagePdfUpload(file, size, originalName); err != nil {
+				return err
+			}
+			format = "zip"
 		case "pdf-compress", "pdf-rotate", "pdf-split":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
@@ -571,7 +587,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			if _, ok := jobs.AudioMIME[output]; !ok {
 				return invalidOptions()
 			}
-		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" && opts.tool != "pdf-rotate" && opts.tool != "pdf-split" {
+		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" && opts.tool != "pdf-rotate" && opts.tool != "pdf-split" && opts.tool != "image-pdf" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}

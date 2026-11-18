@@ -47,12 +47,15 @@ export async function detectFileKind(file: File): Promise<FileKind | null> {
   }
 }
 
+/** Eigene Eingabe (Markdown) oder mehrere Bilder zu einem Ergebnis (Bild zu PDF): nie als Aktion für eine PDF-Datei. */
+const NOT_FOR_SINGLE_FILE: ReadonlySet<string> = new Set(['markdown-pdf', 'image-pdf']);
+
 /** Werkzeuge, die zu einem Dateityp passen, in Reihenfolge Konvertieren, Komprimieren, Skalieren. */
 export function toolsForKind(kind: FileKind): Tool[] {
   if (kind === 'markdown') return availableTools.filter((tool) => tool.id === 'markdown-pdf');
   const { category } = KIND_INFO[kind];
   return TOOL_ACTIONS.flatMap((action) =>
-    availableTools.filter((tool) => tool.category === category && tool.action === action.id && tool.id !== 'markdown-pdf' && tool.quickStart !== false),
+    availableTools.filter((tool) => tool.category === category && tool.action === action.id && !NOT_FOR_SINGLE_FILE.has(tool.id) && tool.quickStart !== false),
   );
 }
 

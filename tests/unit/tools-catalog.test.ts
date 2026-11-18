@@ -17,12 +17,16 @@ describe('Werkzeugkatalog nach Aktion', () => {
   });
 
   it('ordnet Audio unter Konvertieren und PDF unter Komprimieren', () => {
-    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Audio konvertieren']);
+    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Bild zu PDF', 'Audio konvertieren']);
     expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
     expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
     expect(titlesOf('rotate')).toEqual(['PDF drehen']);
     expect(titlesOf('split')).toEqual(['PDF teilen']);
     expect(titlesOf('merge')).toEqual(['PDF zusammenführen']);
+  });
+
+  it('führt Bild zu PDF unter /pdf/aus-bildern', () => {
+    expect(getTool('image-pdf')).toMatchObject({ title: 'Bild zu PDF', href: '/pdf/aus-bildern', category: 'pdf' });
   });
 
   it('enthält jedes verfügbare Werkzeug genau einmal', () => {

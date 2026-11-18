@@ -215,6 +215,12 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"pdf-rotate","angle":90}`,
 		`{"tool":"pdf-rotate","angle":270,"pages":"1-3,5"}`,
 		`{"tool":"pdf-merge"}`,
+		`{"tool":"image-pdf"}`,
+		`{"tool":"image-pdf","pageSize":"fit","orientation":"auto","margin":"none"}`,
+		`{"tool":"image-pdf","pageSize":"letter","orientation":"landscape","margin":"medium"}`,
+		`{"tool":"image-pdf"}`,
+		`{"tool":"image-pdf","pageSize":"fit","orientation":"auto","margin":"none"}`,
+		`{"tool":"image-pdf","pageSize":"letter","orientation":"landscape","margin":"medium"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -251,6 +257,9 @@ func TestValidatorRejectsViolations(t *testing.T) {
 		"Rotate ohne Winkel":         {"PdfRotateOptions", `{"tool":"pdf-rotate"}`},
 		"PdfMerge unbekanntes Feld":  {"PdfMergeOptions", `{"tool":"pdf-merge","order":[1,0]}`},
 		"PdfMerge zu wenige Dateien": {"PdfMergeCapabilities", `{"available":true,"minFiles":1,"maxFiles":20,"maxTotalBytes":1,"maxOutputBytes":1,"maxPages":1}`},
+		"Bild-PDF Seitenformat":      {"ImagePdfOptions", `{"tool":"image-pdf","pageSize":"a3"}`},
+		"Bild-PDF Rand":              {"ImagePdfOptions", `{"tool":"image-pdf","margin":"huge"}`},
+		"Bild-PDF Ausrichtung":       {"ImagePdfOptions", `{"tool":"image-pdf","orientation":"diagonal"}`},
 		"Audiokanäle":                {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
 		"Audio ohne Bildfelder":      {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
 		"const":                      {"LiveResponse", `{"status":"nein"}`},

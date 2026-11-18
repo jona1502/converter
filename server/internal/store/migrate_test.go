@@ -61,7 +61,7 @@ func reference(t *testing.T) string {
 }
 
 // Constraint-Zeilen, die 0004_audio gegenüber Alembic 0003 ersetzt.
-// 0005_markdown erweitert diese Listen im aktuellen Schnappschuss weiter.
+// 0005_markdown und 0006_image_pdf erweitern diese Listen im aktuellen Schnappschuss weiter.
 const (
 	alembicToolCheck   = `constraint jobs.ck_jobs_tool c CHECK (tool = ANY (ARRAY['image-convert'::text, 'image-compress'::text, 'image-resize'::text, 'pdf-compress'::text]))`
 	alembicFormatCheck = `constraint jobs.ck_jobs_input_format c CHECK (input_format = ANY (ARRAY['jpeg'::text, 'png'::text, 'webp'::text, 'gif'::text, 'bmp'::text, 'ico'::text, 'avif'::text, 'pdf'::text]))`
@@ -69,7 +69,7 @@ const (
 	audioFormatCheck   = `constraint jobs.ck_jobs_input_format c CHECK (input_format = ANY (ARRAY['jpeg'::text, 'png'::text, 'webp'::text, 'gif'::text, 'bmp'::text, 'ico'::text, 'avif'::text, 'pdf'::text, 'mp3'::text, 'wav'::text, 'flac'::text, 'ogg'::text]))`
 )
 
-// currentSchema ist der Alembic-0003-Schnappschuss plus 0004_audio/0005_markdown: nur die
+// currentSchema ist der Alembic-0003-Schnappschuss plus 0004_audio/0005_markdown/0006_image_pdf: nur die
 // beiden CHECK-Constraints für Werkzeug und Eingabeformat sind erweitert.
 func currentSchema(t *testing.T) string {
 	t.Helper()
@@ -79,8 +79,8 @@ func currentSchema(t *testing.T) string {
 			t.Fatalf("Referenzzeile fehlt: %s", line)
 		}
 	}
-	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text, 'pdf-split'::text, 'pdf-merge'::text", 1)+"\n", 1)
-	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text", 1)+"\n", 1)
+	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text, 'pdf-split'::text, 'pdf-merge'::text, 'image-pdf'::text", 1)+"\n", 1)
+	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text, 'zip'::text", 1)+"\n", 1)
 }
 
 // migrationsUpTo liefert die eingebetteten Migrationen mit Version <= n.
@@ -230,7 +230,7 @@ func TestLoadMigrations(t *testing.T) {
 	for _, m := range all {
 		got = append(got, m.Name)
 	}
-	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate", "pdf_split", "pdf_merge"}
+	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate", "pdf_split", "pdf_merge", "image_pdf"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("Migrationen = %v", got)
 	}
@@ -595,4 +595,25 @@ func TestMigration0007PreservesJobsAndAddsPdfSplit(t *testing.T) {
 
 func TestMigration0008PreservesJobsAndAddsPdfMerge(t *testing.T) {
 	assertToolMigration(t, 8, "pdf-merge", "pdf", append([][2]string{{"pdf-rotate", "pdf"}, {"pdf-split", "pdf"}}, keptTools...))
+}
+
+func TestMigration0009PreservesJobsAndAddsImagePdfAndZip(t *testing.T) {
+	assertToolMigration(t, 9, "image-pdf", "zip", append([][2]string{{"pdf-rotate", "pdf"}, {"pdf-split", "pdf"}, {"pdf-merge", "pdf"}}, keptTools...))
+	// Das neue Eingabeformat zip gilt nur für Bild zu PDF, alle übrigen Formate bleiben gültig.
+	ctx := testContext(t)
+	pool, _ := testdb.NewPool(t)
+	if _, err := store.Migrate(ctx, pool, migrations.FS); err != nil {
+		t.Fatal(err)
+	}
+	seedJobs(t, ctx, pool)
+	for _, format := range []string{"jpeg", "png", "webp", "gif", "bmp", "ico", "avif", "pdf", "mp3", "wav", "flac", "ogg", "markdown", "zip"} {
+		_, err := pool.Exec(ctx, `INSERT INTO jobs (id,session_id,tool,state,options,input_name,input_size,input_format,input_sha256,input_storage_key,max_attempts,expires_at) VALUES (gen_random_uuid(),$1,'image-pdf','queued','{}','test',1,$2,decode(repeat('ef',32),'hex'),'jobs/x/input',3,now()+interval '1 hour')`, sessionID, format)
+		if err != nil {
+			t.Fatalf("input_format %s: %v", format, err)
+		}
+	}
+	_, err := pool.Exec(ctx, `INSERT INTO jobs (id,session_id,tool,state,options,input_name,input_size,input_format,input_sha256,input_storage_key,max_attempts,expires_at) VALUES (gen_random_uuid(),$1,'image-pdf','queued','{}','test',1,'html',decode(repeat('ef',32),'hex'),'jobs/x/input',3,now()+interval '1 hour')`, sessionID)
+	if err == nil {
+		t.Fatal("unknown format accepted")
+	}
 }

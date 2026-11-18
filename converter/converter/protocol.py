@@ -49,6 +49,7 @@ from converter.limits import Limits, parse_limits
 from converter.options import (
     AudioOptions,
     ImageOptions,
+    ImagePdfOptions,
     JobOptions,
     MarkdownOptions,
     PdfMergeOptions,
@@ -164,7 +165,8 @@ def _results(value: object, options: JobOptions) -> tuple[ResultTarget, ...]:
         | MarkdownOptions
         | PdfRotateOptions
         | SplitOptions
-        | PdfMergeOptions,
+        | PdfMergeOptions
+        | ImagePdfOptions,
     ):
         expected: list[str | None] = [None]
     else:

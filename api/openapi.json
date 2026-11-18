@@ -392,7 +392,8 @@
           "wav",
           "flac",
           "ogg",
-          "markdown"
+          "markdown",
+          "zip"
         ],
         "title": "InputFormat",
         "type": "string"
@@ -476,7 +477,8 @@
             "markdown-pdf": "#/components/schemas/MarkdownOptions",
             "pdf-rotate": "#/components/schemas/PdfRotateOptions",
             "pdf-split": "#/components/schemas/SplitOptions",
-            "pdf-merge": "#/components/schemas/PdfMergeOptions"
+            "pdf-merge": "#/components/schemas/PdfMergeOptions",
+            "image-pdf": "#/components/schemas/ImagePdfOptions"
           },
           "propertyName": "tool"
         },
@@ -501,6 +503,9 @@
           },
           {
             "$ref": "#/components/schemas/PdfMergeOptions"
+          },
+          {
+            "$ref": "#/components/schemas/ImagePdfOptions"
           }
         ]
       },
@@ -974,7 +979,8 @@
           "markdown-pdf",
           "pdf-rotate",
           "pdf-split",
-          "pdf-merge"
+          "pdf-merge",
+          "image-pdf"
         ],
         "title": "Tool",
         "type": "string"
@@ -1286,6 +1292,99 @@
         ],
         "title": "PdfMergeDetails",
         "type": "object"
+      },
+      "ImagePdfOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für image-pdf. Die Eingabe ist ein ZIP-Bündel (nur gespeicherte Einträge, Namen 001.ext bis NNN.ext) mit 1 bis maxImages Bildern; jede Seite des PDFs zeigt ein Bild in Namensreihenfolge. Bei pageSize fit ist nur orientation auto zulässig.",
+        "properties": {
+          "margin": {
+            "default": "small",
+            "enum": [
+              "none",
+              "small",
+              "medium"
+            ],
+            "title": "Margin",
+            "type": "string"
+          },
+          "orientation": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "portrait",
+              "landscape"
+            ],
+            "title": "Orientation",
+            "type": "string"
+          },
+          "pageSize": {
+            "default": "a4",
+            "enum": [
+              "a4",
+              "letter",
+              "fit"
+            ],
+            "title": "PageSize",
+            "type": "string"
+          },
+          "tool": {
+            "const": "image-pdf",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "ImagePdfOptions",
+        "type": "object"
+      },
+      "ImagePdfCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxImages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxImageBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxTotalBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxImages",
+          "maxImageBytes",
+          "maxTotalBytes",
+          "maxOutputBytes"
+        ],
+        "title": "ImagePdfCapabilities",
+        "type": "object"
+      },
+      "ImagePdfDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount"
+        ],
+        "title": "ImagePdfDetails",
+        "type": "object"
       }
     }
   },
@@ -1297,7 +1396,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities. Der Teil pdfMerge entspricht PdfMergeCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities. Der Teil pdfMerge entspricht PdfMergeCapabilities. Der Teil imagePdf entspricht ImagePdfCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {

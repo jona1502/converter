@@ -55,6 +55,8 @@ func (JobOptions) UnionVariant(tag string) any {
 		return new(ImageOptions)
 	case ToolMarkdownPDF:
 		return new(MarkdownOptions)
+	case ToolImagePDF:
+		return new(ImagePdfOptions)
 	case ToolPDFCompress:
 		return new(PdfOptions)
 	case ToolAudioConvert:

@@ -27,6 +27,9 @@ func APITypes() *Types {
 	Enum(ts, "", apitypes.MarkdownPageSizes())
 	Enum(ts, "", apitypes.MarkdownOrientations())
 	Enum(ts, "", apitypes.SplitModes())
+	Enum(ts, "", apitypes.ImagePdfPageSizes())
+	Enum(ts, "", apitypes.ImagePdfOrientations())
+	Enum(ts, "", apitypes.ImagePdfMargins())
 	Enum(ts, "", apitypes.CheckStatuses())
 	Enum(ts, "", apitypes.ReadyStatuses())
 	Enum(ts, "", []apitypes.ResizeMode{
@@ -65,6 +68,9 @@ func APITypes() *Types {
 		"PdfMergeOptions":      reflect.TypeFor[apitypes.PdfMergeOptions](),
 		"PdfMergeCapabilities": reflect.TypeFor[apitypes.PdfMergeCapabilities](),
 		"PdfMergeDetails":      reflect.TypeFor[apitypes.PdfMergeDetails](),
+		"ImagePdfOptions":      reflect.TypeFor[apitypes.ImagePdfOptions](),
+		"ImagePdfCapabilities": reflect.TypeFor[apitypes.ImagePdfCapabilities](),
+		"ImagePdfDetails":      reflect.TypeFor[apitypes.ImagePdfDetails](),
 		"AudioOptions":         reflect.TypeFor[apitypes.AudioOptions](),
 		"AudioCapabilities":    reflect.TypeFor[apitypes.AudioCapabilities](),
 		"AudioDetails":         reflect.TypeFor[apitypes.AudioDetails](),
