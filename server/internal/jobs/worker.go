@@ -192,7 +192,7 @@ func (w *Worker) Process(runCtx context.Context, task *Task) {
 	switch task.Tool {
 	case "markdown-pdf":
 		timeout = w.rt.cfg.MarkdownTimeout
-	case "pdf-compress":
+	case "pdf-compress", "image-pdf":
 		timeout = w.rt.cfg.PDFTimeout
 	case "audio-convert":
 		timeout = w.rt.cfg.AudioTimeout
