@@ -35,6 +35,9 @@ func parseOptions(raw []byte) (options, error) {
 	if markdown, ok := input.Value.(*apitypes.MarkdownOptions); ok {
 		return parseMarkdownOptions(markdown)
 	}
+	if rotate, ok := input.PdfRotate(); ok {
+		return parsePdfRotateOptions(rotate)
+	}
 	if pdf, ok := input.Pdf(); ok {
 		levels := pdf.Levels.Or([]apitypes.PdfLevel{"high", "balanced", "small"})
 		if len(levels) == 0 || len(levels) > 3 {
