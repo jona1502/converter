@@ -79,8 +79,43 @@ func currentSchema(t *testing.T) string {
 			t.Fatalf("Referenzzeile fehlt: %s", line)
 		}
 	}
-	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text", 1)+"\n", 1)
+	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text, 'pdf-split'::text", 1)+"\n", 1)
 	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text", 1)+"\n", 1)
+}
+
+// migrationsUpTo liefert die eingebetteten Migrationen mit Version <= n.
+func migrationsUpTo(t *testing.T, n int) fstest.MapFS {
+	t.Helper()
+	all, err := store.LoadMigrations(migrations.FS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := fstest.MapFS{}
+	for _, m := range all {
+		if m.Version <= n {
+			out[fmt.Sprintf("%04d_%s.sql", m.Version, m.Name)] = &fstest.MapFile{Data: []byte(m.SQL)}
+		}
+	}
+	return out
+}
+
+// versionRange liefert from..to (einschließlich) als Versionsliste.
+func versionRange(from, to int) []int {
+	var out []int
+	for v := from; v <= to; v++ {
+		out = append(out, v)
+	}
+	return out
+}
+
+// headVersion ist die höchste eingebettete Migrationsversion.
+func headVersion(t *testing.T) int {
+	t.Helper()
+	all, err := store.LoadMigrations(migrations.FS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return all[len(all)-1].Version
 }
 
 // alembicOnly enthält nur die Portierungen 0001–0003.
@@ -195,8 +230,8 @@ func TestLoadMigrations(t *testing.T) {
 	for _, m := range all {
 		got = append(got, m.Name)
 	}
-	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate"}
-	if !slices.Equal(got[:6], want) {
+	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate", "pdf_split"}
+	if !slices.Equal(got, want) {
 		t.Fatalf("Migrationen = %v", got)
 	}
 }
@@ -222,7 +257,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Baselined || !slices.Equal(res.Applied, []int{1, 2, 3, 4, 5, 6}) {
+	if res.Baselined || !slices.Equal(res.Applied, versionRange(1, headVersion(t))) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
 	assertSchema(t, ctx, pool, currentSchema(t))
@@ -238,7 +273,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if res.Baselined || len(res.Applied) != 0 {
 		t.Fatalf("zweiter Lauf = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, versionRange(1, headVersion(t))) {
 		t.Fatalf("Versionen = %v", v)
 	}
 }
@@ -263,7 +298,7 @@ func TestMigration0004AllowsAudioJobs(t *testing.T) {
 	}
 	before := dataDump(t, ctx, pool)
 	res, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(res.Applied, []int{4, 5, 6}) {
+	if err != nil || !slices.Equal(res.Applied, versionRange(4, headVersion(t))) {
 		t.Fatalf("Ergebnis = %+v, %v", res, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -302,11 +337,11 @@ func TestMigrateBaselinesAlembicHeadWithoutTouchingData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Baseline übernimmt 1–3 ohne SQL, danach laufen 0004_audio bis 0006_pdf_rotate.
-	if !res.Baselined || !slices.Equal(res.Applied, []int{4, 5, 6}) {
+	// Baseline übernimmt 1–3 ohne SQL, danach laufen alle Migrationen ab 0004_audio.
+	if !res.Baselined || !slices.Equal(res.Applied, versionRange(4, headVersion(t))) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, versionRange(1, headVersion(t))) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -398,7 +433,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
 		switch len(results[i].Applied) {
-		case 6:
+		case headVersion(t):
 			applied++
 		case 0:
 		default:
@@ -408,7 +443,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 	if applied != 1 {
 		t.Fatalf("%d Runner haben migriert, erwartet genau 1", applied)
 	}
-	if v := versions(t, ctx, pools[0]); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
+	if v := versions(t, ctx, pools[0]); !slices.Equal(v, versionRange(1, headVersion(t))) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	assertSchema(t, ctx, pools[0], currentSchema(t))
@@ -437,8 +472,8 @@ func TestMigrateConcurrentBaselineOnce(t *testing.T) {
 		if errs[i] != nil {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
-		// Nur der baselinende Runner führt danach 0004 bis 0006 aus.
-		if results[i].Baselined != slices.Equal(results[i].Applied, []int{4, 5, 6}) ||
+		// Nur der baselinende Runner führt danach 0004 bis zum Head aus.
+		if results[i].Baselined != slices.Equal(results[i].Applied, versionRange(4, headVersion(t))) ||
 			(!results[i].Baselined && len(results[i].Applied) != 0) {
 			t.Fatalf("Runner %d: %+v", i, results[i])
 		}
@@ -491,7 +526,7 @@ func TestMigration0005PreservesJobsAndAddsMarkdown(t *testing.T) {
 	}
 	before := dataDump(t, ctx, pool)
 	result, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(result.Applied, []int{5, 6}) {
+	if err != nil || !slices.Equal(result.Applied, versionRange(5, headVersion(t))) {
 		t.Fatalf("%+v %v", result, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -511,18 +546,14 @@ func TestMigration0005PreservesJobsAndAddsMarkdown(t *testing.T) {
 	}
 }
 
-func TestMigration0006PreservesJobsAndAddsPdfRotate(t *testing.T) {
+// assertToolMigration prüft eine Migration, die nur ck_jobs_tool erweitert: Daten bleiben
+// unverändert, das neue Werkzeug wird akzeptiert und alle bisherigen bleiben erlaubt.
+func assertToolMigration(t *testing.T, version int, tool, format string, keep [][2]string) {
+	t.Helper()
 	ctx := testContext(t)
 	pool, _ := testdb.NewPool(t)
-	all, err := store.LoadMigrations(migrations.FS)
-	if err != nil {
-		t.Fatal(err)
-	}
-	beforeFS := fstest.MapFS{}
-	for _, m := range all[:5] {
-		beforeFS[fmt.Sprintf("%04d_%s.sql", m.Version, m.Name)] = &fstest.MapFile{Data: []byte(m.SQL)}
-	}
-	if _, err := store.Migrate(ctx, pool, beforeFS); err != nil {
+	before := migrationsUpTo(t, version-1)
+	if _, err := store.Migrate(ctx, pool, before); err != nil {
 		t.Fatal(err)
 	}
 	seedJobs(t, ctx, pool)
@@ -530,23 +561,34 @@ func TestMigration0006PreservesJobsAndAddsPdfRotate(t *testing.T) {
 		_, err := pool.Exec(ctx, `INSERT INTO jobs (id,session_id,tool,state,options,input_name,input_size,input_format,input_sha256,input_storage_key,max_attempts,expires_at) VALUES (gen_random_uuid(),$1,$2,'queued','{}','test',1,$3,decode(repeat('ef',32),'hex'),'jobs/x/input',3,now()+interval '1 hour')`, sessionID, tool, format)
 		return err
 	}
-	if err := insert("pdf-rotate", "pdf"); err == nil {
-		t.Fatal("0005 accepted pdf-rotate")
+	if err := insert(tool, format); err == nil {
+		t.Fatalf("%04d: Vorgänger akzeptierte %s", version-1, tool)
 	}
-	before := dataDump(t, ctx, pool)
-	result, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(result.Applied, []int{6}) {
+	dump := dataDump(t, ctx, pool)
+	result, err := store.Migrate(ctx, pool, migrationsUpTo(t, version))
+	if err != nil || !slices.Equal(result.Applied, []int{version}) {
 		t.Fatalf("%+v %v", result, err)
 	}
-	if after := dataDump(t, ctx, pool); after != before {
-		t.Fatal("0006 changed existing data")
+	if after := dataDump(t, ctx, pool); after != dump {
+		t.Fatalf("%04d änderte vorhandene Daten", version)
 	}
-	for _, tc := range [][2]string{{"pdf-rotate", "pdf"}, {"markdown-pdf", "markdown"}, {"pdf-compress", "pdf"}} {
+	for _, tc := range append([][2]string{{tool, format}}, keep...) {
 		if err := insert(tc[0], tc[1]); err != nil {
-			t.Fatalf("%v: %v", tc, err)
+			t.Fatalf("%04d: %v: %v", version, tc, err)
 		}
 	}
 	if err := insert("pdf-flip", "pdf"); err == nil {
 		t.Fatal("unknown tool accepted")
 	}
+}
+
+// keptTools sind alle Werkzeuge, die jede Migration ab 0006 weiter erlauben muss.
+var keptTools = [][2]string{{"markdown-pdf", "markdown"}, {"pdf-compress", "pdf"}, {"audio-convert", "mp3"}, {"image-convert", "png"}}
+
+func TestMigration0006PreservesJobsAndAddsPdfRotate(t *testing.T) {
+	assertToolMigration(t, 6, "pdf-rotate", "pdf", keptTools)
+}
+
+func TestMigration0007PreservesJobsAndAddsPdfSplit(t *testing.T) {
+	assertToolMigration(t, 7, "pdf-split", "pdf", append([][2]string{{"pdf-rotate", "pdf"}}, keptTools...))
 }
