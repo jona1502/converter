@@ -67,6 +67,7 @@ type Config struct {
 	PdfMaxInputBytes         int64
 	PdfMaxResultsTotalBytes  int64
 	PdfImageMaxPixels        int64
+	PdfRenderMaxPages        int64
 	AudioMaxInputBytes       int64
 	AudioMaxDurationSeconds  int64
 	AudioMaxChannels         int64
@@ -142,6 +143,7 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.PdfMaxInputBytes = p.positive("PDF_MAX_INPUT_BYTES", 100_000_000)
 	c.PdfMaxResultsTotalBytes = p.positive("PDF_MAX_RESULTS_TOTAL_BYTES", 300_000_000)
 	c.PdfImageMaxPixels = p.positive("PDF_IMAGE_MAX_PIXELS", 40_000_000)
+	c.PdfRenderMaxPages = p.positive("PDF_RENDER_MAX_PAGES", 100)
 	c.AudioMaxInputBytes = p.positive("AUDIO_MAX_INPUT_BYTES", 104_857_600)
 	c.AudioMaxDurationSeconds = p.positive("AUDIO_MAX_DURATION_SECONDS", 1800)
 	c.AudioMaxChannels = p.positive("AUDIO_MAX_CHANNELS", 8)
