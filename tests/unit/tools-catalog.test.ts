@@ -5,11 +5,12 @@ describe('Werkzeugkatalog nach Aktion', () => {
   const titlesOf = (id: string) =>
     availableToolsByAction.find((group) => group.action.id === id)?.tools.map((tool) => tool.title);
 
-  it('gruppiert Konvertieren, Komprimieren und Skalieren in dieser Reihenfolge', () => {
+  it('gruppiert Konvertieren, Komprimieren, Skalieren und Zusammenführen in dieser Reihenfolge', () => {
     expect(availableToolsByAction.map((group) => group.action.title)).toEqual([
       'Konvertieren',
       'Komprimieren',
       'Skalieren',
+      'Zusammenführen',
     ]);
   });
 
@@ -17,6 +18,7 @@ describe('Werkzeugkatalog nach Aktion', () => {
     expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Audio konvertieren']);
     expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
     expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
+    expect(titlesOf('merge')).toEqual(['PDF zusammenführen']);
   });
 
   it('enthält jedes verfügbare Werkzeug genau einmal', () => {
