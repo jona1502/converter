@@ -22,7 +22,7 @@ Ereignisse: JSONL über stdout, kompakt, ASCII, jede Zeile < ``MAX_EVENT_BYTES``
 
     {"kind":"progress","phase":"encode"}                                  Bild, Audio
     {"kind":"progress","phase":"encode",
-     "progress":{"step":"encode","current":65536,"total":1323000}}        Audio (Frames), PDF zu Bild (Seiten)
+     "progress":{"step":"encode","current":65536,"total":1323000}}        Audio, PDF zu Bild
     {"kind":"analysis","analysis":{...PdfAnalysis...}}                    PDF, genau einmal
     {"kind":"progress","phase":"variant",
      "progress":{"step":"variant","level":"high","current":3,"total":12}} PDF, gedrosselt
