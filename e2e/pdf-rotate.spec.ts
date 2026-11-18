@@ -113,5 +113,5 @@ test('Werkzeug ist in der Navigation unter Drehen erreichbar', async ({ page }, 
   const nav = page.getByRole('navigation').first();
   await nav.getByRole('button', { name: 'Drehen-Menü', exact: true }).click();
   await nav.getByRole('link', { name: 'PDF drehen', exact: true }).click();
-  await expect(page).toHaveURL(/\/pdf\/drehen$/);
+  await expect(page).toHaveURL(/\/pdf\/drehen\/?$/);
 });

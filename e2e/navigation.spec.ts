@@ -89,6 +89,7 @@ test.describe('Desktop (1440 px)', () => {
     await expect(link(page, 'Markdown zu PDF')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Bild zu PDF')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
     await expect(link(page, 'PDF zu Bild')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Audio konvertieren')).toBeFocused();
