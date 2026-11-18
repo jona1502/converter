@@ -45,6 +45,12 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	if limits.MarkdownMaxOutputBytes == 0 {
 		limits.MarkdownMaxOutputBytes = 20_971_520
 	}
+	if limits.ImagePdfMaxImages == 0 {
+		limits.ImagePdfMaxImages = 30
+	}
+	if limits.ImagePdfMaxInputBytes == 0 {
+		limits.ImagePdfMaxInputBytes = 104_857_600
+	}
 	if limits.MarkdownMaxPages == 0 {
 		limits.MarkdownMaxPages = 300
 	}
