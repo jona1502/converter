@@ -95,6 +95,7 @@ type session struct {
 	pdf       bool
 	audio     bool
 	markdown  bool
+	imagePdf  bool
 	onEvent   func(Event) error
 	analysis  bool
 	next      int // Index des nächsten offenen Ergebnisses
@@ -183,6 +184,8 @@ func (s *session) handle(data []byte) error {
 			details, err = ValidatePdfDetails(o["details"])
 		case s.markdown:
 			details, err = ValidateMarkdownDetails(o["details"], s.req.Limits)
+		case s.imagePdf:
+			details, err = ValidateImagePdfDetails(o["details"], s.req.Limits)
 		case s.audio:
 			details, err = ValidateAudioDetails(o["details"], s.req.Limits)
 		default:
@@ -309,7 +312,7 @@ func (r *Runner) Run(ctx context.Context, req Request, onEvent func(Event) error
 	if err != nil {
 		return Outcome{}, err
 	}
-	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), onEvent: onEvent}
+	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), imagePdf: req.isImagePdf(), onEvent: onEvent}
 	res, err := r.execute(ctx, "run", payload, req.Timeout, s.handle)
 	if err != nil {
 		return Outcome{}, err

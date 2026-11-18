@@ -30,6 +30,7 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	c := p.cfg
 	limits := Limits{
 		MarkdownMaxInputBytes: c.MarkdownMaxInputBytes, MarkdownMaxOutputBytes: c.MarkdownMaxOutputBytes, MarkdownMaxPages: c.MarkdownMaxPages,
+		ImagePdfMaxImages: c.ImagePdfMaxImages, ImagePdfMaxInputBytes: c.ImagePdfMaxInputBytes,
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
@@ -55,6 +56,10 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	if task.Tool == "markdown-pdf" {
 		req.Timeout = c.MarkdownTimeout
 		req.OutputLimit = limits.MarkdownMaxOutputBytes
+	}
+	if task.Tool == "image-pdf" {
+		// Ein Bündel dekodiert bis zu ImagePdfMaxImages Bilder nacheinander.
+		req.Timeout = c.PdfTimeout
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout
