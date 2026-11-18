@@ -12,12 +12,13 @@ import time
 from pathlib import Path
 
 from converter.errors import ProcessingError
-from converter.options import AudioOptions, ImageOptions, MarkdownOptions, PdfOptions
+from converter.options import AudioOptions, ImageOptions, MarkdownOptions, PdfOptions, SplitOptions
 from converter.processing.audio import pipeline as audio
 from converter.processing.files import discard
 from converter.processing.images.pipeline import convert
 from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
+from converter.processing.split import pipeline as split
 from converter.protocol import EventWriter, Request, ResultTarget
 
 # Fortschritt höchstens alle 0,25 s je Stufe (plus erstes und letztes Ereignis),
@@ -116,6 +117,17 @@ def execute(request: Request, writer: EventWriter) -> None:
             )
         except Exception as exc:
             _failure(writer, target, exc, "encode-failed")
+            return
+        writer.result(target.id, details)
+    elif isinstance(options, SplitOptions):
+        (target,) = request.results
+        writer.progress_encode()
+        try:
+            details = split.convert(
+                Path(request.source), Path(target.path), options, request.limits
+            )
+        except Exception as exc:
+            _failure(writer, target, exc, "parse-failed")
             return
         writer.result(target.id, details)
     elif isinstance(options, PdfOptions):

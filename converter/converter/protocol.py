@@ -94,6 +94,7 @@ RESULT_CODES: Final = frozenset(
         "invalid-options",
         "duration-too-long",
         "unsupported-audio",
+        "page-range-invalid",
     }
 )
 # protocol-error/sandbox-failed sind intern: Go bildet sie auf worker-failed ab.
