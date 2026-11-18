@@ -11,6 +11,8 @@ export interface Capabilities {
   audio?: ApiSchemas['AudioCapabilities'];
   /** Fehlt bei älteren Servern; dann ist markdown-pdf nicht verfügbar. */
   markdown?: ApiSchemas['MarkdownCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-to-image nicht verfügbar. */
+  pdfImage?: ApiSchemas['PdfImageCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {
