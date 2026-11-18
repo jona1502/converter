@@ -36,12 +36,12 @@ Optionen `{"tool":"pdf-to-image", "format":"png|jpeg|webp", "dpi":72..300, "page
 
 | Grenze | Wert | Quelle |
 | --- | --- | --- |
-| Eingabegröße | 100 000 000 Byte | bestehend `PDF_MAX_INPUT_BYTES` |
-| Seiten je Auftrag | 100 | neu `PDF_IMAGE_MAX_PAGES` |
-| Pixel je gerenderter Seite | 40 000 000 | bestehend `PDF_IMAGE_MAX_PIXELS` |
+| Eingabegröße | 100 000 000 Byte | bestehend `CONVERTER_PDF_MAX_INPUT_BYTES` |
+| Seiten je Auftrag | 100 | neu `CONVERTER_PDF_RENDER_MAX_PAGES` |
+| Pixel je gerenderter Seite | 40 000 000 | bestehend `CONVERTER_PDF_IMAGE_MAX_PIXELS` (dieselbe 40-MP-Grenze wie bei neu kodierten PDF-Bildern) |
 | Kante je Seite | 16 383 (WebP-Grenze) | Konverter |
-| Ergebnisgröße | 300 000 000 Byte | bestehend `PDF_MAX_RESULTS_TOTAL_BYTES` |
-| Laufzeit | 300 s | bestehend `PDF_TIMEOUT_SECONDS` |
+| Ergebnisgröße | 300 000 000 Byte | bestehend `CONVERTER_PDF_MAX_RESULTS_TOTAL_BYTES` |
+| Laufzeit | 300 s | bestehend `CONVERTER_PDF_TIMEOUT_SECONDS` |
 
 Fehler: verschlüsselte PDF `encrypted` (auch bei leerem Benutzerkennwort), beschädigte PDF `parse-failed`, zu große Seite `dimensions-too-large`, zu viele Seiten oder zu großes Archiv `result-too-large`, Seitenauswahl außerhalb des Dokuments `parse-failed`. Fehlerhafte oder unfertige Ergebnisse werden nicht zum Download freigegeben.
 
