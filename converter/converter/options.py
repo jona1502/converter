@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Final, Literal
 
 from converter import validation as v
+from converter.pagespec import parse_pages
 
 CODE: Final = "invalid-options"
 
@@ -31,6 +32,11 @@ AUDIO_CHANNELS: Final = ("original", "mono")
 MARKDOWN_TOOL: Final = "markdown-pdf"
 MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
 MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
+PDF_IMAGE_TOOL: Final = "pdf-to-image"
+PDF_IMAGE_FORMATS: Final = ("png", "jpeg", "webp")
+PDF_IMAGE_MIN_DPI: Final = 72
+PDF_IMAGE_MAX_DPI: Final = 300
+DEFAULT_PDF_IMAGE_DPI: Final = 150
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
 DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
@@ -110,7 +116,17 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+@dataclass(frozen=True, slots=True)
+class PdfImageOptions:
+    format: str
+    dpi: int = DEFAULT_PDF_IMAGE_DPI
+    # None = alle Seiten; sonst aufsteigende, eindeutige Seitennummern ab 1.
+    pages: tuple[int, ...] | None = None
+    quality: float = DEFAULT_QUALITY
+    tool: str = PDF_IMAGE_TOOL
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions | PdfImageOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -268,6 +284,37 @@ def _markdown(value: dict[str, object]) -> MarkdownOptions:
     return MarkdownOptions(page_size=page_size, orientation=orientation)
 
 
+def _pdf_image(value: dict[str, object]) -> PdfImageOptions:
+    raw = v.obj(
+        value,
+        required=("tool", "format"),
+        optional=("dpi", "pages", "quality"),
+        code=CODE,
+        where="options",
+    )
+    output = raw["format"]
+    if type(output) is not str or output not in PDF_IMAGE_FORMATS:
+        raise v.fail(CODE, "format: unknown")
+    dpi = DEFAULT_PDF_IMAGE_DPI
+    if "dpi" in raw:
+        dpi = v.integer(
+            raw["dpi"], code=CODE, where="dpi", minimum=PDF_IMAGE_MIN_DPI, maximum=PDF_IMAGE_MAX_DPI
+        )
+    pages: tuple[int, ...] | None = None
+    if "pages" in raw:
+        text = v.string(raw["pages"], code=CODE, where="pages", max_length=200)
+        try:
+            pages = parse_pages(text)
+        except ValueError as exc:
+            raise v.fail(CODE, "pages: invalid") from exc
+    quality = DEFAULT_QUALITY
+    if "quality" in raw:
+        quality = v.number(raw["quality"], code=CODE, where="quality")
+        if not 0 <= quality <= 1:
+            raise v.fail(CODE, "quality: out of range")
+    return PdfImageOptions(format=output, dpi=dpi, pages=pages, quality=quality)
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -281,4 +328,6 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == PDF_IMAGE_TOOL:
+        return _pdf_image(value)
     raise v.fail(CODE, "tool: unknown")
