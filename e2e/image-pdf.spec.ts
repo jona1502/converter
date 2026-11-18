@@ -118,11 +118,15 @@ test('Auswahl und Reihenfolge bleiben lokal; erst der Start lädt ein Bündel in
   expect(body.toString('latin1')).toContain('filename="bilder.zip"');
   expect(body.toString('latin1')).not.toContain('rot.png');
   // Gestapelte Einträge 001, 002, 003 enthalten blau, gruen, rot in dieser Reihenfolge.
-  const at = (image: { buffer: Buffer }) => body.indexOf(image.buffer);
-  expect(at(blue)).toBeGreaterThan(0);
-  expect(at(blue)).toBeLessThan(at(green));
-  expect(at(green)).toBeLessThan(at(red));
-  for (const name of ['001.png', '002.png', '003.png']) expect(body.includes(Buffer.from(name))).toBe(true);
+  // Playwright-WebKit liefert in postDataBuffer den binären Dateiteil leer (nur Multipart-Rahmen);
+  // dort ist der ZIP-Inhalt nicht beobachtbar, die Prüfung läuft in den anderen Projekten.
+  if (testInfo.project.name !== 'webkit') {
+    const at = (image: { buffer: Buffer }) => body.indexOf(image.buffer);
+    expect(at(blue)).toBeGreaterThan(0);
+    expect(at(blue)).toBeLessThan(at(green));
+    expect(at(green)).toBeLessThan(at(red));
+    for (const name of ['001.png', '002.png', '003.png']) expect(body.includes(Buffer.from(name))).toBe(true);
+  }
 });
 
 test('Bildgröße sperrt die Ausrichtung und sendet automatisch', async ({ page }) => {
