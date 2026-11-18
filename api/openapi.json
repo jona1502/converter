@@ -473,7 +473,8 @@
             "image-convert": "#/components/schemas/ImageOptions",
             "image-resize": "#/components/schemas/ImageOptions",
             "pdf-compress": "#/components/schemas/PdfOptions",
-            "markdown-pdf": "#/components/schemas/MarkdownOptions"
+            "markdown-pdf": "#/components/schemas/MarkdownOptions",
+            "pdf-rotate": "#/components/schemas/PdfRotateOptions"
           },
           "propertyName": "tool"
         },
@@ -489,6 +490,9 @@
           },
           {
             "$ref": "#/components/schemas/MarkdownOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfRotateOptions"
           }
         ]
       },
@@ -958,7 +962,8 @@
           "image-resize",
           "pdf-compress",
           "audio-convert",
-          "markdown-pdf"
+          "markdown-pdf",
+          "pdf-rotate"
         ],
         "title": "Tool",
         "type": "string"
@@ -1038,6 +1043,88 @@
         ],
         "title": "MarkdownDetails",
         "type": "object"
+      },
+      "PdfRotateOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-rotate: Drehung im Uhrzeigersinn für alle oder gewählte Seiten.",
+        "properties": {
+          "angle": {
+            "enum": [
+              90,
+              180,
+              270
+            ],
+            "title": "Angle",
+            "type": "integer"
+          },
+          "pages": {
+            "default": "all",
+            "description": "\"all\" oder eine Liste einzelner Seiten und Bereiche (1-basiert), z. B. \"1-3,5\".",
+            "maxLength": 256,
+            "title": "Pages",
+            "type": "string"
+          },
+          "tool": {
+            "const": "pdf-rotate",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "angle"
+        ],
+        "title": "PdfRotateOptions",
+        "type": "object"
+      },
+      "PdfRotateCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "angles": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "maxFileBytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxOutputBytes": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "available",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "angles"
+        ],
+        "title": "PdfRotateCapabilities",
+        "type": "object"
+      },
+      "PdfRotateDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "rotatedPages": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pageCount",
+          "rotatedPages"
+        ],
+        "title": "PdfRotateDetails",
+        "type": "object"
       }
     }
   },
@@ -1049,7 +1136,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {

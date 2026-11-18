@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Final, Literal
 
 from converter import validation as v
+from converter.rotate_options import PDF_ROTATE_TOOL, PdfRotateOptions, parse_pdf_rotate
 
 CODE: Final = "invalid-options"
 
@@ -110,7 +111,7 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions | PdfRotateOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -281,4 +282,6 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == PDF_ROTATE_TOOL:
+        return parse_pdf_rotate(value)
     raise v.fail(CODE, "tool: unknown")

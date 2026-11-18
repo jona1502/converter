@@ -195,7 +195,7 @@ func (r Request) encode() ([]byte, error) {
 	if !pdf && len(r.Results) != 1 {
 		return nil, invalid("Bild/Audio hat genau ein Ergebnis")
 	}
-	if pdf && (r.isAudio() || r.isMarkdown()) {
+	if pdf && (r.isAudio() || r.isMarkdown() || r.isRotate()) {
 		return nil, invalid("Audio ohne Stufe")
 	}
 	ids, paths, levels := map[string]bool{}, map[string]bool{r.Source: true}, map[string]bool{}

@@ -18,7 +18,9 @@ from converter.processing.files import discard
 from converter.processing.images.pipeline import convert
 from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
+from converter.processing.pdf.rotate import rotate
 from converter.protocol import EventWriter, Request, ResultTarget
+from converter.rotate_options import PdfRotateOptions
 
 # Fortschritt höchstens alle 0,25 s je Stufe (plus erstes und letztes Ereignis),
 # damit PDFs mit Tausenden Bildern die Ereignisgrenzen von Go nicht fluten.
@@ -101,6 +103,18 @@ def run_pdf(request: Request, options: PdfOptions, writer: EventWriter) -> None:
         writer.result(target.id, details)
 
 
+def run_pdf_rotate(request: Request, options: PdfRotateOptions, writer: EventWriter) -> None:
+    """Ein Ergebnis wie bei Bildern; Ausgabegrenze ist das PDF-Gesamtbudget."""
+    (target,) = request.results
+    writer.progress_encode()
+    try:
+        details = rotate(Path(request.source), Path(target.path), options, request.limits)
+    except Exception as exc:
+        _failure(writer, target, exc, "parse-failed")
+        return
+    writer.result(target.id, details)
+
+
 def execute(request: Request, writer: EventWriter) -> None:
     options = request.options
     if isinstance(options, ImageOptions):
@@ -118,5 +132,7 @@ def execute(request: Request, writer: EventWriter) -> None:
             _failure(writer, target, exc, "encode-failed")
             return
         writer.result(target.id, details)
+    elif isinstance(options, PdfRotateOptions):
+        run_pdf_rotate(request, options, writer)
     else:
         run_pdf(request, options, writer)
