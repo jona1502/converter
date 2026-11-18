@@ -108,6 +108,16 @@ export async function cancelJob(id: string): Promise<void> {
 /** Download-URL des ZIP-Archivs mit den Ergebnissen mehrerer fertiger Aufträge. */
 export const archiveUrl = (jobIds: readonly string[]) =>
   `${prefix}/jobs/archive?${jobIds.map(id => `job_id=${encodeURIComponent(id)}`).join('&')}`;
+/** Obergrenze der Aufträge je Archiv; entspricht maxArchiveJobs im Go-Backend. */
+export const MAX_ARCHIVE_JOBS = 30;
+/**
+ * ZIP-URL für fertige Aufträge eines beliebigen Werkzeugs: erst ab zwei verschiedenen Aufträgen,
+ * nie während der Verarbeitung und nie über der Obergrenze; fehlende IDs und Duplikate zählen nicht.
+ */
+export function batchZipUrl(jobIds: readonly (string | undefined)[], processing: boolean): string | null {
+  const unique = [...new Set(jobIds.filter((id): id is string => !!id))];
+  return !processing && unique.length >= 2 && unique.length <= MAX_ARCHIVE_JOBS ? archiveUrl(unique) : null;
+}
 export const terminal = (job: Job) => !['queued', 'running'].includes(job.state);
 export async function pollJob(initial: Job, signal: AbortSignal, onStatus: (job: Job) => void): Promise<Job> {
   let job = initial, failures = 0;
