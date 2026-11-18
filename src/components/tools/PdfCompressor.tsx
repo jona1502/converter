@@ -143,7 +143,7 @@ export default function PdfCompressor({initialFiles}: ToolProps) {
             {job.state!=='expired'&&result?.downloadUrl&&<a className="btn btn-primary mt-auto w-full" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
           </section>;
         })}</div>
-        {!busy&&zipHref&&<a className="btn btn-secondary self-start" href={zipHref} download="ergebnisse.zip">Alle als ZIP speichern</a>}
+        {!busy&&zipHref&&<a className="btn btn-secondary self-start" href={zipHref}>Alle als ZIP speichern</a>}
       </>}
     </>}/>
 }
