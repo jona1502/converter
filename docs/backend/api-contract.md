@@ -210,6 +210,19 @@ Antwort `202` (bzw. `200` bei Replay): `Job` (Abschnitt 5) und `Location: /api/v
 - Tags, Cover und sonstige Metadaten werden nicht übernommen.
 - Eingabe: MP3, WAV, FLAC, OGG (Vorbis oder Opus).
 
+#### Optionen PDF zu Bild
+
+```json
+{ "tool": "pdf-to-image", "format": "png", "dpi": 150, "pages": "all", "quality": 0.85 }
+```
+
+- `format`: `png` | `jpeg` | `webp` (Pflicht). `quality` (0..1, Standard 0,85) wirkt nur bei `jpeg` und `webp`.
+- `dpi`: Ganzzahl 72..300, Standard 150 (`capabilities.pdfImage.minDpi/maxDpi/defaultDpi`).
+- `pages`: `all` (Standard) oder kommagetrennte Seitennummern und Bereiche ab 1 (`1-3,5`), höchstens 200 Zeichen, nur ASCII-Ziffern, keine Leerzeichen. Gespeichert wird die normalisierte Form (aufsteigend, ohne Duplikate, Läufe als `a-b`). Mehr gewählte Seiten als `capabilities.pdfImage.maxPages` sind `invalid-options`.
+- Genau eine ausdrücklich gewählte Seite ergibt **ein Ergebnis mit Bild** (`image/png|jpeg|webp`, `<stamm>-seite-<n>.<ext>`), jede andere Auswahl inklusive `all` **ein ZIP** (`application/zip`, `<stamm>-bilder.zip`, Einträge `seite-001.<ext>`). Das steht bei der Annahme fest.
+- Details: `{ "pageCount", "sourcePageCount", "archive" }` (Komponente `PdfImageDetails`). Fortschritt: `progress` `{ "step": "encode", "current", "total" }` in Seiten.
+- Fehlercodes: `encrypted`, `parse-failed` (beschädigt oder Seite außerhalb des Dokuments), `dimensions-too-large` (Seite über 40 MP oder 16.383 px), `result-too-large` (zu viele Seiten oder Ergebnis über dem Budget), `timeout`, `memory-limit`. Ohne bestätigte Rundreise-Probe antwortet `POST /jobs` mit `503 service-unavailable`.
+
 #### Optionen PDF
 
 ```json
@@ -318,6 +331,7 @@ cancelled ◀── cancel ─┘        jeder Zustand ──TTL──▶ expire
 
 - Bild: `{ "format", "width", "height", "sourceWidth", "sourceHeight", "upscaled", "transparencyFlattened", "qualityApplied" }`.
 - Audio: `{ "format", "durationSeconds", "sampleRate", "channels", "qualityApplied" }` (Komponente `AudioDetails`). `durationSeconds` ist die tatsächlich dekodierte Dauer (auf Millisekunden gerundet), `channels` die Kanalzahl des Ergebnisses. `input.width`/`input.height` bleiben bei Audio `null`.
+- PDF zu Bild: `{ "pageCount", "sourcePageCount", "archive" }` (Komponente `PdfImageDetails`); `pageCount` sind die gerenderten Seiten.
 - PDF-Variante: wie `PdfVariantResult` in `src/lib/pdf/types.ts` ohne `blob`: `originalSize`, `imagesRecompressed`, `imagesResized`, `imagesSkipped`, `imagesNotSmaller`, `streamsCompressed`, `objectsRemoved`, `notes[]` (Codes wie dort). `size` kann größer als die Eingabe sein; das wird offen angezeigt.
 
 ### `analysis` (PDF)
@@ -328,6 +342,7 @@ Wie `PdfAnalysis` in `src/lib/pdf/types.ts` (`fileSize`, `pdfVersion`, `pageCoun
 
 - Bild: `<stamm>-<suffix>.<ext>`; Suffix `konvertiert` (Konverter, nur wenn Zielformat = Eingabeformat, sonst ohne Suffix wie bisher), `komprimiert`, `skaliert`. Endungen `jpg`, `png`, `webp`, `bmp`, `ico`. Fallback-Stamm `bild`.
 - PDF: `<stamm>-<level>.pdf`, Fallback-Stamm `dokument`.
+- PDF zu Bild: Einzelbild `<stamm>-seite-<n>.<ext>` (`png`, `jpg`, `webp`), Archiv `<stamm>-bilder.zip`; Fallback-Stamm `dokument`.
 - Audio: `<stamm>.<ext>`, Suffix `-konvertiert` nur, wenn Zielformat = Eingabeformat (wie beim Bildkonverter). Endungen `mp3`, `wav`, `flac`, `ogg`; MIME `audio/mpeg`, `audio/wav`, `audio/flac`, `audio/ogg`. Fallback-Stamm `audio`.
 - Eindeutigkeit innerhalb eines Stapels (`a-2.webp`) stellt das Frontend über das `download`-Attribut her.
 
