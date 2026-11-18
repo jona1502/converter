@@ -475,7 +475,8 @@
             "pdf-compress": "#/components/schemas/PdfOptions",
             "markdown-pdf": "#/components/schemas/MarkdownOptions",
             "pdf-rotate": "#/components/schemas/PdfRotateOptions",
-            "pdf-split": "#/components/schemas/SplitOptions"
+            "pdf-split": "#/components/schemas/SplitOptions",
+            "pdf-merge": "#/components/schemas/PdfMergeOptions"
           },
           "propertyName": "tool"
         },
@@ -497,6 +498,9 @@
           },
           {
             "$ref": "#/components/schemas/SplitOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfMergeOptions"
           }
         ]
       },
@@ -969,7 +973,8 @@
           "audio-convert",
           "markdown-pdf",
           "pdf-rotate",
-          "pdf-split"
+          "pdf-split",
+          "pdf-merge"
         ],
         "title": "Tool",
         "type": "string"
@@ -1208,6 +1213,79 @@
         ],
         "title": "SplitDetails",
         "type": "object"
+      },
+      "PdfMergeOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-merge. Das Werkzeug hat keine Einstellungen.",
+        "properties": {
+          "tool": {
+            "const": "pdf-merge",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "PdfMergeOptions",
+        "type": "object"
+      },
+      "PdfMergeCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "minFiles": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "maxFiles": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "maxTotalBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxPages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "minFiles",
+          "maxFiles",
+          "maxTotalBytes",
+          "maxOutputBytes",
+          "maxPages"
+        ],
+        "title": "PdfMergeCapabilities",
+        "type": "object"
+      },
+      "PdfMergeDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceCount": {
+            "type": "integer",
+            "minimum": 2
+          }
+        },
+        "required": [
+          "pageCount",
+          "sourceCount"
+        ],
+        "title": "PdfMergeDetails",
+        "type": "object"
       }
     }
   },
@@ -1219,7 +1297,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities. Der Teil pdfMerge entspricht PdfMergeCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {
@@ -1351,6 +1429,7 @@
               "schema": {
                 "properties": {
                   "file": {
+                    "description": "Bei pdf-merge 2 bis 20 Teile namens file in der gewünschten Reihenfolge, sonst genau ein Teil",
                     "format": "binary",
                     "type": "string"
                   },

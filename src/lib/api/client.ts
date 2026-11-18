@@ -15,6 +15,8 @@ export interface Capabilities {
   pdfRotate?: ApiSchemas['PdfRotateCapabilities'];
   /** Fehlt bei älteren Servern; dann ist pdf-split nicht verfügbar. */
   pdfSplit?: ApiSchemas['PdfSplitCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-merge nicht verfügbar. */
+  pdfMerge?: ApiSchemas['PdfMergeCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {
@@ -78,11 +80,12 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
     signal?.addEventListener('abort', abort, {once: true});
   });
 }
-export async function createJob(file: File, options: Record<string, unknown>, key: string, signal: AbortSignal, onWaiting?: (waiting:boolean)=>void): Promise<Job> {
+/** Mehrere Dateien (pdf-merge) werden in der übergebenen Reihenfolge als wiederholte Teile `file` gesendet. */
+export async function createJob(file: File | readonly File[], options: Record<string, unknown>, key: string, signal: AbortSignal, onWaiting?: (waiting:boolean)=>void): Promise<Job> {
   const token = await csrf();
   const body = new FormData();
   body.append('options', JSON.stringify(options));
-  body.append('file', file);
+  for (const part of Array.isArray(file) ? file : [file]) body.append('file', part);
   const schedulingDeadline=Date.now()+15*60_000;
   for (;;) {
     try {

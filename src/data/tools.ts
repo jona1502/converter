@@ -5,9 +5,9 @@
  */
 
 export type ToolCategory = 'bilder' | 'pdf' | 'audio';
-export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren' | 'drehen' | 'teilen';
+export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren' | 'drehen' | 'teilen' | 'zusammenfuehren';
 /** Aktion, nach der die Kopfzeile die Werkzeuge in Menüs gruppiert. */
-export type ToolAction = 'convert' | 'compress' | 'resize' | 'rotate' | 'split';
+export type ToolAction = 'convert' | 'compress' | 'resize' | 'rotate' | 'split' | 'merge';
 
 export interface ToolActionInfo {
   readonly id: ToolAction;
@@ -55,6 +55,7 @@ export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
   { id: 'resize', title: 'Skalieren' },
   { id: 'rotate', title: 'Drehen' },
   { id: 'split', title: 'Teilen' },
+  { id: 'merge', title: 'Zusammenführen' },
 ];
 
 export const TOOLS: readonly Tool[] = [
@@ -146,6 +147,17 @@ export const TOOLS: readonly Tool[] = [
     action: 'split',
     available: true,
     quickStart: false,
+  },
+  {
+    id: 'pdf-zusammenfuehren',
+    title: 'PDF zusammenführen',
+    description: 'Zwei bis zwanzig PDFs in wählbarer Reihenfolge zu einer PDF verbinden.',
+    lead: 'Fügen Sie mehrere PDFs in der gewünschten Reihenfolge zu einer einzigen PDF zusammen; die Seiten bleiben unverändert.',
+    href: '/pdf/zusammenfuehren',
+    category: 'pdf',
+    operation: 'zusammenfuehren',
+    action: 'merge',
+    available: true,
   },
 ];
 

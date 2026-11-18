@@ -11,7 +11,7 @@ export interface ApiSchemas {
   "InputFormat": "jpeg" | "png" | "webp" | "gif" | "bmp" | "ico" | "avif" | "pdf" | "mp3" | "wav" | "flac" | "ogg" | "markdown";
   "JobError": { "code": ApiSchemas["ProcessingErrorCode"] | ApiSchemas["ApiErrorCode"] };
   "JobInput": { "format": ApiSchemas["InputFormat"]; "height": number | null; "name": string; "size": number; "width": number | null };
-  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"] | ApiSchemas["SplitOptions"];
+  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"] | ApiSchemas["SplitOptions"] | ApiSchemas["PdfMergeOptions"];
   "JobPhase": "analyze" | "variant" | "encode" | "save";
   "JobResultView": { "details": Record<string, unknown> | null; "downloadName": string; "downloadUrl": string | null; "error": ApiSchemas["JobError"] | null; "id": string; "level": ApiSchemas["PdfLevel"] | null; "mime": string; "size": number | null; "state": ApiSchemas["ResultState"] };
   "JobState": "queued" | "running" | "succeeded" | "partially_succeeded" | "failed" | "cancelled" | "expired";
@@ -27,7 +27,7 @@ export interface ApiSchemas {
   "ResizePercent": { "allowUpscale": boolean; "mode": "percent"; "percent": number };
   "ResultState": "pending" | "running" | "succeeded" | "failed" | "cancelled";
   "SessionResponse": { "created": boolean; "csrfToken": string; "expiresAt": string };
-  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate" | "pdf-split";
+  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate" | "pdf-split" | "pdf-merge";
   "MarkdownOptions": { "orientation"?: "portrait" | "landscape"; "pageSize"?: "a4" | "letter"; "tool": "markdown-pdf" };
   "MarkdownCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number };
   "MarkdownDetails": { "pageCount": number };
@@ -37,4 +37,7 @@ export interface ApiSchemas {
   "SplitOptions": { "mode": "ranges" | "each"; "ranges"?: string; "tool": "pdf-split" };
   "PdfSplitCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxParts": number };
   "SplitDetails": { "pageCount": number; "partCount": number };
+  "PdfMergeOptions": { "tool": "pdf-merge" };
+  "PdfMergeCapabilities": { "available": boolean; "minFiles": number; "maxFiles": number; "maxTotalBytes": number; "maxOutputBytes": number; "maxPages": number };
+  "PdfMergeDetails": { "pageCount": number; "sourceCount": number };
 }

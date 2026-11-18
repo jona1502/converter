@@ -1,0 +1,7 @@
+---
+import ToolPage from '../../components/site/ToolPage.astro';
+import PdfMerger from '../../components/tools/PdfMerger';
+---
+<ToolPage toolId="pdf-zusammenfuehren" description="Mehrere PDF-Dateien nach ausdrücklichem Start in gewünschter Reihenfolge zu einer PDF zusammenführen. Zwei bis zwanzig Dateien, verschlüsselte PDFs werden nicht unterstützt.">
+  <PdfMerger client:load />
+</ToolPage>

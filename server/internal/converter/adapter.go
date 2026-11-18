@@ -74,6 +74,11 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		req.Timeout = c.PdfTimeout
 		req.OutputLimit = req.Limits.PdfMaxResultsTotalBytes
 	}
+	if task.Tool == "pdf-merge" {
+		// Eingaben sind höchstens PdfMaxInputBytes; das Ergebnis erhält dieselbe Grenze.
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = c.PdfMaxInputBytes
+	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout
 		req.OutputLimit = c.AudioMaxOutputBytes

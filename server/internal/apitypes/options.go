@@ -63,6 +63,8 @@ func (JobOptions) UnionVariant(tag string) any {
 		return new(PdfRotateOptions)
 	case ToolPDFSplit:
 		return new(SplitOptions)
+	case ToolPDFMerge:
+		return new(PdfMergeOptions)
 	}
 	return nil
 }

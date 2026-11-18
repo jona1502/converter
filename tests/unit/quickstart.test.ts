@@ -55,7 +55,7 @@ describe('Aktionen je Typ', () => {
 
   it('bietet für Markdown ausschließlich das eigene PDF-Werkzeug', () => {
     expect(ids('markdown')).toEqual(['markdown-pdf']);
-    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen']);
+    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen', 'pdf-zusammenfuehren']);
   });
 
   it('bietet für Bilder Konvertieren, Komprimieren und Skalieren', () => {
@@ -63,9 +63,9 @@ describe('Aktionen je Typ', () => {
     expect(toolsForKind('image').map(actionLabel)).toEqual(['Konvertieren', 'Komprimieren', 'Skalieren']);
   });
 
-  it('bietet für PDF Komprimieren und Drehen und für Audio nur Konvertieren', () => {
-    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen']);
-    expect(toolsForKind('pdf').map(actionLabel)).toEqual(['Komprimieren', 'Drehen']);
+  it('bietet für PDF Komprimieren, Drehen und Zusammenführen und für Audio nur Konvertieren', () => {
+    expect(ids('pdf')).toEqual(['pdf-komprimieren', 'pdf-drehen', 'pdf-zusammenfuehren']);
+    expect(toolsForKind('pdf').map(actionLabel)).toEqual(['Komprimieren', 'Drehen', 'Zusammenführen']);
     expect(ids('audio')).toEqual(['audio-konvertieren']);
     expect(toolsForKind('audio').map(actionLabel)).toEqual(['Konvertieren']);
   });

@@ -335,6 +335,7 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 	}
 	out.PdfRotate = a.pdfRotateCapabilities(report)
 	a.addSplitCapabilities(&out, report)
+	out.PdfMerge = a.mergeCapabilities(report)
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -445,6 +446,9 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		if err := a.requireSplit(); err != nil {
 			return err
 		}
+	}
+	if opts.tool == "pdf-merge" {
+		return a.createMergeJob(ctx, w, multipart, opts, owner, key, replay, reservation)
 	}
 	part, err = multipart.NextPart()
 	if err != nil {

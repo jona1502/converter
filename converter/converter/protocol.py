@@ -51,6 +51,7 @@ from converter.options import (
     ImageOptions,
     JobOptions,
     MarkdownOptions,
+    PdfMergeOptions,
     SplitOptions,
     parse_options,
 )
@@ -157,7 +158,13 @@ def _results(value: object, options: JobOptions) -> tuple[ResultTarget, ...]:
             raise v.fail(CODE, f"{where}.level: string or null expected")
         targets.append(ResultTarget(result_id, level, _absolute(raw["path"], f"{where}.path")))
     if isinstance(
-        options, ImageOptions | AudioOptions | MarkdownOptions | PdfRotateOptions | SplitOptions
+        options,
+        ImageOptions
+        | AudioOptions
+        | MarkdownOptions
+        | PdfRotateOptions
+        | SplitOptions
+        | PdfMergeOptions,
     ):
         expected: list[str | None] = [None]
     else:
