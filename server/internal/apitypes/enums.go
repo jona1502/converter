@@ -90,10 +90,11 @@ const (
 	ToolPDFCompress   Tool = "pdf-compress"
 	ToolAudioConvert  Tool = "audio-convert"
 	ToolMarkdownPDF   Tool = "markdown-pdf"
+	ToolImagePDF      Tool = "image-pdf"
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF, ToolImagePDF}
 }
 
 // IsImage: image-convert, image-compress und image-resize.
@@ -173,11 +174,12 @@ const (
 	InputWAV      InputFormat = "wav"
 	InputFLAC     InputFormat = "flac"
 	InputOGG      InputFormat = "ogg"
+	InputZIP      InputFormat = "zip"
 )
 
 func InputFormats() []InputFormat {
 	return []InputFormat{InputJPEG, InputPNG, InputWebP, InputGIF, InputBMP, InputICO, InputAVIF, InputPDF,
-		InputMP3, InputWAV, InputFLAC, InputOGG, InputMarkdown}
+		InputMP3, InputWAV, InputFLAC, InputOGG, InputMarkdown, InputZIP}
 }
 
 // AudioFormat: Ein- und Ausgabeformate von audio-convert (Inline-Enum).

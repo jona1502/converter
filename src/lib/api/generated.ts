@@ -8,10 +8,10 @@ export interface ApiSchemas {
   "ErrorResponse": { "error": ApiSchemas["ErrorDetail"]; "requestId": string };
   "FieldError": { "code": string; "path": string };
   "ImageOptions": { "background"?: string; "format": "jpeg" | "png" | "webp" | "bmp" | "ico" | "original"; "icoSizes"?: Array<16 | 32 | 48 | 64 | 128 | 256> | null; "quality"?: number; "resize"?: ApiSchemas["ResizeNone"] | ApiSchemas["ResizePercent"] | ApiSchemas["ResizeDimensions"] | ApiSchemas["ResizeMaxEdge"]; "tool": "image-convert" | "image-compress" | "image-resize" };
-  "InputFormat": "jpeg" | "png" | "webp" | "gif" | "bmp" | "ico" | "avif" | "pdf" | "mp3" | "wav" | "flac" | "ogg" | "markdown";
+  "InputFormat": "jpeg" | "png" | "webp" | "gif" | "bmp" | "ico" | "avif" | "pdf" | "mp3" | "wav" | "flac" | "ogg" | "markdown" | "zip";
   "JobError": { "code": ApiSchemas["ProcessingErrorCode"] | ApiSchemas["ApiErrorCode"] };
   "JobInput": { "format": ApiSchemas["InputFormat"]; "height": number | null; "name": string; "size": number; "width": number | null };
-  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"];
+  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["ImagePdfOptions"];
   "JobPhase": "analyze" | "variant" | "encode" | "save";
   "JobResultView": { "details": Record<string, unknown> | null; "downloadName": string; "downloadUrl": string | null; "error": ApiSchemas["JobError"] | null; "id": string; "level": ApiSchemas["PdfLevel"] | null; "mime": string; "size": number | null; "state": ApiSchemas["ResultState"] };
   "JobState": "queued" | "running" | "succeeded" | "partially_succeeded" | "failed" | "cancelled" | "expired";
@@ -27,8 +27,11 @@ export interface ApiSchemas {
   "ResizePercent": { "allowUpscale": boolean; "mode": "percent"; "percent": number };
   "ResultState": "pending" | "running" | "succeeded" | "failed" | "cancelled";
   "SessionResponse": { "created": boolean; "csrfToken": string; "expiresAt": string };
-  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf";
+  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "image-pdf";
   "MarkdownOptions": { "orientation"?: "portrait" | "landscape"; "pageSize"?: "a4" | "letter"; "tool": "markdown-pdf" };
   "MarkdownCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number };
   "MarkdownDetails": { "pageCount": number };
+  "ImagePdfOptions": { "margin"?: "none" | "small" | "medium"; "orientation"?: "auto" | "portrait" | "landscape"; "pageSize"?: "a4" | "letter" | "fit"; "tool": "image-pdf" };
+  "ImagePdfCapabilities": { "available": boolean; "maxImages": number; "maxImageBytes": number; "maxTotalBytes": number; "maxOutputBytes": number };
+  "ImagePdfDetails": { "pageCount": number };
 }

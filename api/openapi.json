@@ -392,7 +392,8 @@
           "wav",
           "flac",
           "ogg",
-          "markdown"
+          "markdown",
+          "zip"
         ],
         "title": "InputFormat",
         "type": "string"
@@ -473,7 +474,8 @@
             "image-convert": "#/components/schemas/ImageOptions",
             "image-resize": "#/components/schemas/ImageOptions",
             "pdf-compress": "#/components/schemas/PdfOptions",
-            "markdown-pdf": "#/components/schemas/MarkdownOptions"
+            "markdown-pdf": "#/components/schemas/MarkdownOptions",
+            "image-pdf": "#/components/schemas/ImagePdfOptions"
           },
           "propertyName": "tool"
         },
@@ -489,6 +491,9 @@
           },
           {
             "$ref": "#/components/schemas/MarkdownOptions"
+          },
+          {
+            "$ref": "#/components/schemas/ImagePdfOptions"
           }
         ]
       },
@@ -958,7 +963,8 @@
           "image-resize",
           "pdf-compress",
           "audio-convert",
-          "markdown-pdf"
+          "markdown-pdf",
+          "image-pdf"
         ],
         "title": "Tool",
         "type": "string"
@@ -1038,6 +1044,99 @@
         ],
         "title": "MarkdownDetails",
         "type": "object"
+      },
+      "ImagePdfOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für image-pdf. Die Eingabe ist ein ZIP-Bündel (nur gespeicherte Einträge, Namen 001.ext bis NNN.ext) mit 1 bis maxImages Bildern; jede Seite des PDFs zeigt ein Bild in Namensreihenfolge. Bei pageSize fit ist nur orientation auto zulässig.",
+        "properties": {
+          "margin": {
+            "default": "small",
+            "enum": [
+              "none",
+              "small",
+              "medium"
+            ],
+            "title": "Margin",
+            "type": "string"
+          },
+          "orientation": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "portrait",
+              "landscape"
+            ],
+            "title": "Orientation",
+            "type": "string"
+          },
+          "pageSize": {
+            "default": "a4",
+            "enum": [
+              "a4",
+              "letter",
+              "fit"
+            ],
+            "title": "PageSize",
+            "type": "string"
+          },
+          "tool": {
+            "const": "image-pdf",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "ImagePdfOptions",
+        "type": "object"
+      },
+      "ImagePdfCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxImages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxImageBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxTotalBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxImages",
+          "maxImageBytes",
+          "maxTotalBytes",
+          "maxOutputBytes"
+        ],
+        "title": "ImagePdfCapabilities",
+        "type": "object"
+      },
+      "ImagePdfDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount"
+        ],
+        "title": "ImagePdfDetails",
+        "type": "object"
       }
     }
   },
@@ -1049,7 +1148,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil imagePdf entspricht ImagePdfCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {
