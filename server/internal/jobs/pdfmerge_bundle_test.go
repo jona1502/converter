@@ -116,3 +116,22 @@ func TestBundleWithoutFilesIsEmptyList(t *testing.T) {
 		t.Fatalf("%d %v", len(files), err)
 	}
 }
+
+// Muss byte-gleich zu GOLDEN in converter/tests/test_pdf_merge.py sein.
+func TestBundleMatchesGolden(t *testing.T) {
+	var out bytes.Buffer
+	w := NewBundleWriter(&out)
+	for _, f := range []string{"%PDF-a", "%PDF-bb"} {
+		if _, _, err := w.AddFile(strings.NewReader(f), 10, 4); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_ = w.Close()
+	want := "MIPDFMRG1\n" +
+		"\x00\x00\x00\x06%PDF-a\x00\x00\x00\x00" +
+		"\x00\x00\x00\x07%PDF-bb\x00\x00\x00\x00" +
+		"\x00\x00\x00\x00"
+	if out.String() != want {
+		t.Fatalf("Bündel = %q", out.String())
+	}
+}
