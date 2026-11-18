@@ -31,6 +31,8 @@ async function prepareImages(page: Page, path: string, tool: string) {
     return route.fulfill({ status: 202, json: imageJob(tool, `bild-${index}`, `bild${index}.png`) });
   });
   await page.goto(path);
+  // Erst nach der Hydration Dateien setzen, sonst geht die Auswahl unter Last (WebKit) verloren.
+  await expect(page.getByRole('button', { name: 'Dateien auswählen', exact: true })).toBeEnabled();
 }
 
 const files = (...names: string[]) => names.map(name => ({ name, mimeType: 'image/png', buffer: PNG }));
