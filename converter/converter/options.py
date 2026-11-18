@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Final, Literal
 
 from converter import validation as v
+from converter.processing.split.ranges import PageRange, parse_ranges
 
 CODE: Final = "invalid-options"
 
@@ -31,6 +32,8 @@ AUDIO_CHANNELS: Final = ("original", "mono")
 MARKDOWN_TOOL: Final = "markdown-pdf"
 MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
 MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
+SPLIT_TOOL: Final = "pdf-split"
+SPLIT_MODES: Final = ("ranges", "each")
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
 DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
@@ -110,7 +113,21 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+@dataclass(frozen=True, slots=True)
+class SplitOptions:
+    """``each``: jede Seite einzeln; ``ranges``: je Bereich eine Teil-PDF."""
+
+    mode: str
+    ranges: tuple[PageRange, ...] = ()
+    tool: str = SPLIT_TOOL
+
+    @property
+    def single_pdf(self) -> bool:
+        """Genau ein Bereich: Ergebnis ist eine PDF, sonst ein ZIP."""
+        return self.mode == "ranges" and len(self.ranges) == 1
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions | SplitOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -268,6 +285,24 @@ def _markdown(value: dict[str, object]) -> MarkdownOptions:
     return MarkdownOptions(page_size=page_size, orientation=orientation)
 
 
+def _split(value: dict[str, object]) -> SplitOptions:
+    raw = v.obj(value, required=("tool", "mode"), optional=("ranges",), code=CODE, where="options")
+    mode = v.string(raw["mode"], code=CODE, where="mode", max_length=16)
+    if mode not in SPLIT_MODES:
+        raise v.fail(CODE, "mode: unknown")
+    if mode == "each":
+        if "ranges" in raw:
+            raise v.fail(CODE, "ranges: only with mode ranges")
+        return SplitOptions(mode=mode)
+    if "ranges" not in raw:
+        raise v.fail(CODE, "ranges: required with mode ranges")
+    spec = v.string(raw["ranges"], code=CODE, where="ranges", max_length=1024)
+    try:
+        return SplitOptions(mode=mode, ranges=parse_ranges(spec))
+    except ValueError as exc:
+        raise v.fail(CODE, "ranges: invalid") from exc
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -281,4 +316,6 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == SPLIT_TOOL:
+        return _split(value)
     raise v.fail(CODE, "tool: unknown")
