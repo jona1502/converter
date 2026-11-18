@@ -196,3 +196,39 @@ def test_quality_changes_jpeg_size(tmp_path: Path) -> None:
         tmp_path, source, PdfImageOptions(format="jpeg", quality=0.95, pages=(1,)), name="h.bin"
     )
     assert low.stat().st_size < high.stat().st_size
+
+
+def test_sandboxed_cli_reports_page_progress_and_result(tmp_path: Path) -> None:
+    from tests.helpers import encode, new_id, request, run_cli
+
+    source = make_pdf(tmp_path / "in.pdf", pages=3)
+    target = target_file(tmp_path / "out.zip")
+    result_id = new_id()
+    options = {"tool": "pdf-to-image", "format": "png", "dpi": 72, "pages": "1-3"}
+    result = run_cli(["run"], encode(request(source, options, [(result_id, None, target)])))
+    assert result.returncode == 0, result.stderr
+    events = result.events
+    assert events[0] == {"kind": "progress", "phase": "encode"}
+    frames = [e["progress"] for e in events if "progress" in e]
+    assert frames[0] == {"step": "encode", "current": 0, "total": 3}
+    assert frames[-1] == {"step": "encode", "current": 3, "total": 3}
+    assert events[-1] == {
+        "kind": "result",
+        "id": result_id,
+        "details": {"pageCount": 3, "sourcePageCount": 3, "archive": True},
+    }
+    with zipfile.ZipFile(target) as archive:
+        assert len(archive.namelist()) == 3
+
+
+def test_cli_maps_processing_errors_to_result_errors(tmp_path: Path) -> None:
+    from tests.helpers import encode, new_id, request, run_cli
+
+    source = make_pdf(tmp_path / "enc.pdf", encryption=pikepdf.Encryption(owner="o", user="u"))
+    target = target_file(tmp_path / "out.png")
+    result_id = new_id()
+    options = {"tool": "pdf-to-image", "format": "png", "pages": "1"}
+    result = run_cli(["run"], encode(request(source, options, [(result_id, None, target)])))
+    assert result.returncode == 0, result.stderr
+    assert result.events[-1] == {"kind": "error", "id": result_id, "code": "encrypted"}
+    assert target.stat().st_size == 0

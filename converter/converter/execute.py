@@ -12,12 +12,19 @@ import time
 from pathlib import Path
 
 from converter.errors import ProcessingError
-from converter.options import AudioOptions, ImageOptions, MarkdownOptions, PdfOptions
+from converter.options import (
+    AudioOptions,
+    ImageOptions,
+    MarkdownOptions,
+    PdfImageOptions,
+    PdfOptions,
+)
 from converter.processing.audio import pipeline as audio
 from converter.processing.files import discard
 from converter.processing.images.pipeline import convert
 from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
+from converter.processing.pdfimage import pipeline as pdfimage
 from converter.protocol import EventWriter, Request, ResultTarget
 
 # Fortschritt höchstens alle 0,25 s je Stufe (plus erstes und letztes Ereignis),
@@ -60,6 +67,28 @@ def run_audio(request: Request, options: AudioOptions, writer: EventWriter) -> N
 
     try:
         details = audio.convert(
+            Path(request.source), Path(target.path), options, request.limits, progress
+        )
+    except Exception as exc:
+        _failure(writer, target, exc, "encode-failed")
+        return
+    writer.result(target.id, details)
+
+
+def run_pdf_image(request: Request, options: PdfImageOptions, writer: EventWriter) -> None:
+    (target,) = request.results
+    writer.progress_encode()
+    last = 0.0
+
+    def progress(current: int, total: int) -> None:
+        nonlocal last
+        now = time.monotonic()
+        if current in {0, total} or now - last >= PROGRESS_INTERVAL:
+            last = now
+            writer.progress_encode_frames(current, total)
+
+    try:
+        details = pdfimage.convert(
             Path(request.source), Path(target.path), options, request.limits, progress
         )
     except Exception as exc:
@@ -118,5 +147,7 @@ def execute(request: Request, writer: EventWriter) -> None:
             _failure(writer, target, exc, "encode-failed")
             return
         writer.result(target.id, details)
+    elif isinstance(options, PdfImageOptions):
+        run_pdf_image(request, options, writer)
     elif isinstance(options, PdfOptions):
         run_pdf(request, options, writer)
