@@ -333,6 +333,14 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 	if !report.Markdown.Available {
 		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolMarkdownPDF })
 	}
+	out.PdfImage = apitypes.PdfImageCapabilities{Available: report.PdfImage.Available,
+		Formats: apitypes.PdfImageFormats(), QualityFormats: []apitypes.PdfImageFormat{apitypes.PdfImageJPEG, apitypes.PdfImageWebP},
+		MinDpi: apitypes.PdfImageMinDPI, MaxDpi: apitypes.PdfImageMaxDPI, DefaultDpi: apitypes.PdfImageDefaultDPI,
+		MaxFileBytes: a.cfg.PdfMaxInputBytes, MaxOutputBytes: a.cfg.PdfMaxResultsTotalBytes,
+		MaxPages: a.cfg.PdfRenderMaxPages, MaxPixels: a.cfg.PdfImageMaxPixels}
+	if !report.PdfImage.Available {
+		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolPDFToImage })
+	}
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -439,6 +447,15 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			return httpapi.NewError(503, apitypes.CodeServiceUnavailable, "Markdown-Verarbeitung ist nicht verfügbar.")
 		}
 	}
+	if opts.tool == "pdf-to-image" {
+		if int64(opts.pageCount) > a.cfg.PdfRenderMaxPages {
+			return invalidOptions()
+		}
+		report, err := converter.LoadReport(filepath.Join(a.cfg.StorageDir, converter.ReportFile), time.Now().UTC(), 15*time.Minute)
+		if err != nil || !report.PdfImage.Available {
+			return httpapi.NewError(503, apitypes.CodeServiceUnavailable, "PDF-zu-Bild-Verarbeitung ist nicht verfügbar.")
+		}
+	}
 	part, err = multipart.NextPart()
 	if err != nil {
 		return httpapi.NewError(422, apitypes.CodeMissingFile, "Genau eine Datei erwartet.")
@@ -459,7 +476,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 	switch opts.tool {
 	case "markdown-pdf":
 		limit = a.cfg.MarkdownMaxInputBytes
-	case "pdf-compress":
+	case "pdf-compress", "pdf-to-image":
 		limit = a.cfg.PdfMaxInputBytes
 	case "audio-convert":
 		limit = a.cfg.AudioMaxInputBytes
@@ -529,7 +546,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		switch opts.tool {
 		case "markdown-pdf":
 			format = "markdown"
-		case "pdf-compress":
+		case "pdf-compress", "pdf-to-image":
 			if !jobs.IsPDF(head) {
 				return httpapi.NewError(415, apitypes.CodeNotPDF, "Keine erkennbare PDF.")
 			}
@@ -560,7 +577,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 			if _, ok := jobs.AudioMIME[output]; !ok {
 				return invalidOptions()
 			}
-		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" {
+		} else if opts.tool != "pdf-compress" && opts.tool != "markdown-pdf" && opts.tool != "pdf-to-image" {
 			if _, ok := jobs.OutputMIME[output]; !ok {
 				return httpapi.NewError(422, apitypes.CodeOriginalFormatUnsupported, "Originalformat nicht erzeugbar.")
 			}
@@ -568,7 +585,7 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 				return invalidOptions()
 			}
 		}
-		accepted, err = a.jobs.Finalize(ctx, owner, reservation, jobs.Upload{Tool: opts.tool, Options: opts.canonical, OriginalName: originalName, Size: size, SHA256: digest, InputFormat: format, OutputFormat: output, PDFLevels: opts.levels}, key)
+		accepted, err = a.jobs.Finalize(ctx, owner, reservation, jobs.Upload{Tool: opts.tool, Options: opts.canonical, OriginalName: originalName, Size: size, SHA256: digest, InputFormat: format, OutputFormat: output, PDFLevels: opts.levels, PDFArchive: opts.pdfArchive, PDFPage: opts.pdfPage}, key)
 		if err != nil {
 			return err
 		}
