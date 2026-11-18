@@ -191,6 +191,7 @@ type Capabilities struct {
 	Audio      AudioCapabilities    `json:"audio"`
 	Jobs       JobCapabilities      `json:"jobs"`
 	Markdown   MarkdownCapabilities `json:"markdown"`
+	PdfSplit   PdfSplitCapabilities `json:"pdfSplit"`
 }
 
 // AudioDetails: details eines audio-convert-Ergebnisses (OpenAPI-Komponente

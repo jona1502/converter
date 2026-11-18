@@ -26,6 +26,7 @@ func APITypes() *Types {
 	Enum(ts, "", apitypes.AudioChannelModes())
 	Enum(ts, "", apitypes.MarkdownPageSizes())
 	Enum(ts, "", apitypes.MarkdownOrientations())
+	Enum(ts, "", apitypes.SplitModes())
 	Enum(ts, "", apitypes.CheckStatuses())
 	Enum(ts, "", apitypes.ReadyStatuses())
 	Enum(ts, "", []apitypes.ResizeMode{
@@ -58,6 +59,9 @@ func APITypes() *Types {
 		"MarkdownOptions":      reflect.TypeFor[apitypes.MarkdownOptions](),
 		"MarkdownCapabilities": reflect.TypeFor[apitypes.MarkdownCapabilities](),
 		"MarkdownDetails":      reflect.TypeFor[apitypes.MarkdownDetails](),
+		"SplitOptions":         reflect.TypeFor[apitypes.SplitOptions](),
+		"PdfSplitCapabilities": reflect.TypeFor[apitypes.PdfSplitCapabilities](),
+		"SplitDetails":         reflect.TypeFor[apitypes.SplitDetails](),
 		"AudioOptions":         reflect.TypeFor[apitypes.AudioOptions](),
 		"AudioCapabilities":    reflect.TypeFor[apitypes.AudioCapabilities](),
 		"AudioDetails":         reflect.TypeFor[apitypes.AudioDetails](),
