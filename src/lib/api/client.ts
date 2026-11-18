@@ -19,6 +19,8 @@ export interface Capabilities {
   pdfMerge?: ApiSchemas['PdfMergeCapabilities'];
   /** Fehlt bei älteren Servern; dann ist image-pdf nicht verfügbar. */
   imagePdf?: ApiSchemas['ImagePdfCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-to-image nicht verfügbar. */
+  pdfImage?: ApiSchemas['PdfImageCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {

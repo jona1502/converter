@@ -34,6 +34,7 @@ class Limits:
     markdown_max_pages: int = 300
     image_pdf_max_images: int = 30
     image_pdf_max_input_bytes: int = 104_857_600
+    pdf_render_max_pages: int = 100
 
 
 def _camel(name: str) -> str:
@@ -46,7 +47,7 @@ FIELDS: Final = {_camel(item.name): item.name for item in fields(Limits)}
 
 
 def parse_limits(value: object) -> Limits:
-    optional = {name for name in FIELDS if name.startswith(("markdown", "imagePdf"))}
+    optional = {name for name in FIELDS if name.startswith(("markdown", "imagePdf", "pdfRender"))}
     raw = v.obj(
         value, required=FIELDS.keys() - optional, optional=optional, code=CODE, where="limits"
     )

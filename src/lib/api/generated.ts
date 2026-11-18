@@ -11,7 +11,7 @@ export interface ApiSchemas {
   "InputFormat": "jpeg" | "png" | "webp" | "gif" | "bmp" | "ico" | "avif" | "pdf" | "mp3" | "wav" | "flac" | "ogg" | "markdown" | "zip";
   "JobError": { "code": ApiSchemas["ProcessingErrorCode"] | ApiSchemas["ApiErrorCode"] };
   "JobInput": { "format": ApiSchemas["InputFormat"]; "height": number | null; "name": string; "size": number; "width": number | null };
-  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"] | ApiSchemas["SplitOptions"] | ApiSchemas["PdfMergeOptions"] | ApiSchemas["ImagePdfOptions"];
+  "JobOptions": ApiSchemas["ImageOptions"] | ApiSchemas["PdfOptions"] | ApiSchemas["AudioOptions"] | ApiSchemas["MarkdownOptions"] | ApiSchemas["PdfRotateOptions"] | ApiSchemas["SplitOptions"] | ApiSchemas["PdfMergeOptions"] | ApiSchemas["ImagePdfOptions"] | ApiSchemas["PdfImageOptions"];
   "JobPhase": "analyze" | "variant" | "encode" | "save";
   "JobResultView": { "details": Record<string, unknown> | null; "downloadName": string; "downloadUrl": string | null; "error": ApiSchemas["JobError"] | null; "id": string; "level": ApiSchemas["PdfLevel"] | null; "mime": string; "size": number | null; "state": ApiSchemas["ResultState"] };
   "JobState": "queued" | "running" | "succeeded" | "partially_succeeded" | "failed" | "cancelled" | "expired";
@@ -27,7 +27,7 @@ export interface ApiSchemas {
   "ResizePercent": { "allowUpscale": boolean; "mode": "percent"; "percent": number };
   "ResultState": "pending" | "running" | "succeeded" | "failed" | "cancelled";
   "SessionResponse": { "created": boolean; "csrfToken": string; "expiresAt": string };
-  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate" | "pdf-split" | "pdf-merge" | "image-pdf";
+  "Tool": "image-convert" | "image-compress" | "image-resize" | "pdf-compress" | "audio-convert" | "markdown-pdf" | "pdf-rotate" | "pdf-split" | "pdf-merge" | "image-pdf" | "pdf-to-image";
   "MarkdownOptions": { "orientation"?: "portrait" | "landscape"; "pageSize"?: "a4" | "letter"; "tool": "markdown-pdf" };
   "MarkdownCapabilities": { "available": boolean; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number };
   "MarkdownDetails": { "pageCount": number };
@@ -43,4 +43,7 @@ export interface ApiSchemas {
   "ImagePdfOptions": { "margin"?: "none" | "small" | "medium"; "orientation"?: "auto" | "portrait" | "landscape"; "pageSize"?: "a4" | "letter" | "fit"; "tool": "image-pdf" };
   "ImagePdfCapabilities": { "available": boolean; "maxImages": number; "maxImageBytes": number; "maxTotalBytes": number; "maxOutputBytes": number };
   "ImagePdfDetails": { "pageCount": number };
+  "PdfImageOptions": { "dpi"?: number; "format": "png" | "jpeg" | "webp"; "pages"?: string; "quality"?: number; "tool": "pdf-to-image" };
+  "PdfImageCapabilities": { "available": boolean; "formats": Array<"png" | "jpeg" | "webp">; "qualityFormats": Array<"png" | "jpeg" | "webp">; "minDpi": number; "maxDpi": number; "defaultDpi": number; "maxFileBytes": number; "maxOutputBytes": number; "maxPages": number; "maxPixels": number };
+  "PdfImageDetails": { "pageCount": number; "sourcePageCount": number; "archive": boolean };
 }

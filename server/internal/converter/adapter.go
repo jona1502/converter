@@ -34,7 +34,7 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
-		PdfImageMaxPixels:  c.PdfImageMaxPixels,
+		PdfImageMaxPixels: c.PdfImageMaxPixels, PdfRenderMaxPages: c.PdfRenderMaxPages,
 		AudioMaxInputBytes: c.AudioMaxInputBytes, AudioMaxDurationSeconds: c.AudioMaxDurationSeconds,
 		AudioMaxChannels: c.AudioMaxChannels, AudioMaxSampleRate: c.AudioMaxSampleRate,
 		AudioMaxOutputBytes: c.AudioMaxOutputBytes,
@@ -53,6 +53,9 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	}
 	if limits.MarkdownMaxPages == 0 {
 		limits.MarkdownMaxPages = 300
+	}
+	if limits.PdfRenderMaxPages == 0 {
+		limits.PdfRenderMaxPages = 100
 	}
 	req := Request{Source: task.InputPath, Options: task.Options, Limits: limits,
 		MemoryBytes: 1 << 30, Timeout: c.ImageTimeout, OutputLimit: c.ImageMaxOutputBytes}
@@ -89,6 +92,16 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	if task.Tool == "image-pdf" {
 		// Ein Bündel dekodiert bis zu ImagePdfMaxImages Bilder nacheinander.
 		req.Timeout = c.PdfTimeout
+	}
+	if task.Tool == "pdf-to-image" {
+		// Ein Ergebnis (Bild oder ZIP) im PDF-Gesamtbudget dieses Versuchs.
+		budget := c.PdfMaxResultsTotalBytes
+		if task.OutputBudget > 0 {
+			budget = min(budget, task.OutputBudget)
+		}
+		req.Limits.PdfMaxResultsTotalBytes = budget
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = budget
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout

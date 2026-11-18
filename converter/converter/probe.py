@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 import pikepdf
 import PIL
+import pypdfium2 as pdfium  # type: ignore[import-untyped]
 import soundfile as sf
 from PIL import Image
 
@@ -24,6 +25,7 @@ from converter.limits import Limits
 from converter.processing.audio import pipeline as audio
 from converter.processing.images.pipeline import INPUTS, OUTPUTS, flatten, save_options
 from converter.processing.markdown.pipeline import render_pdf
+from converter.processing.pdfimage.pipeline import pixel_size
 from converter.protocol import PROTOCOL_VERSION
 
 SIDE = 32
@@ -170,6 +172,30 @@ def probe_markdown() -> bool:
         return False
 
 
+def probe_pdf_image() -> bool:
+    """Rastert eine kleine PDF mit PDFium und prüft Größe und Farbe des Bildes."""
+    try:
+        with pikepdf.Pdf.new() as pdf:
+            page = pdf.add_blank_page(page_size=(SIDE, SIDE))
+            page.Contents = pdf.make_stream(f"1 0 0 rg 0 0 {SIDE} {SIDE} re f".encode())
+            buffer = io.BytesIO()
+            pdf.save(buffer)
+        document = pdfium.PdfDocument(buffer.getvalue())
+        try:
+            pdf_page = document[0]
+            try:
+                bitmap = pdf_page.render(scale=1, rev_byteorder=True, may_draw_forms=False)
+                image = bitmap.to_pil().convert("RGB")
+                bitmap.close()
+            finally:
+                pdf_page.close()
+        finally:
+            document.close()
+        return image.size == pixel_size(SIDE, SIDE, 72) and _red(image)
+    except Exception:
+        return False
+
+
 def run_probe() -> dict[str, Any]:
     return {
         "protocolVersion": PROTOCOL_VERSION,
@@ -177,6 +203,7 @@ def run_probe() -> dict[str, Any]:
         "outputFormats": [name for name in OUTPUTS if probe_output(name)],
         "pdf": probe_pdf(),
         "markdown": {"available": probe_markdown()},
+        "pdfImage": {"available": probe_pdf_image()},
         "audio": {
             "inputFormats": [name for name in audio.INPUTS if probe_audio_input(name)],
             "outputFormats": [name for name in audio.OUTPUTS if probe_audio_output(name)],

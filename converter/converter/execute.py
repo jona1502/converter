@@ -17,6 +17,7 @@ from converter.options import (
     ImageOptions,
     ImagePdfOptions,
     MarkdownOptions,
+    PdfImageOptions,
     PdfMergeOptions,
     PdfOptions,
     SplitOptions,
@@ -29,6 +30,7 @@ from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
 from converter.processing.pdf.rotate import rotate
 from converter.processing.pdf_merge import pipeline as pdf_merge
+from converter.processing.pdfimage import pipeline as pdfimage
 from converter.processing.split import pipeline as split
 from converter.protocol import EventWriter, Request, ResultTarget
 from converter.rotate_options import PdfRotateOptions
@@ -84,6 +86,28 @@ def run_audio(request: Request, options: AudioOptions, writer: EventWriter) -> N
 
     try:
         details = audio.convert(
+            Path(request.source), Path(target.path), options, request.limits, progress
+        )
+    except Exception as exc:
+        _failure(writer, target, exc, "encode-failed")
+        return
+    writer.result(target.id, details)
+
+
+def run_pdf_image(request: Request, options: PdfImageOptions, writer: EventWriter) -> None:
+    (target,) = request.results
+    writer.progress_encode()
+    last = 0.0
+
+    def progress(current: int, total: int) -> None:
+        nonlocal last
+        now = time.monotonic()
+        if current in {0, total} or now - last >= PROGRESS_INTERVAL:
+            last = now
+            writer.progress_encode_frames(current, total)
+
+    try:
+        details = pdfimage.convert(
             Path(request.source), Path(target.path), options, request.limits, progress
         )
     except Exception as exc:
@@ -178,5 +202,7 @@ def execute(request: Request, writer: EventWriter) -> None:
         writer.result(target.id, details)
     elif isinstance(options, ImagePdfOptions):
         run_image_pdf(request, options, writer)
+    elif isinstance(options, PdfImageOptions):
+        run_pdf_image(request, options, writer)
     elif isinstance(options, PdfOptions):
         run_pdf(request, options, writer)

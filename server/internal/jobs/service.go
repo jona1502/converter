@@ -233,6 +233,9 @@ type Upload struct {
 	// ("original" bereits aufgelöst). PDFLevels: pdf-compress, Reihenfolge = ordinal.
 	OutputFormat string
 	PDFLevels    []string
+	// pdf-to-image: PDFArchive = ZIP mit allen Seiten, sonst Einzelbild von Seite PDFPage.
+	PDFArchive bool
+	PDFPage    int
 }
 
 func (u Upload) resultRows(originalName string) ([]resultRow, error) {
@@ -245,6 +248,9 @@ func (u Upload) resultRows(originalName string) ([]resultRow, error) {
 	}
 	if u.Tool == "image-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: ImagePdfDownloadName(originalName)}}, nil
+	}
+	if u.Tool == "pdf-to-image" {
+		return u.pdfImageRow(originalName)
 	}
 	if u.Tool == "markdown-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil

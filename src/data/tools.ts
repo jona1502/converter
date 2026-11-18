@@ -170,6 +170,17 @@ export const TOOLS: readonly Tool[] = [
     action: 'convert',
     available: true,
   },
+  {
+    id: 'pdf-zu-bild',
+    title: 'PDF zu Bild',
+    description: 'Seiten einer PDF als PNG, JPEG oder WebP rendern; mehrere Seiten als ZIP.',
+    lead: 'Wandeln Sie die Seiten einer PDF in PNG-, JPEG- oder WebP-Bilder um, mit wählbarer Auflösung und Seitenauswahl; mehrere Seiten erhalten Sie als ZIP-Archiv.',
+    href: '/pdf/zu-bild',
+    category: 'pdf',
+    operation: 'konvertieren',
+    action: 'convert',
+    available: true,
+  },
 ];
 
 /** Alle freigeschalteten Werkzeuge in Listenreihenfolge. */

@@ -79,7 +79,7 @@ func currentSchema(t *testing.T) string {
 			t.Fatalf("Referenzzeile fehlt: %s", line)
 		}
 	}
-	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text, 'pdf-split'::text, 'pdf-merge'::text, 'image-pdf'::text", 1)+"\n", 1)
+	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-rotate'::text, 'pdf-split'::text, 'pdf-merge'::text, 'image-pdf'::text, 'pdf-to-image'::text", 1)+"\n", 1)
 	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text, 'zip'::text", 1)+"\n", 1)
 }
 
@@ -230,7 +230,7 @@ func TestLoadMigrations(t *testing.T) {
 	for _, m := range all {
 		got = append(got, m.Name)
 	}
-	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate", "pdf_split", "pdf_merge", "image_pdf"}
+	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_rotate", "pdf_split", "pdf_merge", "image_pdf", "pdf_to_image"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("Migrationen = %v", got)
 	}
@@ -616,4 +616,8 @@ func TestMigration0009PreservesJobsAndAddsImagePdfAndZip(t *testing.T) {
 	if err == nil {
 		t.Fatal("unknown format accepted")
 	}
+}
+
+func TestMigration0010PreservesJobsAndAddsPdfToImage(t *testing.T) {
+	assertToolMigration(t, 10, "pdf-to-image", "pdf", append([][2]string{{"pdf-rotate", "pdf"}, {"pdf-split", "pdf"}, {"pdf-merge", "pdf"}, {"image-pdf", "zip"}}, keptTools...))
 }

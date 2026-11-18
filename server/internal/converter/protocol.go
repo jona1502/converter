@@ -66,6 +66,7 @@ type Limits struct {
 	MarkdownMaxPages        int64 `json:"markdownMaxPages"`
 	ImagePdfMaxImages       int64 `json:"imagePdfMaxImages"`
 	ImagePdfMaxInputBytes   int64 `json:"imagePdfMaxInputBytes"`
+	PdfRenderMaxPages       int64 `json:"pdfRenderMaxPages"`
 	ImageMaxInputBytes      int64 `json:"imageMaxInputBytes"`
 	ImageMaxPixels          int64 `json:"imageMaxPixels"`
 	ImageMaxEdge            int64 `json:"imageMaxEdge"`
@@ -85,6 +86,7 @@ func DefaultLimits() Limits {
 	return Limits{
 		MarkdownMaxInputBytes: 2_097_152, MarkdownMaxOutputBytes: 20_971_520, MarkdownMaxPages: 300,
 		ImagePdfMaxImages: 30, ImagePdfMaxInputBytes: 104_857_600,
+		PdfRenderMaxPages:       100,
 		ImageMaxInputBytes:      52_428_800,
 		ImageMaxPixels:          40_000_000,
 		ImageMaxEdge:            16_384,
@@ -104,6 +106,7 @@ func (l Limits) valid() bool {
 	for _, v := range []int64{
 		l.MarkdownMaxInputBytes, l.MarkdownMaxOutputBytes, l.MarkdownMaxPages,
 		l.ImagePdfMaxImages, l.ImagePdfMaxInputBytes,
+		l.PdfRenderMaxPages,
 		l.ImageMaxInputBytes, l.ImageMaxPixels, l.ImageMaxEdge, l.ImageMaxOutputBytes,
 		l.PdfMaxInputBytes, l.PdfMaxResultsTotalBytes, l.PdfImageMaxPixels,
 		l.AudioMaxInputBytes, l.AudioMaxDurationSeconds, l.AudioMaxChannels,

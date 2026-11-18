@@ -4,6 +4,7 @@ const tools = [
   { label: 'Bilder konvertieren', path: '/bilder/konvertieren', group: 'Konvertieren' },
   { label: 'Markdown zu PDF', path: '/pdf/markdown', group: 'Konvertieren' },
   { label: 'Bild zu PDF', path: '/pdf/aus-bildern', group: 'Konvertieren' },
+  { label: 'PDF zu Bild', path: '/pdf/zu-bild', group: 'Konvertieren' },
   { label: 'Audio konvertieren', path: '/audio/konvertieren', group: 'Konvertieren' },
   { label: 'Bilder komprimieren', path: '/bilder/komprimieren', group: 'Komprimieren' },
   { label: 'PDF komprimieren', path: '/pdf/komprimieren', group: 'Komprimieren' },
@@ -88,6 +89,7 @@ test.describe('Desktop (1440 px)', () => {
     await expect(link(page, 'Markdown zu PDF')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Bild zu PDF')).toBeFocused();
+    await expect(link(page, 'PDF zu Bild')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Audio konvertieren')).toBeFocused();
     await page.keyboard.press('Escape');

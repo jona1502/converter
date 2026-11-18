@@ -237,6 +237,10 @@ func (rt *Runtime) claimJob(ctx context.Context, tx pgx.Tx, jobID [16]byte) (*Ta
 	if tool == "pdf-split" {
 		working = rt.cfg.PDFMaxResultsTotalBytes
 	}
+	if tool == "pdf-to-image" {
+		// Ein Ergebnis (Bild oder ZIP) im PDF-Gesamtbudget.
+		working = rt.cfg.PDFMaxResultsTotalBytes
+	}
 	if tool == "pdf-merge" {
 		// Ein Ergebnis, begrenzt durch die Eingabegrenze des Prozesses (< Gesamtbudget).
 		working = rt.cfg.PDFMaxResultsTotalBytes
@@ -435,7 +439,7 @@ func (rt *Runtime) PublishResult(ctx context.Context, t *Task, resultID [16]byte
 	}
 	var width, height *int64
 	// Nur Bilder haben Abmessungen; Audio und PDF lassen input_width/height NULL.
-	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" && t.Tool != "markdown-pdf" && t.Tool != "pdf-rotate" && t.Tool != "pdf-split" && t.Tool != "pdf-merge" && t.Tool != "image-pdf" {
+	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" && t.Tool != "markdown-pdf" && t.Tool != "pdf-rotate" && t.Tool != "pdf-split" && t.Tool != "pdf-merge" && t.Tool != "image-pdf" && t.Tool != "pdf-to-image" {
 		var err error
 		if width, height, err = sourceSize(details); err != nil {
 			return false, err
