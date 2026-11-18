@@ -105,7 +105,10 @@ def _render(document: Any, number: int, options: PdfImageOptions) -> bytes:
         # Keine Formulare initialisieren: nur die sichtbare Seite wird gerastert.
         bitmap = page.render(scale=options.dpi / 72, rev_byteorder=True, may_draw_forms=False)
         try:
-            image = bitmap.to_pil().convert("RGB")
+            image = bitmap.to_pil()
+            if image.mode != "RGB":
+                # Nur bei Alpha-Bitmaps nötig; sonst entfällt eine zweite Kopie bei 40 MP.
+                image = image.convert("RGB")
         finally:
             bitmap.close()
         try:
