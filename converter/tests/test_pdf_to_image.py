@@ -14,7 +14,7 @@ from PIL import Image
 from converter.errors import ProcessingError
 from converter.limits import Limits
 from converter.options import PdfImageOptions
-from tests.helpers import target_file
+from tests.helpers import LINUX, target_file
 
 COLORS = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0)]
 
@@ -232,3 +232,20 @@ def test_cli_maps_processing_errors_to_result_errors(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert result.events[-1] == {"kind": "error", "id": result_id, "code": "encrypted"}
     assert target.stat().st_size == 0
+
+
+@pytest.mark.skipif(not LINUX, reason="RLIMIT_AS und Seccomp gibt es nur im Linux-Container")
+@pytest.mark.parametrize("fmt", ["png", "jpeg", "webp"])
+def test_page_at_the_pixel_limit_fits_into_the_sandbox_memory(tmp_path: Path, fmt: str) -> None:
+    from tests.helpers import encode, new_id, request, run_cli
+
+    # 5 000 x 8 000 pt bei 72 dpi sind genau 40 Megapixel (Grenze), Speicherlimit 1 GiB.
+    source = make_pdf(tmp_path / "huge.pdf", size=(5000, 8000))
+    target = target_file(tmp_path / "out.bin")
+    result_id = new_id()
+    options = {"tool": "pdf-to-image", "format": fmt, "dpi": 72, "pages": "1"}
+    result = run_cli(["run"], encode(request(source, options, [(result_id, None, target)])))
+    assert result.returncode == 0, result.stderr[-500:]
+    assert result.events[-1]["kind"] == "result", result.events[-1]
+    with Image.open(target) as image:
+        assert image.size == (5000, 8000)
