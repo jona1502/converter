@@ -11,18 +11,18 @@ import (
 	"miconverter/server/migrations"
 )
 
-func TestMigration0006AddsPdfToImageOnly(t *testing.T) {
+func TestMigration0010AddsPdfToImageOnly(t *testing.T) {
 	ctx := testContext(t)
 	pool, _ := testdb.NewPool(t)
 	all, err := store.LoadMigrations(migrations.FS)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(all) < 6 || all[5].Name != "pdf_to_image" {
-		t.Fatalf("0006 fehlt: %+v", all)
+	if len(all) < 10 || all[9].Name != "pdf_to_image" {
+		t.Fatalf("0010 fehlt: %+v", all)
 	}
 	beforeFS := fstest.MapFS{}
-	for _, m := range all[:5] {
+	for _, m := range all[:9] {
 		beforeFS[fmt.Sprintf("%04d_%s.sql", m.Version, m.Name)] = &fstest.MapFile{Data: []byte(m.SQL)}
 	}
 	if _, err := store.Migrate(ctx, pool, beforeFS); err != nil {
@@ -34,17 +34,17 @@ func TestMigration0006AddsPdfToImageOnly(t *testing.T) {
 		return err
 	}
 	if err := insert("pdf-to-image", "pdf"); err == nil {
-		t.Fatal("0005 akzeptiert pdf-to-image")
+		t.Fatal("0009 akzeptiert pdf-to-image")
 	}
 	before := dataDump(t, ctx, pool)
 	result, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(result.Applied, []int{6}) {
+	if err != nil || !slices.Equal(result.Applied, []int{10}) {
 		t.Fatalf("%+v %v", result, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
-		t.Fatal("0006 hat vorhandene Daten verändert")
+		t.Fatal("0010 hat vorhandene Daten verändert")
 	}
-	for _, ok := range [][2]string{{"pdf-to-image", "pdf"}, {"markdown-pdf", "markdown"}, {"pdf-compress", "pdf"}, {"audio-convert", "mp3"}} {
+	for _, ok := range [][2]string{{"pdf-to-image", "pdf"}, {"markdown-pdf", "markdown"}, {"pdf-compress", "pdf"}, {"audio-convert", "mp3"}, {"pdf-rotate", "pdf"}, {"pdf-split", "pdf"}, {"pdf-merge", "pdf"}, {"image-pdf", "zip"}} {
 		if err := insert(ok[0], ok[1]); err != nil {
 			t.Fatalf("%v: %v", ok, err)
 		}
