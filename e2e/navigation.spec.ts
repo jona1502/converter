@@ -7,8 +7,9 @@ const tools = [
   { label: 'Bilder komprimieren', path: '/bilder/komprimieren', group: 'Komprimieren' },
   { label: 'PDF komprimieren', path: '/pdf/komprimieren', group: 'Komprimieren' },
   { label: 'Bilder skalieren', path: '/bilder/skalieren', group: 'Skalieren' },
+  { label: 'PDF teilen', path: '/pdf/teilen', group: 'Teilen' },
 ] as const;
-const groups = ['Konvertieren', 'Komprimieren', 'Skalieren'] as const;
+const groups = ['Konvertieren', 'Komprimieren', 'Skalieren', 'Teilen'] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
 function group(page: Page, name: string) { return navigation(page).getByRole('button', { name: `${name}-Menü`, exact: true }); }

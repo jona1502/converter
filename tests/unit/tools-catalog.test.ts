@@ -5,11 +5,12 @@ describe('Werkzeugkatalog nach Aktion', () => {
   const titlesOf = (id: string) =>
     availableToolsByAction.find((group) => group.action.id === id)?.tools.map((tool) => tool.title);
 
-  it('gruppiert Konvertieren, Komprimieren und Skalieren in dieser Reihenfolge', () => {
+  it('gruppiert Konvertieren, Komprimieren, Skalieren und Teilen in dieser Reihenfolge', () => {
     expect(availableToolsByAction.map((group) => group.action.title)).toEqual([
       'Konvertieren',
       'Komprimieren',
       'Skalieren',
+      'Teilen',
     ]);
   });
 
@@ -17,6 +18,7 @@ describe('Werkzeugkatalog nach Aktion', () => {
     expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Audio konvertieren']);
     expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
     expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
+    expect(titlesOf('split')).toEqual(['PDF teilen']);
   });
 
   it('enthält jedes verfügbare Werkzeug genau einmal', () => {
@@ -34,6 +36,7 @@ describe('Werkzeugtexte', () => {
 
   it('getTool liefert den Eintrag und wirft bei unbekannter Kennung', () => {
     expect(getTool('pdf-komprimieren').href).toBe('/pdf/komprimieren');
+    expect(getTool('pdf-teilen').href).toBe('/pdf/teilen');
     expect(() => getTool('gibt-es-nicht')).toThrow();
   });
 });

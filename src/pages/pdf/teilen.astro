@@ -1,0 +1,7 @@
+---
+import ToolPage from '../../components/site/ToolPage.astro';
+import PdfSplitter from '../../components/tools/PdfSplitter';
+---
+<ToolPage toolId="pdf-teilen" description="PDF nach ausdrücklichem Start auf dem Server teilen: Seitenbereiche wie 1-3,5,7- oder jede Seite einzeln. Ein Bereich ergibt eine PDF, mehrere ein ZIP. Verschlüsselte PDFs werden abgelehnt.">
+  <PdfSplitter client:load />
+</ToolPage>

@@ -49,6 +49,10 @@ describe('Typerkennung', () => {
 
 describe('Aktionen je Typ', () => {
   const ids = (kind: Parameters<typeof toolsForKind>[0]) => toolsForKind(kind).map((tool) => tool.id);
+  it('bietet für PDF kein Teilen in der Schnellwahl an, weil es Einstellungen braucht', () => {
+    expect(ids('pdf')).not.toContain('pdf-teilen');
+  });
+
   it('bietet für Markdown ausschließlich das eigene PDF-Werkzeug', () => {
     expect(ids('markdown')).toEqual(['markdown-pdf']);
     expect(ids('pdf')).toEqual(['pdf-komprimieren']);

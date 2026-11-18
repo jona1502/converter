@@ -5,9 +5,9 @@
  */
 
 export type ToolCategory = 'bilder' | 'pdf' | 'audio';
-export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
+export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren' | 'teilen';
 /** Aktion, nach der die Kopfzeile die Werkzeuge in Menüs gruppiert. */
-export type ToolAction = 'convert' | 'compress' | 'resize';
+export type ToolAction = 'convert' | 'compress' | 'resize' | 'split';
 
 export interface ToolActionInfo {
   readonly id: ToolAction;
@@ -38,6 +38,8 @@ export interface Tool {
   readonly action: ToolAction;
   /** Nur verfügbare Werkzeuge werden verlinkt. */
   readonly available: boolean;
+  /** `false`: nicht auf der Startseiten-Schnellwahl anbieten (eigene Seite mit Einstellungen nötig). */
+  readonly quickStart?: boolean;
 }
 
 export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [
@@ -51,6 +53,7 @@ export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
   { id: 'convert', title: 'Konvertieren' },
   { id: 'compress', title: 'Komprimieren' },
   { id: 'resize', title: 'Skalieren' },
+  { id: 'split', title: 'Teilen' },
 ];
 
 export const TOOLS: readonly Tool[] = [
@@ -119,6 +122,18 @@ export const TOOLS: readonly Tool[] = [
     operation: 'konvertieren',
     action: 'convert',
     available: true,
+  },
+  {
+    id: 'pdf-teilen',
+    title: 'PDF teilen',
+    description: 'Seitenbereiche einer PDF herauslösen oder jede Seite einzeln ausgeben.',
+    lead: 'Teilen Sie eine PDF in Seitenbereiche wie 1-3,5,7- oder in einzelne Seiten; ein Bereich ergibt eine PDF, mehrere ein ZIP.',
+    href: '/pdf/teilen',
+    category: 'pdf',
+    operation: 'teilen',
+    action: 'split',
+    available: true,
+    quickStart: false,
   },
 ];
 
