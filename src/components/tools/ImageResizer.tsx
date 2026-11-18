@@ -66,7 +66,7 @@ export default function ImageResizer({ initialFiles }: ToolProps) {
         {format === 'original' ? <p className="hint">Originalformat wird beibehalten; JPEG und WebP verwenden 85 % Qualität. Transparenz wird bei JPEG/BMP mit Weiß gefüllt.</p> : <><QualitySlider format={displayFormat} value={quality} onChange={setQuality} /><BackgroundColor format={displayFormat} value={background} onChange={setBackground} /></>}
       </>}
       actionTitle="Skalieren"
-      action={<ActionBar processLabel="Skalieren" counts={batch.counts} progress={batch.progress} isProcessing={batch.isProcessing} disabledReason={reason}
+      action={<ActionBar processLabel="Skalieren" counts={batch.counts} progress={batch.progress} isProcessing={batch.isProcessing} disabledReason={reason} zipHref={batch.zipUrl}
         onReset={() => { batch.reset(); setProcessedKey(null); setLimitMessage(''); buttonRef.current?.focus(); }}
         onProcess={() => { setProcessedKey(key); void batch.processAll(optionsFor, 'skaliert'); }} />}
       resultsHeadingId={`${id}-results`}
