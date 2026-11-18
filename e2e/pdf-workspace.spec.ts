@@ -89,7 +89,8 @@ test('laufende PDF zeigt Analyse und fertige Varianten, Teilfehler bleiben der V
   await expect(balanced).toContainText('Größer als das Original');
   await expect(balanced.locator('dt', { hasText: 'Originalgröße' })).toBeVisible();
   await expect(balanced.locator('dt', { hasText: 'Ergebnisgröße' })).toBeVisible();
-  await expect(results.getByRole('link')).toHaveCount(2);
+  await expect(results.getByRole('link')).toHaveCount(3);
+  await expect(results.getByRole('link', { name: 'Alle als ZIP speichern' })).toHaveAttribute('href', '/api/v1/jobs/archive?job_id=pdf-workspace');
   await expect(page.getByRole('button', { name: 'Komprimieren', exact: true })).toBeEnabled();
 });
 

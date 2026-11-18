@@ -10,7 +10,7 @@ import { LIMITS, buildOutputFileName, makeUniqueFileNames, type EncodeSupport, t
 import {probeServerImage} from '../../lib/api/probe';
 import { errorCodeOf } from './errorMessages';
 import { jobProgress, type JobProgress } from '../../lib/api/progress';
-import { ApiError, apiMessage, capabilities, createJob, deleteJob, pollJob, type Tool } from '../../lib/api/client';
+import { ApiError, apiMessage, batchZipUrl, capabilities, createJob, deleteJob, pollJob, type Tool } from '../../lib/api/client';
 
 export type EntryStatus = 'checking' | 'ready' | 'invalid' | 'uploading' | 'queued' | 'processing' | 'done' | 'error';
 
@@ -290,7 +290,10 @@ export function useImageBatch(tool: Tool = 'image-convert') {
     return total === 0 ? null : { total, done, failed, finished: done + failed };
   }, [entries, runIds]);
 
-  return { entries, support, limits, isProcessing, counts, progress, addFiles, remove, reset, processAll };
+  /** ZIP mit allen fertigen Ergebnissen; erst ab zwei fertigen Dateien und nach Ende des Durchlaufs. */
+  const zipUrl = useMemo(() => batchZipUrl(entries.flatMap(entry => entry.status === 'done' ? [entry.jobId] : []), isProcessing), [entries, isProcessing]);
+
+  return { entries, support, limits, isProcessing, counts, progress, zipUrl, addFiles, remove, reset, processAll };
 }
 
 export type ImageBatch = ReturnType<typeof useImageBatch>;
