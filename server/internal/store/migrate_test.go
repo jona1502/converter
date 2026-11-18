@@ -79,7 +79,7 @@ func currentSchema(t *testing.T) string {
 			t.Fatalf("Referenzzeile fehlt: %s", line)
 		}
 	}
-	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text", 1)+"\n", 1)
+	ref = strings.Replace(ref, alembicToolCheck+"\n", strings.Replace(audioToolCheck, "'audio-convert'::text", "'audio-convert'::text, 'markdown-pdf'::text, 'pdf-merge'::text", 1)+"\n", 1)
 	return strings.Replace(ref, alembicFormatCheck+"\n", strings.Replace(audioFormatCheck, "'ogg'::text", "'ogg'::text, 'markdown'::text", 1)+"\n", 1)
 }
 
@@ -195,8 +195,8 @@ func TestLoadMigrations(t *testing.T) {
 	for _, m := range all {
 		got = append(got, m.Name)
 	}
-	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown"}
-	if !slices.Equal(got[:5], want) {
+	want := []string{"initial_schema", "download_lease", "stale_attempts", "audio", "markdown", "pdf_merge"}
+	if !slices.Equal(got[:6], want) {
 		t.Fatalf("Migrationen = %v", got)
 	}
 }
@@ -222,7 +222,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Baselined || !slices.Equal(res.Applied, []int{1, 2, 3, 4, 5}) {
+	if res.Baselined || !slices.Equal(res.Applied, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
 	assertSchema(t, ctx, pool, currentSchema(t))
@@ -238,7 +238,7 @@ func TestMigrateEmptyDatabaseMatchesCurrentSchema(t *testing.T) {
 	if res.Baselined || len(res.Applied) != 0 {
 		t.Fatalf("zweiter Lauf = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 }
@@ -263,7 +263,7 @@ func TestMigration0004AllowsAudioJobs(t *testing.T) {
 	}
 	before := dataDump(t, ctx, pool)
 	res, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(res.Applied, []int{4, 5}) {
+	if err != nil || !slices.Equal(res.Applied, []int{4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v, %v", res, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -303,10 +303,10 @@ func TestMigrateBaselinesAlembicHeadWithoutTouchingData(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Baseline übernimmt 1–3 ohne SQL, danach laufen 0004_audio und 0005_markdown.
-	if !res.Baselined || !slices.Equal(res.Applied, []int{4, 5}) {
+	if !res.Baselined || !slices.Equal(res.Applied, []int{4, 5, 6}) {
 		t.Fatalf("Ergebnis = %+v", res)
 	}
-	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pool); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -398,7 +398,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
 		switch len(results[i].Applied) {
-		case 5:
+		case 6:
 			applied++
 		case 0:
 		default:
@@ -408,7 +408,7 @@ func TestMigrateConcurrentRunnersApplyOnce(t *testing.T) {
 	if applied != 1 {
 		t.Fatalf("%d Runner haben migriert, erwartet genau 1", applied)
 	}
-	if v := versions(t, ctx, pools[0]); !slices.Equal(v, []int{1, 2, 3, 4, 5}) {
+	if v := versions(t, ctx, pools[0]); !slices.Equal(v, []int{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("Versionen = %v", v)
 	}
 	assertSchema(t, ctx, pools[0], currentSchema(t))
@@ -438,7 +438,7 @@ func TestMigrateConcurrentBaselineOnce(t *testing.T) {
 			t.Fatalf("Runner %d: %v", i, errs[i])
 		}
 		// Nur der baselinende Runner führt danach 0004 und 0005 aus.
-		if results[i].Baselined != slices.Equal(results[i].Applied, []int{4, 5}) ||
+		if results[i].Baselined != slices.Equal(results[i].Applied, []int{4, 5, 6}) ||
 			(!results[i].Baselined && len(results[i].Applied) != 0) {
 			t.Fatalf("Runner %d: %+v", i, results[i])
 		}
@@ -491,7 +491,7 @@ func TestMigration0005PreservesJobsAndAddsMarkdown(t *testing.T) {
 	}
 	before := dataDump(t, ctx, pool)
 	result, err := store.Migrate(ctx, pool, migrations.FS)
-	if err != nil || !slices.Equal(result.Applied, []int{5}) {
+	if err != nil || !slices.Equal(result.Applied, []int{5, 6}) {
 		t.Fatalf("%+v %v", result, err)
 	}
 	if after := dataDump(t, ctx, pool); after != before {
@@ -508,5 +508,45 @@ func TestMigration0005PreservesJobsAndAddsMarkdown(t *testing.T) {
 	}
 	if err := insert("markdown-pdf", "html"); err == nil {
 		t.Fatal("unknown format accepted")
+	}
+}
+
+func TestMigration0006PreservesJobsAndAddsPdfMerge(t *testing.T) {
+	ctx := testContext(t)
+	pool, _ := testdb.NewPool(t)
+	all, err := store.LoadMigrations(migrations.FS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	beforeFS := fstest.MapFS{}
+	for _, m := range all[:5] {
+		beforeFS[fmt.Sprintf("%04d_%s.sql", m.Version, m.Name)] = &fstest.MapFile{Data: []byte(m.SQL)}
+	}
+	if _, err := store.Migrate(ctx, pool, beforeFS); err != nil {
+		t.Fatal(err)
+	}
+	seedJobs(t, ctx, pool)
+	insert := func(tool string) error {
+		_, err := pool.Exec(ctx, `INSERT INTO jobs (id,session_id,tool,state,options,input_name,input_size,input_format,input_sha256,input_storage_key,max_attempts,expires_at) VALUES (gen_random_uuid(),$1,$2,'queued','{}','test',1,'pdf',decode(repeat('cd',32),'hex'),'jobs/x/input',3,now()+interval '1 hour')`, sessionID, tool)
+		return err
+	}
+	if err := insert("pdf-merge"); err == nil {
+		t.Fatal("0005 accepted pdf-merge")
+	}
+	before := dataDump(t, ctx, pool)
+	result, err := store.Migrate(ctx, pool, migrations.FS)
+	if err != nil || !slices.Equal(result.Applied, []int{6}) {
+		t.Fatalf("%+v %v", result, err)
+	}
+	if after := dataDump(t, ctx, pool); after != before {
+		t.Fatal("0006 changed existing data")
+	}
+	for _, tool := range []string{"pdf-merge", "markdown-pdf", "pdf-compress"} {
+		if err := insert(tool); err != nil {
+			t.Fatalf("%s: %v", tool, err)
+		}
+	}
+	if err := insert("pdf-shuffle"); err == nil {
+		t.Fatal("unknown tool accepted")
 	}
 }
