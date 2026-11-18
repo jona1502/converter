@@ -236,6 +236,10 @@ type Upload struct {
 }
 
 func (u Upload) resultRows(originalName string) ([]resultRow, error) {
+	if u.Tool == "pdf-split" {
+		row, err := splitResultRow(originalName, u.Options)
+		return []resultRow{row}, err
+	}
 	if u.Tool == "markdown-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil
 	}

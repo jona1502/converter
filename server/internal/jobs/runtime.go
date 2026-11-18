@@ -231,6 +231,9 @@ func (rt *Runtime) claimJob(ctx context.Context, tx pgx.Tx, jobID [16]byte) (*Ta
 	if tool == "audio-convert" {
 		working = rt.cfg.AudioMaxOutputBytes
 	}
+	if tool == "pdf-split" {
+		working = rt.cfg.PDFMaxResultsTotalBytes
+	}
 	if tool == "pdf-compress" {
 		// Bereits veröffentlichte Stufen zählen gegen das Gesamtbudget.
 		working = max(0, rt.cfg.PDFMaxResultsTotalBytes-(reserved-inputSize))
@@ -425,7 +428,7 @@ func (rt *Runtime) PublishResult(ctx context.Context, t *Task, resultID [16]byte
 	}
 	var width, height *int64
 	// Nur Bilder haben Abmessungen; Audio und PDF lassen input_width/height NULL.
-	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" && t.Tool != "markdown-pdf" {
+	if t.Tool != "pdf-compress" && t.Tool != "audio-convert" && t.Tool != "markdown-pdf" && t.Tool != "pdf-split" {
 		var err error
 		if width, height, err = sourceSize(details); err != nil {
 			return false, err
