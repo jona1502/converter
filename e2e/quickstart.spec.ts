@@ -95,7 +95,7 @@ test('Auswahl zeigt Titel, eine Dropzone und höchstens eine Textlinkliste statt
   await expect(heading(page)).toBeVisible();
   await expect(picker(page)).toHaveAccessibleDescription(/Bilder, PDF, Audio und Markdown.*hochgeladen wird erst/s);
   await expect(page.locator('.drop-zone')).toHaveCount(1);
-  await expect(page.getByRole('navigation', { name: 'Werkzeuge im Überblick' }).getByRole('link')).toHaveText(['Bilder konvertieren', 'Bilder komprimieren', 'Bilder skalieren', 'Markdown zu PDF', 'PDF komprimieren', 'Audio konvertieren']);
+  await expect(page.getByRole('navigation', { name: 'Werkzeuge im Überblick' }).getByRole('link')).toHaveText(['Bilder konvertieren', 'Bilder komprimieren', 'Bilder skalieren', 'Markdown zu PDF', 'PDF komprimieren', 'Bild zu PDF', 'Audio konvertieren']);
   await expect(page.locator('.card, .card-link, .tool-card')).toHaveCount(0);
   const accept = await page.locator('input[type=file]').getAttribute('accept');
   for (const part of ['.png', '.pdf', 'application/pdf', '.mp3', '.flac']) expect(accept).toContain(part);

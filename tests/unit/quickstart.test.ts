@@ -54,6 +54,10 @@ describe('Aktionen je Typ', () => {
     expect(ids('pdf')).toEqual(['pdf-komprimieren']);
   });
 
+  it('bietet Bild zu PDF nie als Aktion für eine einzelne Datei an', () => {
+    for (const kind of ['image', 'pdf', 'audio', 'markdown'] as const) expect(ids(kind)).not.toContain('image-pdf');
+  });
+
   it('bietet für Bilder Konvertieren, Komprimieren und Skalieren', () => {
     expect(ids('image')).toEqual(['bilder-konvertieren', 'bilder-komprimieren', 'bilder-skalieren']);
     expect(toolsForKind('image').map(actionLabel)).toEqual(['Konvertieren', 'Komprimieren', 'Skalieren']);
