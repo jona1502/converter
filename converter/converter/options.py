@@ -29,6 +29,7 @@ AUDIO_FORMATS: Final = ("mp3", "wav", "flac", "ogg")
 AUDIO_QUALITY_FORMATS: Final = ("mp3", "ogg")
 AUDIO_CHANNELS: Final = ("original", "mono")
 MARKDOWN_TOOL: Final = "markdown-pdf"
+PDF_MERGE_TOOL: Final = "pdf-merge"
 MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
 MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
@@ -110,7 +111,12 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+@dataclass(frozen=True, slots=True)
+class PdfMergeOptions:
+    tool: str = PDF_MERGE_TOOL
+
+
+JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions | PdfMergeOptions
 
 
 def _pixels(value: object, where: str) -> int:
@@ -268,6 +274,11 @@ def _markdown(value: dict[str, object]) -> MarkdownOptions:
     return MarkdownOptions(page_size=page_size, orientation=orientation)
 
 
+def _pdf_merge(value: dict[str, object]) -> PdfMergeOptions:
+    v.obj(value, required=("tool",), code=CODE, where="options")
+    return PdfMergeOptions()
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -281,4 +292,6 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == PDF_MERGE_TOOL:
+        return _pdf_merge(value)
     raise v.fail(CODE, "tool: unknown")

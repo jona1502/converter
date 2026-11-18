@@ -200,3 +200,62 @@ def test_result_limit_discards_output(tmp_path: Path) -> None:
     with pytest.raises(ProcessingError) as info:
         run(other, files, replace(limits, pdf_max_input_bytes=limits.pdf_max_input_bytes - 1))
     assert info.value.code == "file-too-large"
+
+
+def test_options_accept_only_the_tool_tag() -> None:
+    from converter.errors import ProtocolError
+    from converter.options import PdfMergeOptions, parse_options
+
+    assert parse_options({"tool": "pdf-merge"}) == PdfMergeOptions()
+    for bad in ({"tool": "pdf-merge", "levels": []}, {"tool": "pdf-merge", "order": [1, 0]}):
+        with pytest.raises(ProtocolError):
+            parse_options(bad)
+
+
+def test_request_needs_exactly_one_result_without_level(tmp_path: Path) -> None:
+    from converter.errors import ProtocolError
+    from converter.protocol import parse_request
+    from tests.helpers import encode, new_id, request
+
+    source = tmp_path / "input"
+    source.write_bytes(bundle([make_pdf("A"), make_pdf("B")]))
+    one = target_file(tmp_path / "one.pdf")
+    parsed = parse_request(encode(request(source, {"tool": "pdf-merge"}, [(new_id(), None, one)])))
+    assert len(parsed.results) == 1
+    two = target_file(tmp_path / "two.pdf")
+    for results in ([(new_id(), "high", one)], [(new_id(), None, one), (new_id(), None, two)]):
+        with pytest.raises(ProtocolError):
+            parse_request(encode(request(source, {"tool": "pdf-merge"}, results)))
+
+
+def test_cli_merges_and_reports_details(tmp_path: Path) -> None:
+    from tests.helpers import encode, new_id, request, run_cli
+
+    source = tmp_path / "input"
+    source.write_bytes(bundle([make_pdf("A", 2), make_pdf("B")]))
+    target = target_file(tmp_path / "output.pdf")
+    result_id = new_id()
+    result = run_cli(
+        ["run"], encode(request(source, {"tool": "pdf-merge"}, [(result_id, None, target)]))
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.events[-1] == {
+        "kind": "result",
+        "id": result_id,
+        "details": {"pageCount": 3, "sourceCount": 2},
+    }
+    assert page_texts(target) == ["A1", "A2", "B1"]
+
+
+def test_cli_reports_encrypted_as_result_error(tmp_path: Path) -> None:
+    from tests.helpers import encode, new_id, request, run_cli
+
+    source = tmp_path / "input"
+    source.write_bytes(bundle([make_pdf("A"), encrypted_pdf()]))
+    target = target_file(tmp_path / "output.pdf")
+    result_id = new_id()
+    result = run_cli(
+        ["run"], encode(request(source, {"tool": "pdf-merge"}, [(result_id, None, target)]))
+    )
+    assert result.events[-1] == {"kind": "error", "id": result_id, "code": "encrypted"}
+    assert target.stat().st_size == 0
