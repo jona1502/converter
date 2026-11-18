@@ -7,8 +7,9 @@ const tools = [
   { label: 'Bilder komprimieren', path: '/bilder/komprimieren', group: 'Komprimieren' },
   { label: 'PDF komprimieren', path: '/pdf/komprimieren', group: 'Komprimieren' },
   { label: 'Bilder skalieren', path: '/bilder/skalieren', group: 'Skalieren' },
+  { label: 'PDF zusammenführen', path: '/pdf/zusammenfuehren', group: 'Zusammenführen' },
 ] as const;
-const groups = ['Konvertieren', 'Komprimieren', 'Skalieren'] as const;
+const groups = ['Konvertieren', 'Komprimieren', 'Skalieren', 'Zusammenführen'] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
 function group(page: Page, name: string) { return navigation(page).getByRole('button', { name: `${name}-Menü`, exact: true }); }
@@ -21,7 +22,7 @@ async function noOverflow(page: Page) {
 test.describe('Desktop (1440 px)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('Kopfzeile: Logo links, drei Menüs, Theme-Umschalter rechts, keine Seitenleiste', async ({ page }) => {
+  test('Kopfzeile: Logo links, vier Menüs, Theme-Umschalter rechts, keine Seitenleiste', async ({ page }) => {
     await page.goto('/');
     const header = await page.getByRole('banner').boundingBox();
     const main = await page.getByRole('main').boundingBox();
