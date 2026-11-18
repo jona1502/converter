@@ -34,6 +34,7 @@ const TOOL_COMPONENTS: Readonly<Record<string, ToolComponent>> = {
   'pdf-komprimieren': lazy(() => import('../tools/PdfCompressor')),
   'audio-konvertieren': lazy(() => import('../tools/AudioConverter')),
   'markdown-pdf': lazy(() => import('../tools/MarkdownConverter')),
+  'pdf-zu-bild': lazy(() => import('../tools/PdfImageConverter')),
 };
 
 /** Textlinks in der Reihenfolge Bilder, PDF, Audio. */
@@ -216,6 +217,7 @@ export default function QuickStart() {
                   <button id={`remove-${row.id}`} type="button" className="btn btn-ghost shrink-0 self-start" aria-label={`${row.file.name} entfernen`} onClick={() => remove(row)}>Entfernen</button>
                   {row.kind === 'image' && !row.message && status !== 'invalid' && <div className="flex w-full flex-wrap gap-3"><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-komprimieren', row.file)}>Komprimieren</button><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-skalieren', row.file)}>Skalieren</button></div>}
                   {row.kind === 'pdf' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-komprimieren', row.file)}>PDF komprimieren</button>}
+                  {row.kind === 'pdf' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-zu-bild', row.file)}>PDF zu Bild</button>}
                   {row.kind === 'markdown' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('markdown-pdf', row.file)}>PDF erstellen</button>}
                 </li>;
               })}

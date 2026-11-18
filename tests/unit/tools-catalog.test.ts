@@ -14,7 +14,7 @@ describe('Werkzeugkatalog nach Aktion', () => {
   });
 
   it('ordnet Audio unter Konvertieren und PDF unter Komprimieren', () => {
-    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Audio konvertieren']);
+    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'PDF zu Bild', 'Audio konvertieren']);
     expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
     expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
   });
