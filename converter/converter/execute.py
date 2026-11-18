@@ -12,9 +12,16 @@ import time
 from pathlib import Path
 
 from converter.errors import ProcessingError
-from converter.options import AudioOptions, ImageOptions, MarkdownOptions, PdfOptions
+from converter.options import (
+    AudioOptions,
+    ImageOptions,
+    ImagePdfOptions,
+    MarkdownOptions,
+    PdfOptions,
+)
 from converter.processing.audio import pipeline as audio
 from converter.processing.files import discard
+from converter.processing.imagepdf import pipeline as imagepdf
 from converter.processing.images.pipeline import convert
 from converter.processing.markdown import pipeline as markdown
 from converter.processing.pdf.pipeline import analyze, compress
@@ -40,6 +47,17 @@ def run_image(request: Request, options: ImageOptions, writer: EventWriter) -> N
     writer.progress_encode()
     try:
         details = convert(Path(request.source), Path(target.path), options, request.limits)
+    except Exception as exc:
+        _failure(writer, target, exc, "encode-failed")
+        return
+    writer.result(target.id, details)
+
+
+def run_image_pdf(request: Request, options: ImagePdfOptions, writer: EventWriter) -> None:
+    (target,) = request.results
+    writer.progress_encode()
+    try:
+        details = imagepdf.convert(Path(request.source), Path(target.path), options, request.limits)
     except Exception as exc:
         _failure(writer, target, exc, "encode-failed")
         return
@@ -118,9 +136,7 @@ def execute(request: Request, writer: EventWriter) -> None:
             _failure(writer, target, exc, "encode-failed")
             return
         writer.result(target.id, details)
-    elif isinstance(options, PdfOptions):
-        run_pdf(request, options, writer)
+    elif isinstance(options, ImagePdfOptions):
+        run_image_pdf(request, options, writer)
     else:
-        # image-pdf is parsed but not executable until its pipeline is wired.
-        (target,) = request.results
-        _failure(writer, target, ProcessingError("unsupported-type"), "encode-failed")
+        run_pdf(request, options, writer)
