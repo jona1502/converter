@@ -333,6 +333,7 @@ func (a *API) capabilities(w http.ResponseWriter, r *http.Request) error {
 	if !report.Markdown.Available {
 		out.Tools = slices.DeleteFunc(out.Tools, func(tool apitypes.Tool) bool { return tool == apitypes.ToolMarkdownPDF })
 	}
+	out.PdfMerge = a.mergeCapabilities(report)
 	audioIn, audioOut := report.AudioFormats()
 	for _, f := range audioIn {
 		out.Audio.InputFormats = append(out.Audio.InputFormats, apitypes.AudioFormat(f))
@@ -438,6 +439,9 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) error {
 		if err != nil || !report.Markdown.Available {
 			return httpapi.NewError(503, apitypes.CodeServiceUnavailable, "Markdown-Verarbeitung ist nicht verfügbar.")
 		}
+	}
+	if opts.tool == "pdf-merge" {
+		return a.createMergeJob(ctx, w, multipart, opts, owner, key, replay, reservation)
 	}
 	part, err = multipart.NextPart()
 	if err != nil {
