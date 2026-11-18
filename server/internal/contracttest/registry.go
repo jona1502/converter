@@ -68,6 +68,9 @@ func APITypes() *Types {
 	} {
 		ts.Component(name, t)
 	}
+	ts.Component("PdfRotateOptions", reflect.TypeFor[apitypes.PdfRotateOptions]())
+	ts.Component("PdfRotateCapabilities", reflect.TypeFor[apitypes.RotateCapabilities]())
+	ts.Component("PdfRotateDetails", reflect.TypeFor[apitypes.PdfRotateDetails]())
 	// ResizeOptions ist im Vertrag keine eigene Komponente, sondern das
 	// Inline-oneOf ImageOptions.resize; geprüft über compareType.
 	return ts

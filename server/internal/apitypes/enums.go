@@ -90,10 +90,11 @@ const (
 	ToolPDFCompress   Tool = "pdf-compress"
 	ToolAudioConvert  Tool = "audio-convert"
 	ToolMarkdownPDF   Tool = "markdown-pdf"
+	ToolPDFRotate     Tool = "pdf-rotate"
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF, ToolPDFRotate}
 }
 
 // IsImage: image-convert, image-compress und image-resize.
