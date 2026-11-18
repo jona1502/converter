@@ -60,6 +60,10 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 		// Ausgabe ≈ Eingabe: gleiche Grenzen und Zeit wie PDF-Verarbeitung.
 		req.Timeout = c.PdfTimeout
 		req.OutputLimit = c.PdfMaxResultsTotalBytes
+		if task.OutputBudget > 0 {
+			req.OutputLimit = min(req.OutputLimit, task.OutputBudget)
+			req.Limits.PdfMaxResultsTotalBytes = req.OutputLimit
+		}
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout

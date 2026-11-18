@@ -102,3 +102,23 @@ func TestPdfRotateSessionAcceptsOnlyValidResult(t *testing.T) {
 		})
 	}
 }
+
+func TestPdfRotateRequestUsesOutputBudget(t *testing.T) {
+	cfg, err := config.Load(func(k string) (string, bool) { return "test", k == "CONVERTER_ENVIRONMENT" })
+	if err != nil {
+		t.Fatal(err)
+	}
+	task := jobs.Task{Tool: "pdf-rotate", InputPath: "/data/input", OutputBudget: 5_000_000, Options: json.RawMessage(`{"angle":90,"pages":"all","tool":"pdf-rotate"}`), Results: []jobs.TaskResult{{ID: [16]byte{1}, Path: "/data/result"}}}
+	req, err := NewProcessor(nil, cfg).request(task)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.OutputLimit != 5_000_000 || req.Limits.PdfMaxResultsTotalBytes != 5_000_000 {
+		t.Fatalf("%+v", req)
+	}
+	task.OutputBudget = 0
+	req, err = NewProcessor(nil, cfg).request(task)
+	if err != nil || req.OutputLimit != cfg.PdfMaxResultsTotalBytes {
+		t.Fatalf("%+v %v", req, err)
+	}
+}
