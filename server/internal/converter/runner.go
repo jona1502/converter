@@ -95,6 +95,7 @@ type session struct {
 	pdf       bool
 	audio     bool
 	markdown  bool
+	merge     bool
 	onEvent   func(Event) error
 	analysis  bool
 	next      int // Index des nächsten offenen Ergebnisses
@@ -181,6 +182,8 @@ func (s *session) handle(data []byte) error {
 		switch {
 		case s.pdf:
 			details, err = ValidatePdfDetails(o["details"])
+		case s.merge:
+			details, err = ValidatePdfMergeDetails(o["details"])
 		case s.markdown:
 			details, err = ValidateMarkdownDetails(o["details"], s.req.Limits)
 		case s.audio:
@@ -195,6 +198,9 @@ func (s *session) handle(data []byte) error {
 		switch {
 		case s.pdf:
 			limit = s.req.Limits.PdfMaxResultsTotalBytes - s.usedBytes
+		case s.merge:
+			// Ein Ergebnis; Grenze ist die Summe der Eingaben (Eingabegrenze).
+			limit = s.req.OutputLimit
 		case s.markdown:
 			limit = s.req.Limits.MarkdownMaxOutputBytes
 		case s.audio:
@@ -309,7 +315,7 @@ func (r *Runner) Run(ctx context.Context, req Request, onEvent func(Event) error
 	if err != nil {
 		return Outcome{}, err
 	}
-	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), onEvent: onEvent}
+	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), merge: req.isPdfMerge(), onEvent: onEvent}
 	res, err := r.execute(ctx, "run", payload, req.Timeout, s.handle)
 	if err != nil {
 		return Outcome{}, err
