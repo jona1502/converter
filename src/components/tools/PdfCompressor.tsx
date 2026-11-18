@@ -3,7 +3,7 @@ import {formatBytes, formatSizeChange} from '../../lib/format';
 import {ToolWorkspace} from './ToolWorkspace';
 import {useInitialFiles, type ToolProps} from './useInitialFiles';
 import {jobProgress} from '../../lib/api/progress';
-import {apiMessage, ApiError, capabilities, cancelJob, createJob, deleteJob, pollJob, type Job} from '../../lib/api/client';
+import {apiMessage, ApiError, capabilities, cancelJob, createJob, jobZipUrl, deleteJob, pollJob, type Job} from '../../lib/api/client';
 const levels = ['high','balanced','small'] as const;
 const labels = {high: 'Hohe Qualität', balanced: 'Ausgewogen', small: 'Kleine Datei'};
 export default function PdfCompressor({initialFiles}: ToolProps) {
@@ -58,6 +58,7 @@ export default function PdfCompressor({initialFiles}: ToolProps) {
     }catch(error){if(version===generation.current&&!active.signal.aborted)setError(apiMessage(error));}
     finally{if(version===generation.current){setBusy(false);controller.current=null;}}
   }
+  const zipHref=jobZipUrl(job);
   const imageAnalysis=job?.analysis?.images;
   const images=imageAnalysis&&typeof imageAnalysis==='object'?imageAnalysis as Record<string,unknown>:null;
   const progress=job?.progress;
@@ -142,6 +143,7 @@ export default function PdfCompressor({initialFiles}: ToolProps) {
             {job.state!=='expired'&&result?.downloadUrl&&<a className="btn btn-primary mt-auto w-full" href={result.downloadUrl} download={result.downloadName}>{labels[level]} herunterladen</a>}
           </section>;
         })}</div>
+        {!busy&&zipHref&&<a className="btn btn-secondary self-start" href={zipHref} download="ergebnisse.zip">Alle als ZIP speichern</a>}
       </>}
     </>}/>
 }
