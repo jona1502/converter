@@ -95,6 +95,7 @@ type session struct {
 	pdf       bool
 	audio     bool
 	markdown  bool
+	split     bool
 	onEvent   func(Event) error
 	analysis  bool
 	next      int // Index des nächsten offenen Ergebnisses
@@ -183,6 +184,8 @@ func (s *session) handle(data []byte) error {
 			details, err = ValidatePdfDetails(o["details"])
 		case s.markdown:
 			details, err = ValidateMarkdownDetails(o["details"], s.req.Limits)
+		case s.split:
+			details, err = ValidateSplitDetails(o["details"])
 		case s.audio:
 			details, err = ValidateAudioDetails(o["details"], s.req.Limits)
 		default:
@@ -197,6 +200,8 @@ func (s *session) handle(data []byte) error {
 			limit = s.req.Limits.PdfMaxResultsTotalBytes - s.usedBytes
 		case s.markdown:
 			limit = s.req.Limits.MarkdownMaxOutputBytes
+		case s.split:
+			limit = s.req.Limits.PdfMaxResultsTotalBytes
 		case s.audio:
 			limit = s.req.Limits.AudioMaxOutputBytes
 		}
@@ -309,7 +314,7 @@ func (r *Runner) Run(ctx context.Context, req Request, onEvent func(Event) error
 	if err != nil {
 		return Outcome{}, err
 	}
-	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), onEvent: onEvent}
+	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), split: req.isSplit(), onEvent: onEvent}
 	res, err := r.execute(ctx, "run", payload, req.Timeout, s.handle)
 	if err != nil {
 		return Outcome{}, err
