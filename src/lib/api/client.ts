@@ -11,6 +11,8 @@ export interface Capabilities {
   audio?: ApiSchemas['AudioCapabilities'];
   /** Fehlt bei älteren Servern; dann ist markdown-pdf nicht verfügbar. */
   markdown?: ApiSchemas['MarkdownCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-split nicht verfügbar. */
+  pdfSplit?: ApiSchemas['PdfSplitCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {
@@ -36,6 +38,7 @@ const messages: Record<string, string> = {
   'cancelled': 'Die Verarbeitung wurde abgebrochen.',
   'timeout': 'Die Verarbeitung hat das Zeitlimit überschritten.',
   'memory-limit': 'Für diese Datei reicht der verfügbare Arbeitsspeicher nicht aus.',
+  'page-range-invalid': 'Die Seitenbereiche passen nicht zu dieser PDF.',
 };
 export class ApiError extends Error {
   constructor(public code: string, public status = 0, public retryAfter = 1) {
