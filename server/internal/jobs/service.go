@@ -233,11 +233,30 @@ type Upload struct {
 	// ("original" bereits aufgelöst). PDFLevels: pdf-compress, Reihenfolge = ordinal.
 	OutputFormat string
 	PDFLevels    []string
+	// pdf-to-image: PDFArchive = ZIP mit allen Seiten, sonst Einzelbild von Seite PDFPage.
+	PDFArchive bool
+	PDFPage    int
 }
 
 func (u Upload) resultRows(originalName string) ([]resultRow, error) {
+	if u.Tool == "pdf-rotate" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: PDFRotateDownloadName(originalName)}}, nil
+	}
+	if u.Tool == "pdf-split" {
+		row, err := splitResultRow(originalName, u.Options)
+		return []resultRow{row}, err
+	}
+	if u.Tool == "image-pdf" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: ImagePdfDownloadName(originalName)}}, nil
+	}
+	if u.Tool == "pdf-to-image" {
+		return u.pdfImageRow(originalName)
+	}
 	if u.Tool == "markdown-pdf" {
 		return []resultRow{{ordinal: 0, mime: PDFMIME, name: CleanBase(originalName, PDFFallbackBase) + ".pdf"}}, nil
+	}
+	if u.Tool == "pdf-merge" {
+		return []resultRow{{ordinal: 0, mime: PDFMIME, name: PDFMergeDownloadName}}, nil
 	}
 	if u.Tool == "pdf-compress" {
 		if len(u.PDFLevels) == 0 {
@@ -303,6 +322,8 @@ func (s *Service) Finalize(ctx context.Context, sessionID [16]byte, r Reservatio
 		fallback = PDFFallbackBase
 	case u.Tool == "audio-convert":
 		fallback = AudioFallbackBase
+	case u.Tool == "image-pdf":
+		fallback = ImagePdfFallbackBase
 	}
 	rows, err := u.resultRows(u.OriginalName)
 	if err == nil && u.Size > r.Bytes {

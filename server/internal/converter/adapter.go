@@ -30,10 +30,11 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	c := p.cfg
 	limits := Limits{
 		MarkdownMaxInputBytes: c.MarkdownMaxInputBytes, MarkdownMaxOutputBytes: c.MarkdownMaxOutputBytes, MarkdownMaxPages: c.MarkdownMaxPages,
+		ImagePdfMaxImages: c.ImagePdfMaxImages, ImagePdfMaxInputBytes: c.ImagePdfMaxInputBytes,
 		ImageMaxInputBytes: c.ImageMaxInputBytes, ImageMaxPixels: c.ImageMaxPixels,
 		ImageMaxEdge: int64(c.ImageMaxEdge), ImageMaxOutputBytes: c.ImageMaxOutputBytes,
 		PdfMaxInputBytes: c.PdfMaxInputBytes, PdfMaxResultsTotalBytes: c.PdfMaxResultsTotalBytes,
-		PdfImageMaxPixels:  c.PdfImageMaxPixels,
+		PdfImageMaxPixels: c.PdfImageMaxPixels, PdfRenderMaxPages: c.PdfRenderMaxPages,
 		AudioMaxInputBytes: c.AudioMaxInputBytes, AudioMaxDurationSeconds: c.AudioMaxDurationSeconds,
 		AudioMaxChannels: c.AudioMaxChannels, AudioMaxSampleRate: c.AudioMaxSampleRate,
 		AudioMaxOutputBytes: c.AudioMaxOutputBytes,
@@ -44,8 +45,17 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	if limits.MarkdownMaxOutputBytes == 0 {
 		limits.MarkdownMaxOutputBytes = 20_971_520
 	}
+	if limits.ImagePdfMaxImages == 0 {
+		limits.ImagePdfMaxImages = 30
+	}
+	if limits.ImagePdfMaxInputBytes == 0 {
+		limits.ImagePdfMaxInputBytes = 104_857_600
+	}
 	if limits.MarkdownMaxPages == 0 {
 		limits.MarkdownMaxPages = 300
+	}
+	if limits.PdfRenderMaxPages == 0 {
+		limits.PdfRenderMaxPages = 100
 	}
 	req := Request{Source: task.InputPath, Options: task.Options, Limits: limits,
 		MemoryBytes: 1 << 30, Timeout: c.ImageTimeout, OutputLimit: c.ImageMaxOutputBytes}
@@ -55,6 +65,43 @@ func (p *Processor) request(task jobs.Task) (Request, error) {
 	if task.Tool == "markdown-pdf" {
 		req.Timeout = c.MarkdownTimeout
 		req.OutputLimit = limits.MarkdownMaxOutputBytes
+	}
+	if task.Tool == "pdf-rotate" {
+		// Ausgabe ≈ Eingabe: gleiche Grenzen und Zeit wie PDF-Verarbeitung.
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = c.PdfMaxResultsTotalBytes
+		if task.OutputBudget > 0 {
+			req.OutputLimit = min(req.OutputLimit, task.OutputBudget)
+			req.Limits.PdfMaxResultsTotalBytes = req.OutputLimit
+		}
+	}
+	if task.Tool == "pdf-split" {
+		// Ein Ergebnis (PDF oder ZIP) im Rahmen des PDF-Gesamtbudgets.
+		if task.OutputBudget <= 0 {
+			return Request{}, invalid("PDF-Arbeitsbudget fehlt")
+		}
+		req.Limits.PdfMaxResultsTotalBytes = min(c.PdfMaxResultsTotalBytes, task.OutputBudget)
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = req.Limits.PdfMaxResultsTotalBytes
+	}
+	if task.Tool == "pdf-merge" {
+		// Eingaben sind höchstens PdfMaxInputBytes; das Ergebnis erhält dieselbe Grenze.
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = c.PdfMaxInputBytes
+	}
+	if task.Tool == "image-pdf" {
+		// Ein Bündel dekodiert bis zu ImagePdfMaxImages Bilder nacheinander.
+		req.Timeout = c.PdfTimeout
+	}
+	if task.Tool == "pdf-to-image" {
+		// Ein Ergebnis (Bild oder ZIP) im PDF-Gesamtbudget dieses Versuchs.
+		budget := c.PdfMaxResultsTotalBytes
+		if task.OutputBudget > 0 {
+			budget = min(budget, task.OutputBudget)
+		}
+		req.Limits.PdfMaxResultsTotalBytes = budget
+		req.Timeout = c.PdfTimeout
+		req.OutputLimit = budget
 	}
 	if task.Tool == "audio-convert" {
 		req.Timeout = c.AudioTimeout

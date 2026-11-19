@@ -5,18 +5,28 @@ describe('Werkzeugkatalog nach Aktion', () => {
   const titlesOf = (id: string) =>
     availableToolsByAction.find((group) => group.action.id === id)?.tools.map((tool) => tool.title);
 
-  it('gruppiert Konvertieren, Komprimieren und Skalieren in dieser Reihenfolge', () => {
+  it('gruppiert Konvertieren, Komprimieren, Skalieren, Drehen, Teilen und Zusammenführen in dieser Reihenfolge', () => {
     expect(availableToolsByAction.map((group) => group.action.title)).toEqual([
       'Konvertieren',
       'Komprimieren',
       'Skalieren',
+      'Drehen',
+      'Teilen',
+      'Zusammenführen',
     ]);
   });
 
   it('ordnet Audio unter Konvertieren und PDF unter Komprimieren', () => {
-    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Audio konvertieren']);
+    expect(titlesOf('convert')).toEqual(['Bilder konvertieren', 'Markdown zu PDF', 'Bild zu PDF', 'PDF zu Bild', 'Audio konvertieren']);
     expect(titlesOf('compress')).toEqual(['Bilder komprimieren', 'PDF komprimieren']);
     expect(titlesOf('resize')).toEqual(['Bilder skalieren']);
+    expect(titlesOf('rotate')).toEqual(['PDF drehen']);
+    expect(titlesOf('split')).toEqual(['PDF teilen']);
+    expect(titlesOf('merge')).toEqual(['PDF zusammenführen']);
+  });
+
+  it('führt Bild zu PDF unter /pdf/aus-bildern', () => {
+    expect(getTool('image-pdf')).toMatchObject({ title: 'Bild zu PDF', href: '/pdf/aus-bildern', category: 'pdf' });
   });
 
   it('enthält jedes verfügbare Werkzeug genau einmal', () => {
@@ -34,6 +44,8 @@ describe('Werkzeugtexte', () => {
 
   it('getTool liefert den Eintrag und wirft bei unbekannter Kennung', () => {
     expect(getTool('pdf-komprimieren').href).toBe('/pdf/komprimieren');
+    expect(getTool('pdf-drehen').href).toBe('/pdf/drehen');
+    expect(getTool('pdf-teilen').href).toBe('/pdf/teilen');
     expect(() => getTool('gibt-es-nicht')).toThrow();
   });
 });

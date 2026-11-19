@@ -181,6 +181,15 @@ func TestSerializedDTOsValidate(t *testing.T) {
 		t.Fatal("AudioDetails mit unbekanntem Format akzeptiert")
 	}
 
+	merge := mustJSON(t, apitypes.PdfMergeCapabilities{Available: true, MinFiles: 2, MaxFiles: 20, MaxTotalBytes: 100_000_000, MaxOutputBytes: 100_000_000, MaxPages: 2000})
+	if err := spec.ValidateComponent("PdfMergeCapabilities", merge); err != nil {
+		t.Fatalf("PdfMergeCapabilities: %v %s", err, merge)
+	}
+	mergeDetails := mustJSON(t, apitypes.PdfMergeDetails{PageCount: 5, SourceCount: 2})
+	if err := spec.ValidateComponent("PdfMergeDetails", mergeDetails); err != nil {
+		t.Fatalf("PdfMergeDetails: %v", err)
+	}
+
 	caps := mustJSON(t, apitypes.Capabilities{APIVersion: "1", Tools: apitypes.Tools()})
 	schema, err = spec.ResponseSchema("/api/v1/capabilities", "GET", 200)
 	if err != nil {
@@ -203,6 +212,15 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 		`{"tool":"audio-convert","format":"flac"}`,
 		`{"tool":"markdown-pdf"}`,
 		`{"tool":"markdown-pdf","pageSize":"letter","orientation":"landscape"}`,
+		`{"tool":"pdf-rotate","angle":90}`,
+		`{"tool":"pdf-rotate","angle":270,"pages":"1-3,5"}`,
+		`{"tool":"pdf-merge"}`,
+		`{"tool":"image-pdf"}`,
+		`{"tool":"image-pdf","pageSize":"fit","orientation":"auto","margin":"none"}`,
+		`{"tool":"image-pdf","pageSize":"letter","orientation":"landscape","margin":"medium"}`,
+		`{"tool":"image-pdf"}`,
+		`{"tool":"image-pdf","pageSize":"fit","orientation":"auto","margin":"none"}`,
+		`{"tool":"image-pdf","pageSize":"letter","orientation":"landscape","margin":"medium"}`,
 	} {
 		var o apitypes.JobOptions
 		if err := validation.DecodeStrictBytes([]byte(in), validation.Limits{MaxBytes: 8192}, "options", &o); err != nil {
@@ -221,27 +239,34 @@ func TestOptionsRoundTripValidates(t *testing.T) {
 func TestValidatorRejectsViolations(t *testing.T) {
 	spec := MustLoad(t)
 	cases := map[string]struct{ component, data string }{
-		"fehlendes Pflichtfeld":   {"ErrorResponse", `{"error":{"code":"not-found","message":"x"}}`},
-		"unbekanntes Feld":        {"ErrorResponse", `{"error":{"code":"not-found","message":"x"},"requestId":"a","x":1}`},
-		"falscher Enum":           {"ErrorResponse", `{"error":{"code":"nope","message":"x"},"requestId":"a"}`},
-		"integer statt Zahl":      {"ErrorDetail", `{"code":"server-busy","message":"x","retryAfterSeconds":1.5}`},
-		"null nicht erlaubt":      {"JobInput", `{"name":null,"size":1,"format":"png","width":null,"height":null}`},
-		"keine UUID":              {"JobResultView", `{"id":"x","level":null,"state":"pending","size":null,"mime":"a","downloadName":"a","downloadUrl":null,"details":null,"error":null}`},
-		"pattern":                 {"ImageOptions", `{"tool":"image-convert","format":"png","background":"red"}`},
-		"maximum":                 {"ImageOptions", `{"tool":"image-convert","format":"png","quality":1.5}`},
-		"exclusiveMinimum":        {"ResizeMaxEdge", `{"mode":"maxEdge","maxEdge":0}`},
-		"minItems":                {"PdfOptions", `{"tool":"pdf-compress","levels":[]}`},
-		"oneOf ohne Treffer":      {"JobOptions", `{"tool":"video"}`},
-		"Audioformat":             {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
-		"Markdown Seitenformat":   {"MarkdownOptions", `{"tool":"markdown-pdf","pageSize":"a3"}`},
-		"Markdown Ausrichtung":    {"MarkdownOptions", `{"tool":"markdown-pdf","orientation":"diagonal"}`},
-		"Audiokanäle":             {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
-		"Audio ohne Bildfelder":   {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
-		"const":                   {"LiveResponse", `{"status":"nein"}`},
-		"additionalProperties":    {"ReadyResponse", `{"status":"ok","checks":{"db":"vielleicht"}}`},
-		"ready status":            {"ReadyResponse", `{"status":"kaputt","checks":{}}`},
-		"Array-Element falsch":    {"ImageOptions", `{"tool":"image-convert","format":"ico","icoSizes":[17]}`},
-		"Objekt statt null/Liste": {"ErrorDetail", `{"code":"invalid-request","message":"x","fields":{}}`},
+		"fehlendes Pflichtfeld":      {"ErrorResponse", `{"error":{"code":"not-found","message":"x"}}`},
+		"unbekanntes Feld":           {"ErrorResponse", `{"error":{"code":"not-found","message":"x"},"requestId":"a","x":1}`},
+		"falscher Enum":              {"ErrorResponse", `{"error":{"code":"nope","message":"x"},"requestId":"a"}`},
+		"integer statt Zahl":         {"ErrorDetail", `{"code":"server-busy","message":"x","retryAfterSeconds":1.5}`},
+		"null nicht erlaubt":         {"JobInput", `{"name":null,"size":1,"format":"png","width":null,"height":null}`},
+		"keine UUID":                 {"JobResultView", `{"id":"x","level":null,"state":"pending","size":null,"mime":"a","downloadName":"a","downloadUrl":null,"details":null,"error":null}`},
+		"pattern":                    {"ImageOptions", `{"tool":"image-convert","format":"png","background":"red"}`},
+		"maximum":                    {"ImageOptions", `{"tool":"image-convert","format":"png","quality":1.5}`},
+		"exclusiveMinimum":           {"ResizeMaxEdge", `{"mode":"maxEdge","maxEdge":0}`},
+		"minItems":                   {"PdfOptions", `{"tool":"pdf-compress","levels":[]}`},
+		"oneOf ohne Treffer":         {"JobOptions", `{"tool":"video"}`},
+		"Audioformat":                {"AudioOptions", `{"tool":"audio-convert","format":"m4a"}`},
+		"Markdown Seitenformat":      {"MarkdownOptions", `{"tool":"markdown-pdf","pageSize":"a3"}`},
+		"Markdown Ausrichtung":       {"MarkdownOptions", `{"tool":"markdown-pdf","orientation":"diagonal"}`},
+		"Rotate Winkel":              {"PdfRotateOptions", `{"tool":"pdf-rotate","angle":45}`},
+		"Rotate ohne Winkel":         {"PdfRotateOptions", `{"tool":"pdf-rotate"}`},
+		"PdfMerge unbekanntes Feld":  {"PdfMergeOptions", `{"tool":"pdf-merge","order":[1,0]}`},
+		"PdfMerge zu wenige Dateien": {"PdfMergeCapabilities", `{"available":true,"minFiles":1,"maxFiles":20,"maxTotalBytes":1,"maxOutputBytes":1,"maxPages":1}`},
+		"Bild-PDF Seitenformat":      {"ImagePdfOptions", `{"tool":"image-pdf","pageSize":"a3"}`},
+		"Bild-PDF Rand":              {"ImagePdfOptions", `{"tool":"image-pdf","margin":"huge"}`},
+		"Bild-PDF Ausrichtung":       {"ImagePdfOptions", `{"tool":"image-pdf","orientation":"diagonal"}`},
+		"Audiokanäle":                {"AudioOptions", `{"tool":"audio-convert","format":"mp3","channels":"stereo"}`},
+		"Audio ohne Bildfelder":      {"AudioOptions", `{"tool":"audio-convert","format":"mp3","resize":{"mode":"none"}}`},
+		"const":                      {"LiveResponse", `{"status":"nein"}`},
+		"additionalProperties":       {"ReadyResponse", `{"status":"ok","checks":{"db":"vielleicht"}}`},
+		"ready status":               {"ReadyResponse", `{"status":"kaputt","checks":{}}`},
+		"Array-Element falsch":       {"ImageOptions", `{"tool":"image-convert","format":"ico","icoSizes":[17]}`},
+		"Objekt statt null/Liste":    {"ErrorDetail", `{"code":"invalid-request","message":"x","fields":{}}`},
 	}
 	for name, tc := range cases {
 		if err := spec.ValidateComponent(tc.component, []byte(tc.data)); err == nil {

@@ -34,6 +34,8 @@ const TOOL_COMPONENTS: Readonly<Record<string, ToolComponent>> = {
   'pdf-komprimieren': lazy(() => import('../tools/PdfCompressor')),
   'audio-konvertieren': lazy(() => import('../tools/AudioConverter')),
   'markdown-pdf': lazy(() => import('../tools/MarkdownConverter')),
+  'pdf-zusammenfuehren': lazy(() => import('../tools/PdfMerger')),
+  'pdf-zu-bild': lazy(() => import('../tools/PdfImageConverter')),
 };
 
 /** Textlinks in der Reihenfolge Bilder, PDF, Audio. */
@@ -148,9 +150,9 @@ export default function QuickStart() {
       else document.getElementById(`remove-${remaining[Math.min(index, remaining.length - 1)]!.id}`)?.focus();
     });
   };
-  const openTool = (id: string, file: File) => {
+  const openTool = (id: string, file: File, files: File[] = [file]) => {
     const tool = availableTools.find(entry => entry.id === id)!;
-    const next = { tool, files: [file] };
+    const next = { tool, files };
     secondaryRef.current = next;
     history.pushState(null, '', `#${id}`);
     setSecondary(next);
@@ -216,6 +218,8 @@ export default function QuickStart() {
                   <button id={`remove-${row.id}`} type="button" className="btn btn-ghost shrink-0 self-start" aria-label={`${row.file.name} entfernen`} onClick={() => remove(row)}>Entfernen</button>
                   {row.kind === 'image' && !row.message && status !== 'invalid' && <div className="flex w-full flex-wrap gap-3"><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-komprimieren', row.file)}>Komprimieren</button><button type="button" className="btn btn-ghost" disabled={running} onClick={() => openTool('bilder-skalieren', row.file)}>Skalieren</button></div>}
                   {row.kind === 'pdf' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-komprimieren', row.file)}>PDF komprimieren</button>}
+                  {row.kind === 'pdf' && !row.message && rows.filter(other => other.kind === 'pdf' && !other.message).length > 1 && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-zusammenfuehren', row.file, rows.filter(other => other.kind === 'pdf' && !other.message).map(other => other.file))}>PDFs zusammenführen</button>}
+                  {row.kind === 'pdf' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('pdf-zu-bild', row.file)}>PDF zu Bild</button>}
                   {row.kind === 'markdown' && !row.message && <button type="button" className="btn btn-secondary" disabled={running} onClick={() => openTool('markdown-pdf', row.file)}>PDF erstellen</button>}
                 </li>;
               })}

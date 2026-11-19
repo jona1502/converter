@@ -1,0 +1,7 @@
+---
+import ToolPage from '../../components/site/ToolPage.astro';
+import PdfRotator from '../../components/tools/PdfRotator';
+---
+<ToolPage toolId="pdf-drehen" description="PDF-Seiten nach ausdrücklichem Start drehen: 90°, 180° oder 270° für alle oder ausgewählte Seiten, ohne Qualitätsverlust. Verschlüsselte PDFs werden nicht unterstützt.">
+  <PdfRotator client:load />
+</ToolPage>

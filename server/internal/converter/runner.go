@@ -95,6 +95,11 @@ type session struct {
 	pdf       bool
 	audio     bool
 	markdown  bool
+	rotate    bool
+	split     bool
+	merge     bool
+	imagePdf  bool
+	pdfImage  bool
 	onEvent   func(Event) error
 	analysis  bool
 	next      int // Index des nächsten offenen Ergebnisses
@@ -181,8 +186,18 @@ func (s *session) handle(data []byte) error {
 		switch {
 		case s.pdf:
 			details, err = ValidatePdfDetails(o["details"])
+		case s.rotate:
+			details, err = ValidatePdfRotateDetails(o["details"])
+		case s.merge:
+			details, err = ValidatePdfMergeDetails(o["details"])
 		case s.markdown:
 			details, err = ValidateMarkdownDetails(o["details"], s.req.Limits)
+		case s.split:
+			details, err = ValidateSplitDetails(o["details"])
+		case s.imagePdf:
+			details, err = ValidateImagePdfDetails(o["details"], s.req.Limits)
+		case s.pdfImage:
+			details, err = ValidatePdfImageDetails(o["details"], s.req.Limits)
 		case s.audio:
 			details, err = ValidateAudioDetails(o["details"], s.req.Limits)
 		default:
@@ -195,8 +210,15 @@ func (s *session) handle(data []byte) error {
 		switch {
 		case s.pdf:
 			limit = s.req.Limits.PdfMaxResultsTotalBytes - s.usedBytes
+		case s.rotate:
+			limit = s.req.Limits.PdfMaxResultsTotalBytes
+		case s.merge:
+			// Ein Ergebnis; Grenze ist die Summe der Eingaben (Eingabegrenze).
+			limit = s.req.OutputLimit
 		case s.markdown:
 			limit = s.req.Limits.MarkdownMaxOutputBytes
+		case s.split, s.pdfImage:
+			limit = s.req.Limits.PdfMaxResultsTotalBytes
 		case s.audio:
 			limit = s.req.Limits.AudioMaxOutputBytes
 		}
@@ -244,7 +266,7 @@ func (s *session) handle(data []byte) error {
 func (s *session) progress(data []byte) error {
 	if !s.pdf {
 		var optional []string
-		if s.audio {
+		if s.audio || s.pdfImage {
 			optional = []string{"progress"}
 		}
 		o, err := parseObject(data, []string{"kind", "phase"}, optional)
@@ -309,7 +331,7 @@ func (r *Runner) Run(ctx context.Context, req Request, onEvent func(Event) error
 	if err != nil {
 		return Outcome{}, err
 	}
-	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), onEvent: onEvent}
+	s := &session{req: req, pdf: req.isPDF(), audio: req.isAudio(), markdown: req.isMarkdown(), rotate: req.isRotate(), split: req.isSplit(), merge: req.isPdfMerge(), imagePdf: req.isImagePdf(), pdfImage: req.isPDFImage(), onEvent: onEvent}
 	res, err := r.execute(ctx, "run", payload, req.Timeout, s.handle)
 	if err != nil {
 		return Outcome{}, err

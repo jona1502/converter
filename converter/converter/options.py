@@ -13,6 +13,9 @@ from dataclasses import dataclass
 from typing import Final, Literal
 
 from converter import validation as v
+from converter.pagespec import parse_pages
+from converter.processing.split.ranges import PageRange, parse_ranges
+from converter.rotate_options import PDF_ROTATE_TOOL, PdfRotateOptions, parse_pdf_rotate
 
 CODE: Final = "invalid-options"
 
@@ -29,8 +32,20 @@ AUDIO_FORMATS: Final = ("mp3", "wav", "flac", "ogg")
 AUDIO_QUALITY_FORMATS: Final = ("mp3", "ogg")
 AUDIO_CHANNELS: Final = ("original", "mono")
 MARKDOWN_TOOL: Final = "markdown-pdf"
+PDF_MERGE_TOOL: Final = "pdf-merge"
 MARKDOWN_PAGE_SIZES: Final = ("a4", "letter")
 MARKDOWN_ORIENTATIONS: Final = ("portrait", "landscape")
+SPLIT_TOOL: Final = "pdf-split"
+SPLIT_MODES: Final = ("ranges", "each")
+IMAGE_PDF_TOOL: Final = "image-pdf"
+IMAGE_PDF_PAGE_SIZES: Final = ("a4", "letter", "fit")
+IMAGE_PDF_ORIENTATIONS: Final = ("auto", "portrait", "landscape")
+IMAGE_PDF_MARGINS: Final = ("none", "small", "medium")
+PDF_IMAGE_TOOL: Final = "pdf-to-image"
+PDF_IMAGE_FORMATS: Final = ("png", "jpeg", "webp")
+PDF_IMAGE_MIN_DPI: Final = 72
+PDF_IMAGE_MAX_DPI: Final = 300
+DEFAULT_PDF_IMAGE_DPI: Final = 150
 # 0,8 entspricht etwa LAME V2 bzw. Vorbis q8: transparent, aber kleiner als WAV.
 DEFAULT_AUDIO_QUALITY: Final = 0.8
 DEFAULT_QUALITY: Final = 0.85
@@ -110,7 +125,54 @@ class MarkdownOptions:
     orientation: str = "portrait"
 
 
-JobOptions = ImageOptions | PdfOptions | AudioOptions | MarkdownOptions
+@dataclass(frozen=True, slots=True)
+class SplitOptions:
+    """``each``: jede Seite einzeln; ``ranges``: je Bereich eine Teil-PDF."""
+
+    mode: str
+    ranges: tuple[PageRange, ...] = ()
+    tool: str = SPLIT_TOOL
+
+    @property
+    def single_pdf(self) -> bool:
+        """Genau ein Bereich: Ergebnis ist eine PDF, sonst ein ZIP."""
+        return self.mode == "ranges" and len(self.ranges) == 1
+
+
+@dataclass(frozen=True, slots=True)
+class PdfMergeOptions:
+    tool: str = PDF_MERGE_TOOL
+
+
+@dataclass(frozen=True, slots=True)
+class ImagePdfOptions:
+    tool: str = IMAGE_PDF_TOOL
+    page_size: str = "a4"
+    orientation: str = "auto"
+    margin: str = "small"
+
+
+@dataclass(frozen=True, slots=True)
+class PdfImageOptions:
+    format: str
+    dpi: int = DEFAULT_PDF_IMAGE_DPI
+    # None = alle Seiten; sonst aufsteigende, eindeutige Seitennummern ab 1.
+    pages: tuple[int, ...] | None = None
+    quality: float = DEFAULT_QUALITY
+    tool: str = PDF_IMAGE_TOOL
+
+
+JobOptions = (
+    ImageOptions
+    | PdfOptions
+    | AudioOptions
+    | MarkdownOptions
+    | PdfRotateOptions
+    | SplitOptions
+    | PdfMergeOptions
+    | ImagePdfOptions
+    | PdfImageOptions
+)
 
 
 def _pixels(value: object, where: str) -> int:
@@ -268,6 +330,85 @@ def _markdown(value: dict[str, object]) -> MarkdownOptions:
     return MarkdownOptions(page_size=page_size, orientation=orientation)
 
 
+def _split(value: dict[str, object]) -> SplitOptions:
+    raw = v.obj(value, required=("tool", "mode"), optional=("ranges",), code=CODE, where="options")
+    mode = v.string(raw["mode"], code=CODE, where="mode", max_length=16)
+    if mode not in SPLIT_MODES:
+        raise v.fail(CODE, "mode: unknown")
+    if mode == "each":
+        if "ranges" in raw:
+            raise v.fail(CODE, "ranges: only with mode ranges")
+        return SplitOptions(mode=mode)
+    if "ranges" not in raw:
+        raise v.fail(CODE, "ranges: required with mode ranges")
+    spec = v.string(raw["ranges"], code=CODE, where="ranges", max_length=1024)
+    try:
+        return SplitOptions(mode=mode, ranges=parse_ranges(spec))
+    except ValueError as exc:
+        raise v.fail(CODE, "ranges: invalid") from exc
+
+
+def _pdf_merge(value: dict[str, object]) -> PdfMergeOptions:
+    v.obj(value, required=("tool",), code=CODE, where="options")
+    return PdfMergeOptions()
+
+
+def _choice(raw: dict[str, object], name: str, allowed: tuple[str, ...], default: str) -> str:
+    if name not in raw:
+        return default
+    chosen = v.string(raw[name], code=CODE, where=name, max_length=16)
+    if chosen not in allowed:
+        raise v.fail(CODE, f"{name}: unknown")
+    return chosen
+
+
+def _image_pdf(value: dict[str, object]) -> ImagePdfOptions:
+    raw = v.obj(
+        value,
+        required=("tool",),
+        optional=("pageSize", "orientation", "margin"),
+        code=CODE,
+        where="options",
+    )
+    page_size = _choice(raw, "pageSize", IMAGE_PDF_PAGE_SIZES, "a4")
+    orientation = _choice(raw, "orientation", IMAGE_PDF_ORIENTATIONS, "auto")
+    margin = _choice(raw, "margin", IMAGE_PDF_MARGINS, "small")
+    if page_size == "fit" and orientation != "auto":
+        raise v.fail(CODE, "orientation: only auto with fit")
+    return ImagePdfOptions(page_size=page_size, orientation=orientation, margin=margin)
+
+
+def _pdf_image(value: dict[str, object]) -> PdfImageOptions:
+    raw = v.obj(
+        value,
+        required=("tool", "format"),
+        optional=("dpi", "pages", "quality"),
+        code=CODE,
+        where="options",
+    )
+    output = raw["format"]
+    if type(output) is not str or output not in PDF_IMAGE_FORMATS:
+        raise v.fail(CODE, "format: unknown")
+    dpi = DEFAULT_PDF_IMAGE_DPI
+    if "dpi" in raw:
+        dpi = v.integer(
+            raw["dpi"], code=CODE, where="dpi", minimum=PDF_IMAGE_MIN_DPI, maximum=PDF_IMAGE_MAX_DPI
+        )
+    pages: tuple[int, ...] | None = None
+    if "pages" in raw:
+        text = v.string(raw["pages"], code=CODE, where="pages", max_length=200)
+        try:
+            pages = parse_pages(text)
+        except ValueError as exc:
+            raise v.fail(CODE, "pages: invalid") from exc
+    quality = DEFAULT_QUALITY
+    if "quality" in raw:
+        quality = v.number(raw["quality"], code=CODE, where="quality")
+        if not 0 <= quality <= 1:
+            raise v.fail(CODE, "quality: out of range")
+    return PdfImageOptions(format=output, dpi=dpi, pages=pages, quality=quality)
+
+
 def parse_options(value: object) -> JobOptions:
     """Prüft dekodiertes Options-JSON; Fehler: ``ProtocolError("invalid-options")``."""
     if type(value) is not dict:
@@ -281,4 +422,14 @@ def parse_options(value: object) -> JobOptions:
         return _audio(value)
     if tool == MARKDOWN_TOOL:
         return _markdown(value)
+    if tool == PDF_ROTATE_TOOL:
+        return parse_pdf_rotate(value)
+    if tool == SPLIT_TOOL:
+        return _split(value)
+    if tool == PDF_MERGE_TOOL:
+        return _pdf_merge(value)
+    if tool == IMAGE_PDF_TOOL:
+        return _image_pdf(value)
+    if tool == PDF_IMAGE_TOOL:
+        return _pdf_image(value)
     raise v.fail(CODE, "tool: unknown")

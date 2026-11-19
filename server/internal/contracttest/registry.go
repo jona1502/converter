@@ -26,6 +26,11 @@ func APITypes() *Types {
 	Enum(ts, "", apitypes.AudioChannelModes())
 	Enum(ts, "", apitypes.MarkdownPageSizes())
 	Enum(ts, "", apitypes.MarkdownOrientations())
+	Enum(ts, "", apitypes.SplitModes())
+	Enum(ts, "", apitypes.ImagePdfPageSizes())
+	Enum(ts, "", apitypes.ImagePdfOrientations())
+	Enum(ts, "", apitypes.ImagePdfMargins())
+	Enum(ts, "", apitypes.PdfImageFormats())
 	Enum(ts, "", apitypes.CheckStatuses())
 	Enum(ts, "", apitypes.ReadyStatuses())
 	Enum(ts, "", []apitypes.ResizeMode{
@@ -58,7 +63,19 @@ func APITypes() *Types {
 		"MarkdownOptions":      reflect.TypeFor[apitypes.MarkdownOptions](),
 		"MarkdownCapabilities": reflect.TypeFor[apitypes.MarkdownCapabilities](),
 		"MarkdownDetails":      reflect.TypeFor[apitypes.MarkdownDetails](),
+		"SplitOptions":         reflect.TypeFor[apitypes.SplitOptions](),
+		"PdfSplitCapabilities": reflect.TypeFor[apitypes.PdfSplitCapabilities](),
+		"SplitDetails":         reflect.TypeFor[apitypes.SplitDetails](),
+		"PdfMergeOptions":      reflect.TypeFor[apitypes.PdfMergeOptions](),
+		"PdfMergeCapabilities": reflect.TypeFor[apitypes.PdfMergeCapabilities](),
+		"PdfMergeDetails":      reflect.TypeFor[apitypes.PdfMergeDetails](),
+		"ImagePdfOptions":      reflect.TypeFor[apitypes.ImagePdfOptions](),
+		"ImagePdfCapabilities": reflect.TypeFor[apitypes.ImagePdfCapabilities](),
+		"ImagePdfDetails":      reflect.TypeFor[apitypes.ImagePdfDetails](),
+		"PdfImageOptions":      reflect.TypeFor[apitypes.PdfImageOptions](),
 		"AudioOptions":         reflect.TypeFor[apitypes.AudioOptions](),
+		"PdfImageCapabilities": reflect.TypeFor[apitypes.PdfImageCapabilities](),
+		"PdfImageDetails":      reflect.TypeFor[apitypes.PdfImageDetails](),
 		"AudioCapabilities":    reflect.TypeFor[apitypes.AudioCapabilities](),
 		"AudioDetails":         reflect.TypeFor[apitypes.AudioDetails](),
 		"ResizeNone":           reflect.TypeFor[apitypes.ResizeNone](),
@@ -68,6 +85,9 @@ func APITypes() *Types {
 	} {
 		ts.Component(name, t)
 	}
+	ts.Component("PdfRotateOptions", reflect.TypeFor[apitypes.PdfRotateOptions]())
+	ts.Component("PdfRotateCapabilities", reflect.TypeFor[apitypes.RotateCapabilities]())
+	ts.Component("PdfRotateDetails", reflect.TypeFor[apitypes.PdfRotateDetails]())
 	// ResizeOptions ist im Vertrag keine eigene Komponente, sondern das
 	// Inline-oneOf ImageOptions.resize; geprüft über compareType.
 	return ts

@@ -80,6 +80,7 @@ type Report struct {
 	PDF             bool           `json:"pdf"`
 	Audio           AudioReport    `json:"audio"`
 	Markdown        MarkdownReport `json:"markdown"`
+	PdfImage        PdfImageReport `json:"pdfImage"`
 	Versions        Versions       `json:"versions"`
 }
 
@@ -205,7 +206,7 @@ func decodeFormats(o object, key string) ([]string, error) {
 
 // parseProbe dekodiert die Probezeile des Konverters streng.
 func parseProbe(data []byte, now time.Time) (Report, error) {
-	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, nil)
+	o, err := parseObject(data, []string{"protocolVersion", "inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, []string{"pdfImage"})
 	if err != nil {
 		return Report{}, err
 	}
@@ -224,6 +225,9 @@ func parseProbe(data []byte, now time.Time) (Report, error) {
 		return Report{}, err
 	}
 	if rep.Markdown, err = decodeMarkdown(o); err != nil {
+		return Report{}, err
+	}
+	if rep.PdfImage, err = decodePdfImage(o); err != nil {
 		return Report{}, err
 	}
 	if rep.Audio, err = decodeAudio(o); err != nil {
@@ -309,7 +313,7 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, fmt.Errorf("%w: lesen", ErrReportInvalid)
 	}
 	o, err := parseObject(data, []string{"schemaVersion", "protocolVersion", "generatedAt",
-		"inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, nil)
+		"inputFormats", "outputFormats", "pdf", "audio", "markdown", "versions"}, []string{"pdfImage"})
 	if err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
@@ -334,6 +338,9 @@ func LoadReport(path string, now time.Time, maxAge time.Duration) (Report, error
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
 	if rep.Markdown, err = decodeMarkdown(o); err != nil {
+		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
+	}
+	if rep.PdfImage, err = decodePdfImage(o); err != nil {
 		return Report{}, fmt.Errorf("%w: %w", ErrReportInvalid, err)
 	}
 	if rep.Audio, err = decodeAudio(o); err != nil {

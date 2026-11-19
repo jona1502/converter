@@ -392,7 +392,8 @@
           "wav",
           "flac",
           "ogg",
-          "markdown"
+          "markdown",
+          "zip"
         ],
         "title": "InputFormat",
         "type": "string"
@@ -473,7 +474,12 @@
             "image-convert": "#/components/schemas/ImageOptions",
             "image-resize": "#/components/schemas/ImageOptions",
             "pdf-compress": "#/components/schemas/PdfOptions",
-            "markdown-pdf": "#/components/schemas/MarkdownOptions"
+            "markdown-pdf": "#/components/schemas/MarkdownOptions",
+            "pdf-rotate": "#/components/schemas/PdfRotateOptions",
+            "pdf-split": "#/components/schemas/SplitOptions",
+            "pdf-merge": "#/components/schemas/PdfMergeOptions",
+            "image-pdf": "#/components/schemas/ImagePdfOptions",
+            "pdf-to-image": "#/components/schemas/PdfImageOptions"
           },
           "propertyName": "tool"
         },
@@ -489,6 +495,21 @@
           },
           {
             "$ref": "#/components/schemas/MarkdownOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfRotateOptions"
+          },
+          {
+            "$ref": "#/components/schemas/SplitOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfMergeOptions"
+          },
+          {
+            "$ref": "#/components/schemas/ImagePdfOptions"
+          },
+          {
+            "$ref": "#/components/schemas/PdfImageOptions"
           }
         ]
       },
@@ -768,7 +789,8 @@
           "animated-unsupported",
           "unsupported-type",
           "duration-too-long",
-          "unsupported-audio"
+          "unsupported-audio",
+          "page-range-invalid"
         ],
         "title": "ProcessingErrorCode",
         "type": "string"
@@ -958,7 +980,12 @@
           "image-resize",
           "pdf-compress",
           "audio-convert",
-          "markdown-pdf"
+          "markdown-pdf",
+          "pdf-rotate",
+          "pdf-split",
+          "pdf-merge",
+          "image-pdf",
+          "pdf-to-image"
         ],
         "title": "Tool",
         "type": "string"
@@ -1038,6 +1065,473 @@
         ],
         "title": "MarkdownDetails",
         "type": "object"
+      },
+      "PdfRotateOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-rotate: Drehung im Uhrzeigersinn für alle oder gewählte Seiten.",
+        "properties": {
+          "angle": {
+            "enum": [
+              90,
+              180,
+              270
+            ],
+            "title": "Angle",
+            "type": "integer"
+          },
+          "pages": {
+            "default": "all",
+            "description": "\"all\" oder eine Liste einzelner Seiten und Bereiche (1-basiert), z. B. \"1-3,5\".",
+            "maxLength": 256,
+            "title": "Pages",
+            "type": "string"
+          },
+          "tool": {
+            "const": "pdf-rotate",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "angle"
+        ],
+        "title": "PdfRotateOptions",
+        "type": "object"
+      },
+      "PdfRotateCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "angles": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "maxFileBytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxOutputBytes": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "available",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "angles"
+        ],
+        "title": "PdfRotateCapabilities",
+        "type": "object"
+      },
+      "PdfRotateDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "rotatedPages": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pageCount",
+          "rotatedPages"
+        ],
+        "title": "PdfRotateDetails",
+        "type": "object"
+      },
+      "SplitOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-split. Bei mode ranges ist ranges Pflicht (z. B. 1-3,5,7-: ASCII, ohne Leerraum, aufsteigend, Seiten 1 bis 99999, höchstens 500 Bereiche), bei mode each ist ranges nicht erlaubt. Genau ein Bereich ergibt eine PDF, sonst ein ZIP.",
+        "properties": {
+          "mode": {
+            "enum": [
+              "ranges",
+              "each"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "ranges": {
+            "maxLength": 1024,
+            "title": "Ranges",
+            "type": "string"
+          },
+          "tool": {
+            "const": "pdf-split",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "mode"
+        ],
+        "title": "SplitOptions",
+        "type": "object"
+      },
+      "PdfSplitCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxFileBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxParts": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "maxParts"
+        ],
+        "title": "PdfSplitCapabilities",
+        "type": "object"
+      },
+      "SplitDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "partCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount",
+          "partCount"
+        ],
+        "title": "SplitDetails",
+        "type": "object"
+      },
+      "PdfMergeOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-merge. Das Werkzeug hat keine Einstellungen.",
+        "properties": {
+          "tool": {
+            "const": "pdf-merge",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "PdfMergeOptions",
+        "type": "object"
+      },
+      "PdfMergeCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "minFiles": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "maxFiles": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "maxTotalBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxPages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "minFiles",
+          "maxFiles",
+          "maxTotalBytes",
+          "maxOutputBytes",
+          "maxPages"
+        ],
+        "title": "PdfMergeCapabilities",
+        "type": "object"
+      },
+      "PdfMergeDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceCount": {
+            "type": "integer",
+            "minimum": 2
+          }
+        },
+        "required": [
+          "pageCount",
+          "sourceCount"
+        ],
+        "title": "PdfMergeDetails",
+        "type": "object"
+      },
+      "ImagePdfOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für image-pdf. Die Eingabe ist ein ZIP-Bündel (nur gespeicherte Einträge, Namen 001.ext bis NNN.ext) mit 1 bis maxImages Bildern; jede Seite des PDFs zeigt ein Bild in Namensreihenfolge. Bei pageSize fit ist nur orientation auto zulässig.",
+        "properties": {
+          "margin": {
+            "default": "small",
+            "enum": [
+              "none",
+              "small",
+              "medium"
+            ],
+            "title": "Margin",
+            "type": "string"
+          },
+          "orientation": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "portrait",
+              "landscape"
+            ],
+            "title": "Orientation",
+            "type": "string"
+          },
+          "pageSize": {
+            "default": "a4",
+            "enum": [
+              "a4",
+              "letter",
+              "fit"
+            ],
+            "title": "PageSize",
+            "type": "string"
+          },
+          "tool": {
+            "const": "image-pdf",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "ImagePdfOptions",
+        "type": "object"
+      },
+      "ImagePdfCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "maxImages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxImageBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxTotalBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "maxImages",
+          "maxImageBytes",
+          "maxTotalBytes",
+          "maxOutputBytes"
+        ],
+        "title": "ImagePdfCapabilities",
+        "type": "object"
+      },
+      "ImagePdfDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pageCount"
+        ],
+        "title": "ImagePdfDetails",
+        "type": "object"
+      },
+      "PdfImageOptions": {
+        "additionalProperties": false,
+        "description": "Optionen für pdf-to-image. pages ist all oder eine Liste wie 1-3,5 (Seiten ab 1); genau eine ausdrücklich gewählte Seite ergibt ein Bild, jede andere Auswahl ein ZIP. quality wirkt nur bei jpeg/webp.",
+        "properties": {
+          "dpi": {
+            "default": 150,
+            "maximum": 300,
+            "minimum": 72,
+            "title": "Dpi",
+            "type": "integer"
+          },
+          "format": {
+            "enum": [
+              "png",
+              "jpeg",
+              "webp"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "pages": {
+            "default": "all",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Pages",
+            "type": "string"
+          },
+          "quality": {
+            "default": 0.85,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Quality",
+            "type": "number"
+          },
+          "tool": {
+            "const": "pdf-to-image",
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "format"
+        ],
+        "title": "PdfImageOptions",
+        "type": "object"
+      },
+      "PdfImageCapabilities": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "formats": {
+            "items": {
+              "enum": [
+                "png",
+                "jpeg",
+                "webp"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "qualityFormats": {
+            "items": {
+              "enum": [
+                "png",
+                "jpeg",
+                "webp"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "minDpi": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxDpi": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "defaultDpi": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxFileBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxOutputBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxPages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxPixels": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "available",
+          "formats",
+          "qualityFormats",
+          "minDpi",
+          "maxDpi",
+          "defaultDpi",
+          "maxFileBytes",
+          "maxOutputBytes",
+          "maxPages",
+          "maxPixels"
+        ],
+        "title": "PdfImageCapabilities",
+        "type": "object"
+      },
+      "PdfImageDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourcePageCount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "archive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pageCount",
+          "sourcePageCount",
+          "archive"
+        ],
+        "title": "PdfImageDetails",
+        "type": "object"
       }
     }
   },
@@ -1049,7 +1543,7 @@
   "paths": {
     "/api/v1/capabilities": {
       "get": {
-        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities.",
+        "description": "Freies Objekt (Vertrag §4). Der Teil audio entspricht AudioCapabilities. Der Teil markdown entspricht MarkdownCapabilities. Der Teil pdfRotate entspricht PdfRotateCapabilities. Der Teil pdfSplit entspricht PdfSplitCapabilities. Der Teil pdfMerge entspricht PdfMergeCapabilities. Der Teil imagePdf entspricht ImagePdfCapabilities. Der Teil pdfImage entspricht PdfImageCapabilities.",
         "operationId": "capabilities_api_v1_capabilities_get",
         "responses": {
           "200": {
@@ -1181,6 +1675,7 @@
               "schema": {
                 "properties": {
                   "file": {
+                    "description": "Bei pdf-merge 2 bis 20 Teile namens file in der gewünschten Reihenfolge, sonst genau ein Teil",
                     "format": "binary",
                     "type": "string"
                   },

@@ -60,6 +60,8 @@ type Config struct {
 	MarkdownMaxInputBytes    int64
 	MarkdownMaxOutputBytes   int64
 	MarkdownMaxPages         int64
+	ImagePdfMaxImages        int64
+	ImagePdfMaxInputBytes    int64
 	ImageMaxInputBytes       int64
 	ImageMaxPixels           int64
 	ImageMaxEdge             int
@@ -67,6 +69,7 @@ type Config struct {
 	PdfMaxInputBytes         int64
 	PdfMaxResultsTotalBytes  int64
 	PdfImageMaxPixels        int64
+	PdfRenderMaxPages        int64
 	AudioMaxInputBytes       int64
 	AudioMaxDurationSeconds  int64
 	AudioMaxChannels         int64
@@ -135,6 +138,8 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.MarkdownMaxOutputBytes = p.positive("MARKDOWN_MAX_OUTPUT_BYTES", 20_971_520)
 	c.MarkdownMaxPages = p.positive("MARKDOWN_MAX_PAGES", 300)
 	c.MarkdownTimeout = p.seconds("MARKDOWN_TIMEOUT_SECONDS", 120)
+	c.ImagePdfMaxImages = p.positive("IMAGE_PDF_MAX_IMAGES", 30)
+	c.ImagePdfMaxInputBytes = p.positive("IMAGE_PDF_MAX_INPUT_BYTES", 104_857_600)
 	c.ImageMaxInputBytes = p.positive("IMAGE_MAX_INPUT_BYTES", 52_428_800)
 	c.ImageMaxPixels = p.positive("IMAGE_MAX_PIXELS", 40_000_000)
 	c.ImageMaxEdge = int(p.positive("IMAGE_MAX_EDGE", 16_384))
@@ -142,6 +147,7 @@ func Load(lookup LookupFunc) (*Config, error) {
 	c.PdfMaxInputBytes = p.positive("PDF_MAX_INPUT_BYTES", 100_000_000)
 	c.PdfMaxResultsTotalBytes = p.positive("PDF_MAX_RESULTS_TOTAL_BYTES", 300_000_000)
 	c.PdfImageMaxPixels = p.positive("PDF_IMAGE_MAX_PIXELS", 40_000_000)
+	c.PdfRenderMaxPages = p.positive("PDF_RENDER_MAX_PAGES", 100)
 	c.AudioMaxInputBytes = p.positive("AUDIO_MAX_INPUT_BYTES", 104_857_600)
 	c.AudioMaxDurationSeconds = p.positive("AUDIO_MAX_DURATION_SECONDS", 1800)
 	c.AudioMaxChannels = p.positive("AUDIO_MAX_CHANNELS", 8)
@@ -236,7 +242,7 @@ func (c *Config) IsProduction() bool { return c.Environment == Production }
 
 // MaxUploadInputBytes: größte Eingabe über alle Werkzeuge.
 func (c *Config) MaxUploadInputBytes() int64 {
-	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes, c.AudioMaxInputBytes, c.MarkdownMaxInputBytes)
+	return max(c.ImageMaxInputBytes, c.PdfMaxInputBytes, c.AudioMaxInputBytes, c.MarkdownMaxInputBytes, c.ImagePdfMaxInputBytes)
 }
 
 // SlogLevel bildet LogLevel auf log/slog ab.

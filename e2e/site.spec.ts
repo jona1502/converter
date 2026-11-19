@@ -96,7 +96,7 @@ test('Navigation ist per Tastatur bedienbar und markiert die aktive Seite', asyn
   });
   if (linksAreTabbable(browserName)) {
     let reached = false;
-    for (let i = 0; i < 30 && !reached; i++) {
+    for (let i = 0; i < 60 && !reached; i++) {
       await page.keyboard.press('Tab');
       reached = await target.evaluate((element) => element === document.activeElement);
     }

@@ -3,12 +3,17 @@ import { expect, test, type Page } from '@playwright/test';
 const tools = [
   { label: 'Bilder konvertieren', path: '/bilder/konvertieren', group: 'Konvertieren' },
   { label: 'Markdown zu PDF', path: '/pdf/markdown', group: 'Konvertieren' },
+  { label: 'Bild zu PDF', path: '/pdf/aus-bildern', group: 'Konvertieren' },
+  { label: 'PDF zu Bild', path: '/pdf/zu-bild', group: 'Konvertieren' },
   { label: 'Audio konvertieren', path: '/audio/konvertieren', group: 'Konvertieren' },
   { label: 'Bilder komprimieren', path: '/bilder/komprimieren', group: 'Komprimieren' },
   { label: 'PDF komprimieren', path: '/pdf/komprimieren', group: 'Komprimieren' },
   { label: 'Bilder skalieren', path: '/bilder/skalieren', group: 'Skalieren' },
+  { label: 'PDF drehen', path: '/pdf/drehen', group: 'Drehen' },
+  { label: 'PDF teilen', path: '/pdf/teilen', group: 'Teilen' },
+  { label: 'PDF zusammenführen', path: '/pdf/zusammenfuehren', group: 'Zusammenführen' },
 ] as const;
-const groups = ['Konvertieren', 'Komprimieren', 'Skalieren'] as const;
+const groups = ['Konvertieren', 'Komprimieren', 'Skalieren', 'Drehen', 'Teilen', 'Zusammenführen'] as const;
 
 function navigation(page: Page) { return page.getByRole('navigation', { name: 'Hauptnavigation' }); }
 function group(page: Page, name: string) { return navigation(page).getByRole('button', { name: `${name}-Menü`, exact: true }); }
@@ -21,7 +26,7 @@ async function noOverflow(page: Page) {
 test.describe('Desktop (1440 px)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('Kopfzeile: Logo links, drei Menüs, Theme-Umschalter rechts, keine Seitenleiste', async ({ page }) => {
+  test('Kopfzeile: Logo links, vier Menüs, Theme-Umschalter rechts, keine Seitenleiste', async ({ page }) => {
     await page.goto('/');
     const header = await page.getByRole('banner').boundingBox();
     const main = await page.getByRole('main').boundingBox();
@@ -82,6 +87,10 @@ test.describe('Desktop (1440 px)', () => {
     await expect(link(page, 'Bilder konvertieren')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Markdown zu PDF')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(link(page, 'Bild zu PDF')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(link(page, 'PDF zu Bild')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(link(page, 'Audio konvertieren')).toBeFocused();
     await page.keyboard.press('Escape');

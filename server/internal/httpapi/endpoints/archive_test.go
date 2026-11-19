@@ -93,3 +93,19 @@ func TestArchiveRejectsBadRequestsAndEmptyArchives(t *testing.T) {
 		t.Errorf("nichts fertig: %d", got)
 	}
 }
+
+// Das Archiv ist werkzeugunabhängig: Namen aus Bild-, PDF- und Audioaufträgen
+// werden gemeinsam und ohne Beachtung der Groß-/Kleinschreibung eindeutig.
+func TestUniqueArchiveNameAcrossToolOutputs(t *testing.T) {
+	taken := map[string]bool{strings.ToLower(archiveSkippedName): true}
+	got := []string{}
+	for _, name := range []string{"foto.webp", "Foto.WEBP", "bericht-high.pdf", "bericht-high.pdf", "ton.mp3", "foto.webp", archiveSkippedName} {
+		got = append(got, uniqueArchiveName(taken, name))
+	}
+	want := []string{"foto.webp", "Foto-2.WEBP", "bericht-high.pdf", "bericht-high-2.pdf", "ton.mp3", "foto-3.webp", "_uebersprungen-2.txt"}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("name %d = %q, want %q", i, got[i], want[i])
+		}
+	}
+}

@@ -77,7 +77,7 @@ func ProcessingErrorCodes() []ProcessingErrorCode {
 		ProcDecodeFailed, ProcEncodeFailed, ProcSaveFailed, ProcEncrypted, ProcParseFailed,
 		ProcResultTooLarge, ProcTimeout, ProcMemoryLimit, ProcWorkerFailed, ProcStorageFull,
 		ProcDimensionsTooLarge, ProcAnimatedUnsupported, ProcUnsupportedType,
-		ProcDurationTooLong, ProcUnsupportedAudio,
+		ProcDurationTooLong, ProcUnsupportedAudio, ProcPageRangeInvalid,
 	}
 }
 
@@ -90,10 +90,14 @@ const (
 	ToolPDFCompress   Tool = "pdf-compress"
 	ToolAudioConvert  Tool = "audio-convert"
 	ToolMarkdownPDF   Tool = "markdown-pdf"
+	ToolPDFRotate     Tool = "pdf-rotate"
+	ToolPDFMerge      Tool = "pdf-merge"
+	ToolImagePDF      Tool = "image-pdf"
+	ToolPDFToImage    Tool = "pdf-to-image"
 )
 
 func Tools() []Tool {
-	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF}
+	return []Tool{ToolImageConvert, ToolImageCompress, ToolImageResize, ToolPDFCompress, ToolAudioConvert, ToolMarkdownPDF, ToolPDFRotate, ToolPDFSplit, ToolPDFMerge, ToolImagePDF, ToolPDFToImage}
 }
 
 // IsImage: image-convert, image-compress und image-resize.
@@ -173,11 +177,12 @@ const (
 	InputWAV      InputFormat = "wav"
 	InputFLAC     InputFormat = "flac"
 	InputOGG      InputFormat = "ogg"
+	InputZIP      InputFormat = "zip"
 )
 
 func InputFormats() []InputFormat {
 	return []InputFormat{InputJPEG, InputPNG, InputWebP, InputGIF, InputBMP, InputICO, InputAVIF, InputPDF,
-		InputMP3, InputWAV, InputFLAC, InputOGG, InputMarkdown}
+		InputMP3, InputWAV, InputFLAC, InputOGG, InputMarkdown, InputZIP}
 }
 
 // AudioFormat: Ein- und Ausgabeformate von audio-convert (Inline-Enum).

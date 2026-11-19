@@ -1,0 +1,7 @@
+---
+import ToolPage from '../../components/site/ToolPage.astro';
+import PdfImageConverter from '../../components/tools/PdfImageConverter';
+---
+<ToolPage toolId="pdf-zu-bild" description="PDF nach ausdrücklichem Start in PNG-, JPEG- oder WebP-Bilder umwandeln. Auflösung und Seiten wählbar; eine Seite ergibt ein Bild, mehrere Seiten ein ZIP-Archiv.">
+  <PdfImageConverter client:load />
+</ToolPage>

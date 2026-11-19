@@ -5,9 +5,9 @@
  */
 
 export type ToolCategory = 'bilder' | 'pdf' | 'audio';
-export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren';
+export type ToolOperation = 'konvertieren' | 'komprimieren' | 'skalieren' | 'drehen' | 'teilen' | 'zusammenfuehren';
 /** Aktion, nach der die Kopfzeile die Werkzeuge in Menüs gruppiert. */
-export type ToolAction = 'convert' | 'compress' | 'resize';
+export type ToolAction = 'convert' | 'compress' | 'resize' | 'rotate' | 'split' | 'merge';
 
 export interface ToolActionInfo {
   readonly id: ToolAction;
@@ -38,6 +38,8 @@ export interface Tool {
   readonly action: ToolAction;
   /** Nur verfügbare Werkzeuge werden verlinkt. */
   readonly available: boolean;
+  /** `false`: nicht auf der Startseiten-Schnellwahl anbieten (eigene Seite mit Einstellungen nötig). */
+  readonly quickStart?: boolean;
 }
 
 export const TOOL_CATEGORIES: readonly ToolCategoryInfo[] = [
@@ -51,6 +53,9 @@ export const TOOL_ACTIONS: readonly ToolActionInfo[] = [
   { id: 'convert', title: 'Konvertieren' },
   { id: 'compress', title: 'Komprimieren' },
   { id: 'resize', title: 'Skalieren' },
+  { id: 'rotate', title: 'Drehen' },
+  { id: 'split', title: 'Teilen' },
+  { id: 'merge', title: 'Zusammenführen' },
 ];
 
 export const TOOLS: readonly Tool[] = [
@@ -116,6 +121,62 @@ export const TOOLS: readonly Tool[] = [
     lead: 'Wandeln Sie MP3, WAV, FLAC und OGG ineinander um; die Abtastrate bleibt erhalten, Tags und Cover werden nicht übernommen.',
     href: '/audio/konvertieren',
     category: 'audio',
+    operation: 'konvertieren',
+    action: 'convert',
+    available: true,
+  },
+  {
+    id: 'pdf-drehen',
+    title: 'PDF drehen',
+    description: 'Alle oder ausgewählte Seiten einer PDF um 90°, 180° oder 270° drehen.',
+    lead: 'Drehen Sie alle oder ausgewählte Seiten Ihrer PDF; Inhalt und Qualität bleiben unverändert, nur der Drehwinkel der Seiten ändert sich.',
+    href: '/pdf/drehen',
+    category: 'pdf',
+    operation: 'drehen',
+    action: 'rotate',
+    available: true,
+  },
+  {
+    id: 'pdf-teilen',
+    title: 'PDF teilen',
+    description: 'Seitenbereiche einer PDF herauslösen oder jede Seite einzeln ausgeben.',
+    lead: 'Teilen Sie eine PDF in Seitenbereiche wie 1-3,5,7- oder in einzelne Seiten; ein Bereich ergibt eine PDF, mehrere ein ZIP.',
+    href: '/pdf/teilen',
+    category: 'pdf',
+    operation: 'teilen',
+    action: 'split',
+    available: true,
+    quickStart: false,
+  },
+  {
+    id: 'pdf-zusammenfuehren',
+    title: 'PDF zusammenführen',
+    description: 'Zwei bis zwanzig PDFs in wählbarer Reihenfolge zu einer PDF verbinden.',
+    lead: 'Fügen Sie mehrere PDFs in der gewünschten Reihenfolge zu einer einzigen PDF zusammen; die Seiten bleiben unverändert.',
+    href: '/pdf/zusammenfuehren',
+    category: 'pdf',
+    operation: 'zusammenfuehren',
+    action: 'merge',
+    available: true,
+  },
+  {
+    id: 'image-pdf',
+    title: 'Bild zu PDF',
+    description: 'Mehrere Bilder in eigener Reihenfolge zu einer PDF zusammenfassen, ein Bild pro Seite.',
+    lead: 'Fassen Sie Bilder in Ihrer Reihenfolge zu einer PDF zusammen, ein Bild pro Seite, wahlweise A4, US Letter oder in Bildgröße.',
+    href: '/pdf/aus-bildern',
+    category: 'pdf',
+    operation: 'konvertieren',
+    action: 'convert',
+    available: true,
+  },
+  {
+    id: 'pdf-zu-bild',
+    title: 'PDF zu Bild',
+    description: 'Seiten einer PDF als PNG, JPEG oder WebP rendern; mehrere Seiten als ZIP.',
+    lead: 'Wandeln Sie die Seiten einer PDF in PNG-, JPEG- oder WebP-Bilder um, mit wählbarer Auflösung und Seitenauswahl; mehrere Seiten erhalten Sie als ZIP-Archiv.',
+    href: '/pdf/zu-bild',
+    category: 'pdf',
     operation: 'konvertieren',
     action: 'convert',
     available: true,

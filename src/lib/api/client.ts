@@ -11,6 +11,16 @@ export interface Capabilities {
   audio?: ApiSchemas['AudioCapabilities'];
   /** Fehlt bei älteren Servern; dann ist markdown-pdf nicht verfügbar. */
   markdown?: ApiSchemas['MarkdownCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-rotate nicht verfügbar. */
+  pdfRotate?: ApiSchemas['PdfRotateCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-split nicht verfügbar. */
+  pdfSplit?: ApiSchemas['PdfSplitCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-merge nicht verfügbar. */
+  pdfMerge?: ApiSchemas['PdfMergeCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist image-pdf nicht verfügbar. */
+  imagePdf?: ApiSchemas['ImagePdfCapabilities'];
+  /** Fehlt bei älteren Servern; dann ist pdf-to-image nicht verfügbar. */
+  pdfImage?: ApiSchemas['PdfImageCapabilities'];
   tools?: Tool[];
 }
 const messages: Record<string, string> = {
@@ -36,6 +46,7 @@ const messages: Record<string, string> = {
   'cancelled': 'Die Verarbeitung wurde abgebrochen.',
   'timeout': 'Die Verarbeitung hat das Zeitlimit überschritten.',
   'memory-limit': 'Für diese Datei reicht der verfügbare Arbeitsspeicher nicht aus.',
+  'page-range-invalid': 'Die Seitenbereiche passen nicht zu dieser PDF.',
 };
 export class ApiError extends Error {
   constructor(public code: string, public status = 0, public retryAfter = 1) {
@@ -73,11 +84,12 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
     signal?.addEventListener('abort', abort, {once: true});
   });
 }
-export async function createJob(file: File, options: Record<string, unknown>, key: string, signal: AbortSignal, onWaiting?: (waiting:boolean)=>void): Promise<Job> {
+/** Mehrere Dateien (pdf-merge) werden in der übergebenen Reihenfolge als wiederholte Teile `file` gesendet. */
+export async function createJob(file: File | readonly File[], options: Record<string, unknown>, key: string, signal: AbortSignal, onWaiting?: (waiting:boolean)=>void): Promise<Job> {
   const token = await csrf();
   const body = new FormData();
   body.append('options', JSON.stringify(options));
-  body.append('file', file);
+  for (const part of Array.isArray(file) ? file : [file]) body.append('file', part);
   const schedulingDeadline=Date.now()+15*60_000;
   for (;;) {
     try {
@@ -108,6 +120,21 @@ export async function cancelJob(id: string): Promise<void> {
 /** Download-URL des ZIP-Archivs mit den Ergebnissen mehrerer fertiger Aufträge. */
 export const archiveUrl = (jobIds: readonly string[]) =>
   `${prefix}/jobs/archive?${jobIds.map(id => `job_id=${encodeURIComponent(id)}`).join('&')}`;
+/** Obergrenze der Aufträge je Archiv; entspricht maxArchiveJobs im Go-Backend. */
+export const MAX_ARCHIVE_JOBS = 30;
+/**
+ * ZIP-URL für fertige Aufträge eines beliebigen Werkzeugs: erst ab zwei verschiedenen Aufträgen,
+ * nie während der Verarbeitung und nie über der Obergrenze; fehlende IDs und Duplikate zählen nicht.
+ */
+export function batchZipUrl(jobIds: readonly (string | undefined)[], processing: boolean): string | null {
+  const unique = [...new Set(jobIds.filter((id): id is string => !!id))];
+  return !processing && unique.length >= 2 && unique.length <= MAX_ARCHIVE_JOBS ? archiveUrl(unique) : null;
+}
+/** ZIP mit den Varianten eines einzelnen Auftrags (z. B. PDF-Komprimierung); ab zwei herunterladbaren Ergebnissen. */
+export function jobZipUrl(job: { readonly id: string; readonly state: string; readonly results: readonly { readonly state: string; readonly downloadUrl?: string | null }[] } | null): string | null {
+  if (!job || !['succeeded', 'partially_succeeded'].includes(job.state)) return null;
+  return job.results.filter(result => result.state === 'succeeded' && result.downloadUrl).length >= 2 ? archiveUrl([job.id]) : null;
+}
 export const terminal = (job: Job) => !['queued', 'running'].includes(job.state);
 export async function pollJob(initial: Job, signal: AbortSignal, onStatus: (job: Job) => void): Promise<Job> {
   let job = initial, failures = 0;

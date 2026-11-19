@@ -67,7 +67,7 @@ export default function ImageCompressor({ initialFiles }: ToolProps) {
         </div>
       </>}
       actionTitle="Komprimieren"
-      action={<ActionBar processLabel="Komprimieren" counts={batch.counts} progress={batch.progress} isProcessing={batch.isProcessing} disabledReason={reason}
+      action={<ActionBar processLabel="Komprimieren" counts={batch.counts} progress={batch.progress} isProcessing={batch.isProcessing} disabledReason={reason} zipHref={batch.zipUrl}
         onReset={reset} onProcess={() => { setProcessedKey(key); void batch.processAll(options, 'komprimiert'); }} />}
       resultsHeadingId={heading}
       resultNotice={processedKey !== null && processedKey !== key && batch.counts.done > 0 && (
